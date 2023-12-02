@@ -22,8 +22,8 @@ public class ItemsString extends App {
 
     public void findString(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
         String hexString = util.stringToHexString(s);
-        byte[] header_ids_size = header.get("header_string_ids_size");
-        byte[] header_ids_off = header.get("header_string_ids_off");
+        byte[] header_ids_size = header.get(header_x_ids_size);
+        byte[] header_ids_off = header.get(header_x_ids_off);
         long ids_count = util.getDecimalValue(header_ids_size);
         long ids_offset = util.getDecimalValue(header_ids_off);
         for (int i = 0; i < ids_count; i++) {
@@ -55,7 +55,6 @@ public class ItemsString extends App {
         byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
         StringBuilder stringBuilder = new StringBuilder();
-
 
         while (true) {
             byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);

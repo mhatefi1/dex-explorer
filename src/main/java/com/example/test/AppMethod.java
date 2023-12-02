@@ -14,10 +14,11 @@ public class AppMethod {
     private static final String print_all = "1";
     private static final String get_method_item_from_hex_address = "2";
     private static final String get_hex_address_from_hex_method_item = "3";
-    private static final String get_hex_method_from_method_item_index = "4";
-    private static final String write_methods_to_file = "5";
-    private static final String compare_dex_file = "6";
-    private static final String match_dex_with_signature = "7";
+    private static final String get_hex_string_from_string_value = "4";
+    private static final String get_hex_method_from_method_item_index = "5";
+    private static final String write_methods_to_file = "6";
+    private static final String compare_dex_file = "7";
+    private static final String match_dex_with_signature = "8";
 
     public static void main(String[] args) {
         try {
@@ -33,10 +34,11 @@ public class AppMethod {
             System.out.println(
                     "Choose your operation " + "\n" +
                             "0 to go back" + "\n" +
-                            print_all + " print all strings " + "\n" +
-                            get_method_item_from_hex_address + " print utf-8 method data use hex address " + "\n" +
-                            get_hex_address_from_hex_method_item + " print hex address use hex string " + "\n" +
-                            get_hex_method_from_method_item_index + " print hex string use index " + "\n" +
+                            print_all + " print all method;" + "\n" +
+                            get_method_item_from_hex_address + " search method by offset; (input format:hex string)" + "\n" +
+                            get_hex_address_from_hex_method_item + " get method index and offset by method; (input format:hex string)" + "\n" +
+                            get_hex_string_from_string_value + " search method info by method name; (input format:utf8 string)" + "\n" +
+                            get_hex_method_from_method_item_index + " search method id by index; (input format:number)" + "\n" +
                             write_methods_to_file + " write dex methods to file " + "\n" +
                             compare_dex_file + " compare dex files in a folder" + "\n" +
                             match_dex_with_signature + " match dex with signature"
@@ -60,9 +62,8 @@ public class AppMethod {
                     myObj.close();
                     System.out.println("waite ...");
                     String hexString = item.getDataAsHex(raf, address);
-                    String s = item.getParsedMethodDataAsUTF8(header, raf, address);
-                    System.out.println("data hex string:" + hexString);
-                    System.out.println(s);
+                    System.out.println(hexString);
+                    System.out.println(util.hexStringToString(hexString));
                 }
                 case get_hex_address_from_hex_method_item -> {
                     System.out.println("Enter hex string: ");
@@ -71,8 +72,15 @@ public class AppMethod {
                     System.out.println("waite ...");
                     appUtil.getAddressFromHexString(header, raf, s, item);
                 }
+                case get_hex_string_from_string_value -> {
+                    System.out.println("Enter method name : ");
+                    String s = myObj.nextLine();
+                    myObj.close();
+                    System.out.println("waite ...");
+                    item.findMethod(header, raf, s);
+                }
                 case get_hex_method_from_method_item_index -> {
-                    System.out.println("Enter string index: ");
+                    System.out.println("Enter index: ");
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");

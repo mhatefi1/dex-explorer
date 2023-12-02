@@ -33,7 +33,7 @@ public class AppClasses {
                     "Choose your operation " + "\n" +
                             "0 to go back" + "\n" +
                             print_all + " print all classes " + "\n" +
-                            get_method_item_from_hex_address + " print utf-8 class data use hex address " + "\n" +
+                           // get_method_item_from_hex_address + " print utf-8 class data use hex address " + "\n" +
                             get_hex_address_from_hex_method_item + " print hex address use hex string " + "\n" +
                             get_hex_method_from_method_item_index + " print hex string use index " + "\n" +
                             write_methods_to_file + " write dex classes to file " + "\n" +

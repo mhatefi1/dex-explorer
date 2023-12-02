@@ -35,14 +35,13 @@ public class AppString {
                     "Choose your operation " + "\n" +
                             "0 to go back" + "\n" +
                             print_all + " print all strings " + "\n" +
-                            get_string_item_from_hex_address + " print utf-8 string use hex address " + "\n" +
-                            get_hex_address_from_hex_string_item + " print hex address use hex string " + "\n" +
-                            get_hex_string_from_string_value + " print hex string from string value " + "\n" +
-                            get_hex_string_from_string_item_index + " print hex string use index " + "\n" +
+                            get_string_item_from_hex_address + " search utf8 value by string id offset; (input format:hex string)" + "\n" +
+                            get_hex_address_from_hex_string_item + " search string index and offset by string hex value; (input format:hex string)" + "\n" +
+                            get_hex_string_from_string_value + " search string index and offset by utf8 value; (input format:utf8 string)" + "\n" +
+                            get_hex_string_from_string_item_index + " search string id by index; (input format:number)" + "\n" +
                             write_strings_to_file + " write dex strings to file " + "\n" +
                             compare_dex_file + " compare dex files in a folder" + "\n" +
                             match_dex_with_signature + " match dex with signature"
-
             );
 
             String input = myObj.nextLine();
@@ -57,7 +56,7 @@ public class AppString {
                     myObj.close();
                 }
                 case get_string_item_from_hex_address -> {
-                    System.out.println("Enter hex address:");
+                    System.out.println("Enter offset as hex:");
                     String hex_address = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
@@ -79,7 +78,7 @@ public class AppString {
                     item.findString(header, raf, s);
                 }
                 case get_hex_string_from_string_item_index -> {
-                    System.out.println("Enter string index: ");
+                    System.out.println("Enter index: ");
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");

@@ -5,7 +5,6 @@ import com.example.test.Items.ItemsMethod;
 import org.apache.pdfbox.io.RandomAccessFile;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -22,17 +21,21 @@ public class AppUtil {
             ArrayList<File> fileList = new ArrayList<>();
             util.extractDex(Util.commonFolder);
             ArrayList<File> dexFileList = util.getRecursiveFileListByFormat(fileList, Util.commonFolder, ".dex");
-            File fist_file = dexFileList.get(0);
-            String fileName = fist_file.getName();
+            File first_file = dexFileList.get(0);
+            String fileName = first_file.getAbsolutePath();
             System.out.println(fileName);
-            ArrayList<String> finall = getFromDexAsArray(fist_file, tClass);
+            ArrayList<String> finall = getFromDexAsArray(first_file, tClass);
 
             for (int i = 1; i < dexFileList.size(); i++) {
+                System.out.println(finall.size());
+                finall = util.removeDupe(finall);
+                System.out.println(finall.size());
                 System.out.println(dexFileList.get(i));
                 ArrayList<String> file_Strings = getFromDexAsArray(dexFileList.get(i), tClass);
                 finall = util.getCommonOfArrayList(file_Strings, finall);
             }
-
+            finall = util.removeDupe(finall);
+            System.out.println(finall.size());
             util.writeArrayToFile(finall, Util.commonFolder + "\\" + tClass.common_file_name + ".txt");
 
         } catch (Exception e) {
@@ -52,14 +55,14 @@ public class AppUtil {
 
             if (tClass instanceof ItemsMethod){
                 for (int i = 0; i < ids_count; i++) {
-                    String hex = ((ItemsMethod) tClass).getParsedMethodDataAsHex(header,raf, ids_offset);
-                    ids_offset = ids_offset + tClass.class_data_size;
+                    String hex = ((ItemsMethod) tClass).getParsedMethodDataAsUTF8(header,raf, ids_offset);
+                    ids_offset = ids_offset + tClass.data_size;
                     s.add(hex);
                 }
             } else {
                 for (int i = 0; i < ids_count; i++) {
                     String hex = tClass.getDataAsHex(raf, ids_offset);
-                    ids_offset = ids_offset + tClass.class_data_size;
+                    ids_offset = ids_offset + tClass.data_size;
                     s.add(hex);
                 }
             }
@@ -122,15 +125,15 @@ public class AppUtil {
 
             if (tClass instanceof ItemsMethod){
                 for (int i = 0; i < ids_count; i++) {
-                    String hex = ((ItemsMethod) tClass).getParsedMethodDataAsHex(header,raf, ids_offset);
-                    ids_offset = ids_offset + tClass.class_data_size;
+                    String hex = ((ItemsMethod) tClass).getParsedMethodDataAsUTF8(header,raf, ids_offset);
+                    ids_offset = ids_offset + tClass.data_size;
                     writer.append(hex);
                     writer.append('\n');
                 }
             } else {
                 for (int i = 0; i < ids_count; i++) {
                     String hex = tClass.getDataAsHex(raf, ids_offset);
-                    ids_offset = ids_offset + tClass.class_data_size;
+                    ids_offset = ids_offset + tClass.data_size;
                     writer.append(hex);
                     writer.append('\n');
                 }
@@ -149,7 +152,7 @@ public class AppUtil {
         long ids_offset = util.getDecimalValue(header_ids_off);
         for (int i = 0; i < ids_count; i++) {
             String hex = tClass.getDataAsHex(raf, ids_offset);
-            ids_offset = ids_offset + tClass.class_data_size;
+            ids_offset = ids_offset + tClass.data_size;
             System.out.println(hex);
         }
     }
@@ -166,7 +169,7 @@ public class AppUtil {
                 System.out.println("ids_index: " + i);
                 break;
             }
-            ids_offset = ids_offset + tClass.class_data_size;
+            ids_offset = ids_offset + tClass.data_size;
         }
     }
 
@@ -190,7 +193,7 @@ public class AppUtil {
         return "error";*/
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = util.getDecimalValue(header_ids_off);
-        ids_offset = index * tClass.class_data_size + ids_offset;
+        ids_offset = index * tClass.data_size + ids_offset;
         return tClass.getDataAsHex(raf, ids_offset);
     }
 

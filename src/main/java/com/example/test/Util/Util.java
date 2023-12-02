@@ -17,7 +17,7 @@ public class Util {
 
     public static String TEMP_DEX_PATH = "";
 
-    public static String commonFolder = "C:\\Users\\sedej\\Desktop\\cap\\c3";
+    public static String commonFolder = "C:\\Users\\sedej\\Desktop\\remo-test\\Newfolder";
     private final String TEMP_DEX_FOLDER = "\\amn-temp";
 
     public static void runDuration(long startTime) {
@@ -238,6 +238,16 @@ public class Util {
             j++;
         }
         return result;
+    }
+
+    public <T> ArrayList<T> removeDupe(ArrayList<T> list){
+        ArrayList<T> newList = new ArrayList<T>();
+        for (T element : list) {
+            if (!newList.contains(element)) {
+                newList.add(element);
+            }
+        }
+        return newList;
     }
 
     public HashMap<String, byte[]> getHeader(RandomAccessFile raf) {
