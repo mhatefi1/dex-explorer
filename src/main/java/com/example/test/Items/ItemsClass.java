@@ -33,23 +33,4 @@ public class ItemsClass extends App {
         byte[] class_data_b = util.getBytesOfFile(raf, start, class_data_size);
         return util.byteToStringHex(class_data_b);
     }
-
-    public String parseClassData(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
-        long start = util.stringHexToDecimal(offseString);
-        byte[] method_data_b = util.getBytesOfFile(raf, start, class_data_size);
-
-        byte[] class_idx_b = Arrays.copyOfRange(method_data_b, 0, 1);
-        byte[] proto_idx_b = Arrays.copyOfRange(method_data_b, 2, 3);
-        byte[] method_idx_b = Arrays.copyOfRange(method_data_b, 4, 7);
-
-        long class_idx = util.getDecimalValue(class_idx_b);
-        long proto_idx = util.getDecimalValue(proto_idx_b);
-        long method_idx = util.getDecimalValue(method_idx_b);
-
-        String class_ = new ItemsType().getTypeByIndex(header, raf, class_idx);
-        String proto = new ItemsProto().getProtoByIndex(header, raf, proto_idx);
-        String method = appUtil.getByIndex(header, raf, method_idx,new ItemsString());
-
-        return util.hexStringToString(proto) + "\n" + util.hexStringToString(class_) + "\n" + util.hexStringToString(method);
-    }
 }
