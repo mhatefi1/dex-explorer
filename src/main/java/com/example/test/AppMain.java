@@ -84,8 +84,8 @@ public class AppMain {
                         ManifestModel manifestModel_ = manifestUtil.matchManifest(manifest_);
 
                         ArrayList<String> activity_list_ = manifestModel_.getActivities();
-                        ArrayList<String> service_list_ = manifestModel_.getActivities();
-                        ArrayList<String> receiver_list_ = manifestModel_.getActivities();
+                        ArrayList<String> service_list_ = manifestModel_.getServices();
+                        ArrayList<String> receiver_list_ = manifestModel_.getReceivers();
 
                         activity_list = util.getCommonOfArrayList(activity_list_, activity_list);
                         service_list = util.getCommonOfArrayList(service_list_, service_list);
