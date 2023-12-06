@@ -12,7 +12,7 @@ public class ItemsString extends App {
     public final static int string_data_off_size = 4;
     public final static String header_x_ids_size = "header_string_ids_size";
     public final static String header_x_ids_off = "header_string_ids_off";
-    public final static String common_file_name = "commonStrings";
+    public final static String common_file_name = "factorizedStrings";
     Util util;
 
     public ItemsString() {
@@ -20,14 +20,15 @@ public class ItemsString extends App {
         util = new Util();
     }
 
-    public void findString(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
+    @Override
+    public void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
         String hexString = util.stringToHexString(s);
         byte[] header_ids_size = header.get(header_x_ids_size);
         byte[] header_ids_off = header.get(header_x_ids_off);
         long ids_count = util.getDecimalValue(header_ids_size);
         long ids_offset = util.getDecimalValue(header_ids_off);
         for (int i = 0; i < ids_count; i++) {
-            String hex = getDataAsHex(null,raf, ids_offset);
+            String hex = getDataAsHex(null, raf, ids_offset);
             if (hex.equals(hexString)) {
                 System.out.println(hex);
                 System.out.println("index:" + i);
@@ -41,7 +42,7 @@ public class ItemsString extends App {
     @Override
     public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
         long start = util.stringHexToDecimal(offseString);
-        return getDataAsHex(header,raf, start);
+        return getDataAsHex(header, raf, start);
     }
 
     @Override
@@ -71,42 +72,9 @@ public class ItemsString extends App {
 
         return stringBuilder.toString();
     }
-
-    @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
-        long start = util.stringHexToDecimal(offseString);
-        return getDataAsUTF8(header,raf, start);
-    }
-
     @Override
     public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
-        String hex = getDataAsHex(header,raf, start);
-        return util.hexStringToString(hex);
-        /*byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
-        long offset = util.getDecimalValue(first_offset_of_string_data_b);
-        StringBuilder stringBuilder = new StringBuilder();
-
-        while (true) {
-            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
-            long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
-            offset++;
-            if (size_in_utf16_l < 127) {
-                break;
-            }
-        }
-
-        while (true) {
-            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
-            String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
-            if (hex.equals("00")) {
-                break;
-            }
-
-            String utf8 = util.hexStringToString(hex);
-            stringBuilder.append(utf8);
-            offset++;
-        }
-
-        return stringBuilder.toString();*/
+        String hex = getDataAsHex(header, raf, start);
+        return util.hexStringToUTF8(hex);
     }
 }

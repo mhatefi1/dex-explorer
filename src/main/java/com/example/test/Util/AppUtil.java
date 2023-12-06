@@ -2,7 +2,7 @@ package com.example.test.Util;
 
 import com.example.test.App;
 import com.example.test.Items.ItemsMethod;
-import com.example.test.Items.ItemsString;
+import com.example.test.Model.ManifestModel;
 import org.apache.pdfbox.io.RandomAccessFile;
 
 import java.io.*;
@@ -11,14 +11,66 @@ import java.util.HashMap;
 
 public class AppUtil {
 
+    private static final String aapt2Path = "C:\\Users\\sedej\\AppData\\Local\\Android\\Sdk\\build-tools\\34.0.0\\aapt2.exe";
     Util util;
 
     public AppUtil(Util util) {
         this.util = util;
     }
 
-    public void getCommonInFolder(App tClass, boolean utf8) {
+    public void getCommonInManifest() {
+        ManifestUtil manifestUtil = new ManifestUtil();
+
+        ArrayList<File> apk_list = util.getFileListByFormat(Util.commonFolder, ".apk");
+        File first_file = apk_list.get(0);
+        String fileName = first_file.getAbsolutePath();
+        System.out.println(fileName);
+
+        String manifest = manifestUtil.dumpManifest(aapt2Path, first_file.getPath());
+        ManifestModel manifestModel = manifestUtil.matchManifest(manifest);
+
+        ArrayList<String> permission_list = manifestModel.getPermission();
+        ArrayList<String> activity_list = manifestModel.getActivities();
+        ArrayList<String> service_list = manifestModel.getServices();
+        ArrayList<String> receiver_list = manifestModel.getReceivers();
+
+        for (int i = 1; i < apk_list.size(); i++) {
+            System.out.println(apk_list.get(i));
+
+            permission_list = util.removeDupe(permission_list);
+            activity_list = util.removeDupe(activity_list);
+            service_list = util.removeDupe(service_list);
+            receiver_list = util.removeDupe(receiver_list);
+
+
+            String manifest_ = manifestUtil.dumpManifest(aapt2Path, apk_list.get(i).getPath());
+            ManifestModel manifestModel_ = manifestUtil.matchManifest(manifest_);
+
+            ArrayList<String> permission_list_ = manifestModel_.getPermission();
+            ArrayList<String> activity_list_ = manifestModel_.getActivities();
+            ArrayList<String> service_list_ = manifestModel_.getServices();
+            ArrayList<String> receiver_list_ = manifestModel_.getReceivers();
+
+            permission_list = util.getCommonOfArrayList(permission_list_, permission_list);
+            activity_list = util.getCommonOfArrayList(activity_list_, activity_list);
+            service_list = util.getCommonOfArrayList(service_list_, service_list);
+            receiver_list = util.getCommonOfArrayList(receiver_list_, receiver_list);
+        }
+
+        permission_list = util.removeDupe(permission_list);
+        activity_list = util.removeDupe(activity_list);
+        service_list = util.removeDupe(service_list);
+        receiver_list = util.removeDupe(receiver_list);
+
+        util.writeArrayToFile(permission_list, Util.commonFolder + "\\" + "factorizedPermissions" + ".txt");
+        util.writeArrayToFile(activity_list, Util.commonFolder + "\\" + "factorizedActivities" + ".txt");
+        util.writeArrayToFile(service_list, Util.commonFolder + "\\" + "factorizedServices" + ".txt");
+        util.writeArrayToFile(receiver_list, Util.commonFolder + "\\" + "factorizedReceivers" + ".txt");
+    }
+
+    public void factorizeInFolder(App tClass, boolean utf8) {
         try {
+            System.out.println("***********" + tClass.common_file_name + "***********");
             ArrayList<File> fileList = new ArrayList<>();
             util.extractDex(Util.commonFolder);
             ArrayList<File> dexFileList = util.getRecursiveFileListByFormat(fileList, Util.commonFolder, ".dex");
@@ -28,15 +80,14 @@ public class AppUtil {
             ArrayList<String> finall = getFromDexAsArray(first_file, tClass, utf8);
 
             for (int i = 1; i < dexFileList.size(); i++) {
-                System.out.println(finall.size());
                 finall = util.removeDupe(finall);
-                System.out.println(finall.size());
                 System.out.println(dexFileList.get(i));
                 ArrayList<String> file_Strings = getFromDexAsArray(dexFileList.get(i), tClass, utf8);
                 finall = util.getCommonOfArrayList(file_Strings, finall);
             }
             finall = util.removeDupe(finall);
-            System.out.println(finall.size());
+            System.out.println("common items count:" + finall.size());
+            System.out.println("**********************");
             util.writeArrayToFile(finall, Util.commonFolder + "\\" + tClass.common_file_name + ".txt");
 
         } catch (Exception e) {
@@ -68,20 +119,6 @@ public class AppUtil {
                 }
             }
 
-          /*  if (tClass instanceof ItemsMethod) {
-                for (int i = 0; i < ids_count; i++) {
-                    String hex = ((ItemsMethod) tClass).getParsedMethodDataAsUTF8(header, raf, ids_offset);
-                    ids_offset = ids_offset + tClass.data_size;
-                    s.add(hex);
-                }
-            } else {
-                for (int i = 0; i < ids_count; i++) {
-                    String hex = tClass.getDataAsHex(raf, ids_offset);
-                    ids_offset = ids_offset + tClass.data_size;
-                    s.add(hex);
-                }
-            }*/
-
             raf.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -107,23 +144,11 @@ public class AppUtil {
             }
             reader.close();
             System.out.println(finals.size() + "+" + signature.size());
-            flag = contains(finals, signature);
+            flag = util.contains(finals, signature);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return flag;
-    }
-
-    boolean contains(ArrayList<String> list, ArrayList<String> subList) {
-        boolean allItemsPresent = true;
-
-        for (String item : subList) {
-            if (!list.contains(item)) {
-                allItemsPresent = false;
-                break;
-            }
-        }
-        return allItemsPresent;
     }
 
 
@@ -188,23 +213,6 @@ public class AppUtil {
     }
 
     public String getByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, App tClass) {
-        /*byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_count = getDecimalValue(header_ids_size);
-        long ids_offset = getDecimalValue(header_ids_off);
-
-        if (index > ids_count) {
-            return "out of index";
-        } else {
-            for (long i = 0; i < ids_count; i++) {
-                String hex = tClass.getClassDataAsHex(raf, ids_offset);
-                ids_offset = ids_offset + tClass.class_data_size;
-                if (i == index) {
-                    return "index [" + i + "]:" + hex;
-                }
-            }
-        }
-        return "error";*/
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = util.getDecimalValue(header_ids_off);
         ids_offset = index * tClass.data_size + ids_offset;

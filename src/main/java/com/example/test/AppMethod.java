@@ -63,7 +63,7 @@ public class AppMethod {
                     System.out.println("waite ...");
                     String hexString = item.getDataAsHex(header,raf, address);
                     System.out.println(hexString);
-                    System.out.println(util.hexStringToString(hexString));
+                    System.out.println(util.hexStringToUTF8(hexString));
                 }
                 case get_hex_address_from_hex_method_item -> {
                     System.out.println("Enter hex string: ");
@@ -77,7 +77,7 @@ public class AppMethod {
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    item.findMethod(header, raf, s);
+                    item.find(header, raf, s);
                 }
                 case get_hex_method_from_method_item_index -> {
                     System.out.println("Enter index: ");
@@ -103,7 +103,7 @@ public class AppMethod {
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.getCommonInFolder(item,s.equals("1"));
+                        appUtil.factorizeInFolder(item,s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();

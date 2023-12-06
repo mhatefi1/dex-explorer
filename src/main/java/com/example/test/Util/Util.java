@@ -1,11 +1,15 @@
 package com.example.test.Util;
 
+import com.example.test.App;
 import org.apache.pdfbox.io.RandomAccessFile;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class Util {
 
@@ -38,20 +42,25 @@ public class Util {
             String folderPath = f.getParent();
             File extractPath = new File(folderPath, name);
             extractPath.mkdir();
-            return new ReadZip().readDexFilesFromZip(path, extractPath.getAbsolutePath()).get(0);
+            return readDexFilesFromZip(path, extractPath.getAbsolutePath()).get(0);
         }
         return f;
     }
 
     public ArrayList<String> getCommonOfArrayList(ArrayList<String> first, ArrayList<String> second) {
         ArrayList<String> result = new ArrayList<>();
-        for (String s : first) {
-            for (String s2 : second) {
-                if (s.equals(s2)) {
-                    result.add(s);
+        try {
+            for (String s : first) {
+                for (String s2 : second) {
+                    if (s.equals(s2)) {
+                        result.add(s);
+                    }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         return result;
     }
 
@@ -70,7 +79,7 @@ public class Util {
 
     }
 
-    public String hexStringToString(String hexString) {
+    public String hexStringToUTF8(String hexString) {
         byte[] bytes = hexStringToByteArray(hexString);
         return new String(bytes, Charset.forName("Cp1252"));
     }
@@ -144,7 +153,7 @@ public class Util {
                 File ext = new File(name);
                 boolean dir = ext.mkdir();
                 if (dir) {
-                    new ReadZip().readDexFilesFromZip(s, ext.getAbsolutePath());
+                    readDexFilesFromZip(s, ext.getAbsolutePath());
                 }
             } else {
                 ArrayList<File> apk = getFileListByFormat(s, ".apk");
@@ -228,6 +237,62 @@ public class Util {
             }
         }
         return newList;
+    }
+
+    public boolean contains(ArrayList<String> list, ArrayList<String> subList) {
+        boolean allItemsPresent = true;
+
+        for (String item : subList) {
+            if (!list.contains(item)) {
+                allItemsPresent = false;
+                break;
+            }
+        }
+        return allItemsPresent;
+    }
+
+    private static File convertInputStreamToFile(InputStream is, String fileName) {
+        OutputStream outputStream = null;
+        File file = null;
+        try {
+            file = new File(fileName);
+            outputStream = new FileOutputStream(file);
+
+            int read;
+            byte[] bytes = new byte[1024];
+            while ((read = is.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, read);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+
+    public ArrayList<File> readDexFilesFromZip(String zipFilePath,String extractPath) {
+        ArrayList<File> list = new ArrayList<>();
+        try {
+            try (ZipFile zipFile = new ZipFile(zipFilePath)) {
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                        InputStream inputStream = zipFile.getInputStream(entry);
+                        list.add(convertInputStreamToFile(inputStream, extractPath + "\\" + entry.getName()));
+                    }
+                }
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return list;
     }
 
     public HashMap<String, byte[]> getHeader(RandomAccessFile raf) {

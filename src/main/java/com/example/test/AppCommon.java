@@ -1,0 +1,123 @@
+package com.example.test;
+
+import com.example.test.Items.ItemsClass;
+import com.example.test.Items.ItemsMethod;
+import com.example.test.Items.ItemsString;
+import com.example.test.Util.AppUtil;
+import com.example.test.Util.Util;
+
+import java.util.Scanner;
+
+public class AppCommon {
+
+    public static void main(String[] args) {
+        Scanner myObj = new Scanner(System.in);
+        System.out.println(
+                "Choose your operation " + "\n" +
+                        "0 to go back" + "\n" +
+                        "1 to get common strings" + "\n" +
+                        "2 to get common methods" + "\n" +
+                        "3 to get common classes" + "\n" +
+                        "4 to get common permissions, activities, services and receivers" + "\n" +
+                        "5 to get all"
+        );
+
+        Util util = new Util();
+        AppUtil appUtil = new AppUtil(util);
+
+        String input = myObj.nextLine();
+
+        switch (input) {
+            case "0" -> {
+                myObj.close();
+                AppMain.main(args);
+            }
+            case "1" -> {
+                ItemsString item = new ItemsString();
+                System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
+                String s = myObj.nextLine();
+                myObj.close();
+                System.out.println("waite ...");
+                try {
+                    appUtil.factorizeInFolder(item, s.equals("1"));
+                    System.out.println("done");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            case "2" -> {
+                ItemsMethod item = new ItemsMethod();
+                System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
+                String s = myObj.nextLine();
+                myObj.close();
+                System.out.println("waite ...");
+                try {
+                    appUtil.factorizeInFolder(item, s.equals("1"));
+                    System.out.println("done");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            case "3" -> {
+                ItemsClass item = new ItemsClass();
+                System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
+                String s = myObj.nextLine();
+                myObj.close();
+                System.out.println("waite ...");
+                try {
+                    appUtil.factorizeInFolder(item, s.equals("1"));
+                    System.out.println("done");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            case "4" -> {
+                myObj.close();
+                System.out.println("waite ...");
+                try {
+                    appUtil.getCommonInManifest();
+                    System.out.println("done");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            case "5" -> {
+                System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
+                String s = myObj.nextLine();
+                boolean utf8 = s.equals("1");
+                myObj.close();
+
+                System.out.println("waite ...");
+
+                ItemsString itemsString = new ItemsString();
+                ItemsMethod itemsMethod = new ItemsMethod();
+                ItemsClass itemsClass = new ItemsClass();
+
+                try {
+                    appUtil.getCommonInManifest();
+                    System.out.println("done");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    appUtil.factorizeInFolder(itemsString, utf8);
+                    System.out.println("done");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    appUtil.factorizeInFolder(itemsMethod, utf8);
+                    System.out.println("done");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    appUtil.factorizeInFolder(itemsClass, utf8);
+                    System.out.println("done");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}

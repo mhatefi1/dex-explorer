@@ -1,5 +1,6 @@
 package com.example.test;
 
+import com.example.test.Util.Util;
 import org.apache.pdfbox.io.RandomAccessFile;
 
 import java.util.HashMap;
@@ -17,11 +18,16 @@ public abstract class App {
         this.common_file_name = common_file_name;
     }
 
+    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
+        long start = new Util().stringHexToDecimal(offseString);
+        return getDataAsUTF8(header, raf, start);
+    }
+
     public abstract String getDataAsHex(HashMap<String, byte[]> header,RandomAccessFile raf, String offseString);
 
     public abstract String getDataAsHex(HashMap<String, byte[]> header,RandomAccessFile raf, long start);
 
-    public abstract String getDataAsUTF8(HashMap<String, byte[]> header,RandomAccessFile raf, String offseString);
-
     public abstract String getDataAsUTF8(HashMap<String, byte[]> header,RandomAccessFile raf, long start);
+
+    public abstract void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s);
 }

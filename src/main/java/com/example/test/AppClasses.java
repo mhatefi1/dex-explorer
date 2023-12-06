@@ -93,7 +93,7 @@ public class AppClasses {
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.getCommonInFolder(item,s.equals("1"));
+                        appUtil.factorizeInFolder(item,s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();

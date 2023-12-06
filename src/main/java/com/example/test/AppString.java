@@ -75,7 +75,7 @@ public class AppString {
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    item.findString(header, raf, s);
+                    item.find(header, raf, s);
                 }
                 case get_hex_string_from_string_item_index -> {
                     System.out.println("Enter index: ");
@@ -101,7 +101,7 @@ public class AppString {
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.getCommonInFolder(item,s.equals("1"));
+                        appUtil.factorizeInFolder(item,s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();

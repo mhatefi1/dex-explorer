@@ -5,7 +5,6 @@ import com.example.test.Util.AppUtil;
 import com.example.test.Util.Util;
 import org.apache.pdfbox.io.RandomAccessFile;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class ItemsClass extends App {
@@ -13,7 +12,7 @@ public class ItemsClass extends App {
     public final static int class_data_size = 32;
     public final static String header_x_ids_size = "header_class_ids_size";
     public final static String header_x_ids_off = "header_class_ids_off";
-    public final static String common_file_name = "commonClasses";
+    public final static String common_file_name = "factorizedClasses";
     Util util;
     AppUtil appUtil;
     public ItemsClass() {
@@ -35,12 +34,13 @@ public class ItemsClass extends App {
     }
 
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
-        return null;
+    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
+        String hex = getDataAsHex(header,raf,start);
+        return util.hexStringToUTF8(hex);
     }
 
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
-        return null;
+    public void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
+
     }
 }
