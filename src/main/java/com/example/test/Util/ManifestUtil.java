@@ -10,11 +10,12 @@ import java.util.regex.Pattern;
 public class ManifestUtil {
 
     public ManifestModel matchManifest(String input) {
-        String regex = "E:\\s(receiver|activity|service)[^-].+?(.*\\n)+?.*name\\(.*(?<=\\))=\"([^\"]*)";
+        String regex = "E:\\s(permission|uses-permission|receiver|activity|service)[^-].+?(.*\\n)+?.*name\\(.*(?<=\\))=\"([^\"]*)";
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
 
+        ArrayList<String> permission_list = new ArrayList<>();
         ArrayList<String> activity_list = new ArrayList<>();
         ArrayList<String> service_list = new ArrayList<>();
         ArrayList<String> receiver_list = new ArrayList<>();
@@ -23,6 +24,11 @@ public class ManifestUtil {
         while (matcher.find()) {
             String match;
             switch (matcher.group(1)) {
+                case "permission", "uses-permission" -> {
+                    match = matcher.group(3);
+                    System.out.println(match);
+                    permission_list.add(match);
+                }
                 case "activity" -> {
                     match = matcher.group(3);
                     System.out.println(match);
@@ -40,14 +46,15 @@ public class ManifestUtil {
                 }
             }
 
-            res.setReceivers(receiver_list);
-            res.setServices(service_list);
+            res.setPermission(permission_list);
             res.setActivities(activity_list);
+            res.setServices(service_list);
+            res.setReceivers(receiver_list);
         }
         return res;
     }
 
-    public String dumpManifest(String aapt,String path){
+    public String dumpManifest(String aapt, String path) {
         String command = aapt + " dump xmltree --file AndroidManifest.xml " + path;
         return runCMD(command);
     }

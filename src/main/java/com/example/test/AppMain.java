@@ -67,14 +67,15 @@ public class AppMain {
                     String manifest = manifestUtil.dumpManifest(aapt2Path, first_file.getPath());
                     ManifestModel manifestModel = manifestUtil.matchManifest(manifest);
 
+                    ArrayList<String> permission_list = manifestModel.getPermission();
                     ArrayList<String> activity_list = manifestModel.getActivities();
                     ArrayList<String> service_list = manifestModel.getServices();
                     ArrayList<String> receiver_list = manifestModel.getReceivers();
 
-
                     for (int i = 1; i < apk_list.size(); i++) {
                         System.out.println(apk_list.get(i));
 
+                        permission_list = util.removeDupe(permission_list);
                         activity_list = util.removeDupe(activity_list);
                         service_list = util.removeDupe(service_list);
                         receiver_list = util.removeDupe(receiver_list);
@@ -83,23 +84,26 @@ public class AppMain {
                         String manifest_ = manifestUtil.dumpManifest(aapt2Path, apk_list.get(i).getPath());
                         ManifestModel manifestModel_ = manifestUtil.matchManifest(manifest_);
 
+                        ArrayList<String> permission_list_ = manifestModel_.getPermission();
                         ArrayList<String> activity_list_ = manifestModel_.getActivities();
                         ArrayList<String> service_list_ = manifestModel_.getServices();
                         ArrayList<String> receiver_list_ = manifestModel_.getReceivers();
 
+                        permission_list = util.getCommonOfArrayList(permission_list_, permission_list);
                         activity_list = util.getCommonOfArrayList(activity_list_, activity_list);
                         service_list = util.getCommonOfArrayList(service_list_, service_list);
                         receiver_list = util.getCommonOfArrayList(receiver_list_, receiver_list);
                     }
 
+                    permission_list = util.removeDupe(permission_list);
                     activity_list = util.removeDupe(activity_list);
                     service_list = util.removeDupe(service_list);
                     receiver_list = util.removeDupe(receiver_list);
 
+                    util.writeArrayToFile(permission_list, s + "\\" + "commonPermissions" + ".txt");
                     util.writeArrayToFile(activity_list, s + "\\" + "commonActivities" + ".txt");
                     util.writeArrayToFile(service_list, s + "\\" + "commonServices" + ".txt");
                     util.writeArrayToFile(receiver_list, s + "\\" + "commonReceivers" + ".txt");
-
 
                     System.out.println("done");
                 } catch (Exception e) {

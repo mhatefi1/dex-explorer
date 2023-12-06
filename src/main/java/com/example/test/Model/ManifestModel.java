@@ -3,11 +3,20 @@ package com.example.test.Model;
 import java.util.ArrayList;
 
 public class ManifestModel {
+    ArrayList<String> permission;
     ArrayList<String> activities;
     ArrayList<String> services;
     ArrayList<String> receivers;
 
     public ManifestModel() {
+    }
+
+    public ArrayList<String> getPermission() {
+        return permission;
+    }
+
+    public void setPermission(ArrayList<String> permission) {
+        this.permission = permission;
     }
 
     public ArrayList<String> getActivities() {
