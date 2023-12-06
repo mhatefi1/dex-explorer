@@ -2,6 +2,7 @@ package com.example.test.Util;
 
 import com.example.test.App;
 import com.example.test.Items.ItemsMethod;
+import com.example.test.Items.ItemsString;
 import org.apache.pdfbox.io.RandomAccessFile;
 
 import java.io.*;
@@ -16,7 +17,7 @@ public class AppUtil {
         this.util = util;
     }
 
-    public void getCommonInFolder(App tClass) {
+    public void getCommonInFolder(App tClass, boolean utf8) {
         try {
             ArrayList<File> fileList = new ArrayList<>();
             util.extractDex(Util.commonFolder);
@@ -24,14 +25,14 @@ public class AppUtil {
             File first_file = dexFileList.get(0);
             String fileName = first_file.getAbsolutePath();
             System.out.println(fileName);
-            ArrayList<String> finall = getFromDexAsArray(first_file, tClass);
+            ArrayList<String> finall = getFromDexAsArray(first_file, tClass, utf8);
 
             for (int i = 1; i < dexFileList.size(); i++) {
                 System.out.println(finall.size());
                 finall = util.removeDupe(finall);
                 System.out.println(finall.size());
                 System.out.println(dexFileList.get(i));
-                ArrayList<String> file_Strings = getFromDexAsArray(dexFileList.get(i), tClass);
+                ArrayList<String> file_Strings = getFromDexAsArray(dexFileList.get(i), tClass, utf8);
                 finall = util.getCommonOfArrayList(file_Strings, finall);
             }
             finall = util.removeDupe(finall);
@@ -43,7 +44,7 @@ public class AppUtil {
         }
     }
 
-    public ArrayList<String> getFromDexAsArray(File f, App tClass) {
+    public ArrayList<String> getFromDexAsArray(File f, App tClass, boolean utf8) {
         ArrayList<String> s = new ArrayList<>();
         try {
             RandomAccessFile raf = new RandomAccessFile(f, "r");
@@ -53,9 +54,23 @@ public class AppUtil {
             long ids_count = util.getDecimalValue(header_ids_size);
             long ids_offset = util.getDecimalValue(header_ids_off);
 
-            if (tClass instanceof ItemsMethod){
+            if (utf8) {
                 for (int i = 0; i < ids_count; i++) {
-                    String hex = ((ItemsMethod) tClass).getParsedMethodDataAsUTF8(header,raf, ids_offset);
+                    String data = tClass.getDataAsUTF8(header, raf, ids_offset);
+                    ids_offset = ids_offset + tClass.data_size;
+                    s.add(data);
+                }
+            } else {
+                for (int i = 0; i < ids_count; i++) {
+                    String data = tClass.getDataAsHex(header, raf, ids_offset);
+                    ids_offset = ids_offset + tClass.data_size;
+                    s.add(data);
+                }
+            }
+
+          /*  if (tClass instanceof ItemsMethod) {
+                for (int i = 0; i < ids_count; i++) {
+                    String hex = ((ItemsMethod) tClass).getParsedMethodDataAsUTF8(header, raf, ids_offset);
                     ids_offset = ids_offset + tClass.data_size;
                     s.add(hex);
                 }
@@ -65,8 +80,7 @@ public class AppUtil {
                     ids_offset = ids_offset + tClass.data_size;
                     s.add(hex);
                 }
-            }
-
+            }*/
 
             raf.close();
         } catch (Exception e) {
@@ -79,7 +93,7 @@ public class AppUtil {
         File f = new File(path);
         boolean flag = false;
         try {
-            ArrayList<String> finall = getFromDexAsArray(f, tClass);
+            ArrayList<String> finals = getFromDexAsArray(f, tClass, false);
 
             String signature_path = "C:\\Users\\sedej\\Desktop\\crack\\crack-me2\\amn-temp\\classes.dex-methods.txt";
             File signature_file = new File(signature_path);
@@ -92,8 +106,8 @@ public class AppUtil {
                 line = reader.readLine();
             }
             reader.close();
-            System.out.println(finall.size() + "+" + signature.size());
-            flag = contains(finall, signature);
+            System.out.println(finals.size() + "+" + signature.size());
+            flag = contains(finals, signature);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,16 +137,16 @@ public class AppUtil {
             File f = new File(Util.TEMP_DEX_PATH + "\\" + fileName);
             BufferedWriter writer = new BufferedWriter(new FileWriter(f, false));
 
-            if (tClass instanceof ItemsMethod){
+            if (tClass instanceof ItemsMethod) {
                 for (int i = 0; i < ids_count; i++) {
-                    String hex = ((ItemsMethod) tClass).getParsedMethodDataAsUTF8(header,raf, ids_offset);
+                    String hex = tClass.getDataAsUTF8(header, raf, ids_offset);
                     ids_offset = ids_offset + tClass.data_size;
                     writer.append(hex);
                     writer.append('\n');
                 }
             } else {
                 for (int i = 0; i < ids_count; i++) {
-                    String hex = tClass.getDataAsHex(raf, ids_offset);
+                    String hex = tClass.getDataAsHex(header, raf, ids_offset);
                     ids_offset = ids_offset + tClass.data_size;
                     writer.append(hex);
                     writer.append('\n');
@@ -151,7 +165,7 @@ public class AppUtil {
         long ids_count = util.getDecimalValue(header_ids_size);
         long ids_offset = util.getDecimalValue(header_ids_off);
         for (int i = 0; i < ids_count; i++) {
-            String hex = tClass.getDataAsHex(raf, ids_offset);
+            String hex = tClass.getDataAsHex(header, raf, ids_offset);
             ids_offset = ids_offset + tClass.data_size;
             System.out.println(hex);
         }
@@ -163,7 +177,7 @@ public class AppUtil {
         long ids_count = util.getDecimalValue(header_ids_size);
         long ids_offset = util.getDecimalValue(header_ids_off);
         for (int i = 0; i < ids_count; i++) {
-            String hex = tClass.getDataAsHex(raf, ids_offset);
+            String hex = tClass.getDataAsHex(header, raf, ids_offset);
             if (hex.equals(s)) {
                 System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
                 System.out.println("ids_index: " + i);
@@ -194,7 +208,7 @@ public class AppUtil {
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = util.getDecimalValue(header_ids_off);
         ids_offset = index * tClass.data_size + ids_offset;
-        return tClass.getDataAsHex(raf, ids_offset);
+        return tClass.getDataAsHex(header, raf, ids_offset);
     }
 
 }

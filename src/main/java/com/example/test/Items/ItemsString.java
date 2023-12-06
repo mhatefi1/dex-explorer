@@ -27,7 +27,7 @@ public class ItemsString extends App {
         long ids_count = util.getDecimalValue(header_ids_size);
         long ids_offset = util.getDecimalValue(header_ids_off);
         for (int i = 0; i < ids_count; i++) {
-            String hex = getDataAsHex(raf, ids_offset);
+            String hex = getDataAsHex(null,raf, ids_offset);
             if (hex.equals(hexString)) {
                 System.out.println(hex);
                 System.out.println("index:" + i);
@@ -38,20 +38,14 @@ public class ItemsString extends App {
         }
     }
 
-
-    public String getStringDataAsUTF8(RandomAccessFile raf, String hex) {
-        String hexString = getDataAsHex(raf, hex);
-        return util.hexStringToString(hexString);
-    }
-
     @Override
-    public String getDataAsHex(RandomAccessFile raf, String offseString) {
+    public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
         long start = util.stringHexToDecimal(offseString);
-        return getDataAsHex(raf, start);
+        return getDataAsHex(header,raf, start);
     }
 
     @Override
-    public String getDataAsHex(RandomAccessFile raf, long start) {
+    public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
         StringBuilder stringBuilder = new StringBuilder();
@@ -76,5 +70,43 @@ public class ItemsString extends App {
         }
 
         return stringBuilder.toString();
+    }
+
+    @Override
+    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
+        long start = util.stringHexToDecimal(offseString);
+        return getDataAsUTF8(header,raf, start);
+    }
+
+    @Override
+    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
+        String hex = getDataAsHex(header,raf, start);
+        return util.hexStringToString(hex);
+        /*byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
+        long offset = util.getDecimalValue(first_offset_of_string_data_b);
+        StringBuilder stringBuilder = new StringBuilder();
+
+        while (true) {
+            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
+            long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
+            offset++;
+            if (size_in_utf16_l < 127) {
+                break;
+            }
+        }
+
+        while (true) {
+            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+            String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
+            if (hex.equals("00")) {
+                break;
+            }
+
+            String utf8 = util.hexStringToString(hex);
+            stringBuilder.append(utf8);
+            offset++;
+        }
+
+        return stringBuilder.toString();*/
     }
 }

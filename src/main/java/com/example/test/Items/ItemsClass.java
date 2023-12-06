@@ -23,14 +23,24 @@ public class ItemsClass extends App {
     }
 
     @Override
-    public String getDataAsHex(RandomAccessFile raf, String offseString) {
+    public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
         long start = util.stringHexToDecimal(offseString);
-        return getDataAsHex(raf, start);
+        return getDataAsHex(header,raf, start);
     }
 
     @Override
-    public String getDataAsHex(RandomAccessFile raf, long start) {
+    public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         byte[] class_data_b = util.getBytesOfFile(raf, start, class_data_size);
         return util.byteToStringHex(class_data_b);
+    }
+
+    @Override
+    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
+        return null;
+    }
+
+    @Override
+    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
+        return null;
     }
 }

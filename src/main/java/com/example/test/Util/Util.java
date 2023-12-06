@@ -10,7 +10,7 @@ import java.util.HashMap;
 public class Util {
 
     public static String TEMP_DEX_PATH = "";
-    public static String commonFolder = "C:\\Users\\sedej\\Desktop\\remo-test\\Newfolder";
+    public static String commonFolder = "C:\\Users\\sedej\\Desktop\\remo-test";
 
     public static void runDuration(long startTime) {
         long endTime = System.currentTimeMillis();

@@ -61,7 +61,7 @@ public class AppMethod {
                     String address = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    String hexString = item.getDataAsHex(raf, address);
+                    String hexString = item.getDataAsHex(header,raf, address);
                     System.out.println(hexString);
                     System.out.println(util.hexStringToString(hexString));
                 }
@@ -98,10 +98,12 @@ public class AppMethod {
                     }
                 }
                 case compare_dex_file -> {
+                    System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
+                    String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.getCommonInFolder(item);
+                        appUtil.getCommonInFolder(item,s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();

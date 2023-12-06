@@ -2,6 +2,8 @@ package com.example.test;
 
 import org.apache.pdfbox.io.RandomAccessFile;
 
+import java.util.HashMap;
+
 public abstract class App {
     public int data_size;
     public String header_x_ids_size;
@@ -15,7 +17,11 @@ public abstract class App {
         this.common_file_name = common_file_name;
     }
 
-    public abstract String getDataAsHex(RandomAccessFile raf, String offseString);
+    public abstract String getDataAsHex(HashMap<String, byte[]> header,RandomAccessFile raf, String offseString);
 
-    public abstract String getDataAsHex(RandomAccessFile raf, long start);
+    public abstract String getDataAsHex(HashMap<String, byte[]> header,RandomAccessFile raf, long start);
+
+    public abstract String getDataAsUTF8(HashMap<String, byte[]> header,RandomAccessFile raf, String offseString);
+
+    public abstract String getDataAsUTF8(HashMap<String, byte[]> header,RandomAccessFile raf, long start);
 }

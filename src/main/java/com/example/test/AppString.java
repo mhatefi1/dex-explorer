@@ -60,7 +60,7 @@ public class AppString {
                     String hex_address = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    String utf8 = item.getStringDataAsUTF8(raf, hex_address);
+                    String utf8 = item.getDataAsUTF8(header,raf, hex_address);
                     System.out.println("data string:" + utf8);
                 }
                 case get_hex_address_from_hex_string_item -> {
@@ -96,10 +96,12 @@ public class AppString {
                     }
                 }
                 case compare_dex_file -> {
+                    System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
+                    String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.getCommonInFolder(item);
+                        appUtil.getCommonInFolder(item,s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();
