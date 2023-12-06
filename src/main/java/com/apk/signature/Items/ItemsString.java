@@ -1,8 +1,8 @@
-package com.example.test.Items;
+package com.apk.signature.Items;
 
 import java.util.HashMap;
 
-import com.example.test.Util.Util;
+import com.apk.signature.Util.Util;
 import org.apache.pdfbox.io.RandomAccessFile;
 
 public class ItemsString extends Item {

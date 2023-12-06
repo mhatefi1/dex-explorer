@@ -1,11 +1,7 @@
-package com.example.test;
+package com.apk.signature;
 
-import com.example.test.Model.ManifestModel;
-import com.example.test.Util.ManifestUtil;
-import com.example.test.Util.Util;
+import com.apk.signature.Util.Util;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class AppMain {

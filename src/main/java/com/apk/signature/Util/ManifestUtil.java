@@ -1,6 +1,6 @@
-package com.example.test.Util;
+package com.apk.signature.Util;
 
-import com.example.test.Model.ManifestModel;
+import com.apk.signature.Model.ManifestModel;
 
 import java.io.*;
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
-package com.example.test.Items;
+package com.apk.signature.Items;
 
-import com.example.test.Util.AppUtil;
-import com.example.test.Util.Util;
+import com.apk.signature.Util.AppUtil;
+import com.apk.signature.Util.Util;
 import org.apache.pdfbox.io.RandomAccessFile;
 
 import java.util.HashMap;

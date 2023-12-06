@@ -1,4 +1,4 @@
-package com.example.test;
+package com.apk.signature;
 
 import static org.junit.Assert.assertTrue;
 

@@ -1,10 +1,10 @@
-package com.example.test;
+package com.apk.signature;
 
-import com.example.test.Items.ItemsClass;
-import com.example.test.Items.ItemsMethod;
-import com.example.test.Items.ItemsString;
-import com.example.test.Util.AppUtil;
-import com.example.test.Util.Util;
+import com.apk.signature.Items.ItemsClass;
+import com.apk.signature.Items.ItemsMethod;
+import com.apk.signature.Items.ItemsString;
+import com.apk.signature.Util.AppUtil;
+import com.apk.signature.Util.Util;
 
 import java.util.Scanner;
 

@@ -1,4 +1,4 @@
-package com.example.test.Model;
+package com.apk.signature.Model;
 
 import java.util.ArrayList;
 

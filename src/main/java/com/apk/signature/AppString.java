@@ -1,22 +1,22 @@
-package com.example.test;
-
-import com.example.test.Items.ItemsMethod;
-import com.example.test.Util.AppUtil;
-import com.example.test.Util.Util;
-import org.apache.pdfbox.io.RandomAccessFile;
+package com.apk.signature;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class AppMethod {
+import com.apk.signature.Items.ItemsString;
+import com.apk.signature.Util.AppUtil;
+import com.apk.signature.Util.Util;
+import org.apache.pdfbox.io.RandomAccessFile;
+
+public class AppString {
 
     private static final String print_all = "1";
-    private static final String get_method_item_from_hex_address = "2";
-    private static final String get_hex_address_from_hex_method_item = "3";
+    private static final String get_string_item_from_hex_address = "2";
+    private static final String get_hex_address_from_hex_string_item = "3";
     private static final String get_hex_string_from_string_value = "4";
-    private static final String get_hex_method_from_method_item_index = "5";
-    private static final String write_methods_to_file = "6";
+    private static final String get_hex_string_from_string_item_index = "5";
+    private static final String write_strings_to_file = "6";
     private static final String compare_dex_file = "7";
     private static final String match_dex_with_signature = "8";
 
@@ -27,22 +27,21 @@ public class AppMethod {
             File dexFile = util.generateDex(args[0]);
             Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
             RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
-            ItemsMethod item = new ItemsMethod();
+            ItemsString item = new ItemsString();
             HashMap<String, byte[]> header = util.getHeader(raf);
 
             Scanner myObj = new Scanner(System.in);
             System.out.println(
                     "Choose your operation " + "\n" +
                             "0 to go back" + "\n" +
-                            print_all + " print all method;" + "\n" +
-                            get_method_item_from_hex_address + " search method by offset; (input format:hex string)" + "\n" +
-                            get_hex_address_from_hex_method_item + " get method index and offset by method; (input format:hex string)" + "\n" +
-                            get_hex_string_from_string_value + " search method info by method name; (input format:utf8 string)" + "\n" +
-                            get_hex_method_from_method_item_index + " search method id by index; (input format:number)" + "\n" +
-                            write_methods_to_file + " write dex methods to file " + "\n" +
+                            print_all + " print all strings " + "\n" +
+                            get_string_item_from_hex_address + " search utf8 value by string id offset; (input format:hex string)" + "\n" +
+                            get_hex_address_from_hex_string_item + " search string index and offset by string hex value; (input format:hex string)" + "\n" +
+                            get_hex_string_from_string_value + " search string index and offset by utf8 value; (input format:utf8 string)" + "\n" +
+                            get_hex_string_from_string_item_index + " search string id by index; (input format:number)" + "\n" +
+                            write_strings_to_file + " write dex strings to file " + "\n" +
                             compare_dex_file + " compare dex files in a folder" + "\n" +
                             match_dex_with_signature + " match dex with signature"
-
             );
 
             String input = myObj.nextLine();
@@ -56,16 +55,15 @@ public class AppMethod {
                     appUtil.getAll(header, raf, item);
                     myObj.close();
                 }
-                case get_method_item_from_hex_address -> {
-                    System.out.println("Enter hex address:");
-                    String address = myObj.nextLine();
+                case get_string_item_from_hex_address -> {
+                    System.out.println("Enter offset as hex:");
+                    String hex_address = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    String hexString = item.getDataAsHex(header,raf, address);
-                    System.out.println(hexString);
-                    System.out.println(util.hexStringToUTF8(hexString));
+                    String utf8 = item.getDataAsUTF8(header,raf, hex_address);
+                    System.out.println("data string:" + utf8);
                 }
-                case get_hex_address_from_hex_method_item -> {
+                case get_hex_address_from_hex_string_item -> {
                     System.out.println("Enter hex string: ");
                     String s = myObj.nextLine();
                     myObj.close();
@@ -73,25 +71,25 @@ public class AppMethod {
                     appUtil.getAddressFromHexString(header, raf, s, item);
                 }
                 case get_hex_string_from_string_value -> {
-                    System.out.println("Enter method name : ");
+                    System.out.println("Enter string : ");
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
                     item.find(header, raf, s);
                 }
-                case get_hex_method_from_method_item_index -> {
+                case get_hex_string_from_string_item_index -> {
                     System.out.println("Enter index: ");
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
                     String res = appUtil.getByIndex(header, raf, Long.parseLong(s), item);
-                    System.out.println(res);
+                    System.out.println("index [" + s + "]:" + res);
                 }
-                case write_methods_to_file -> {
+                case write_strings_to_file -> {
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.writeToFile(header, raf, dexFile.getName() + "-methods.txt", item);
+                        appUtil.writeToFile(header, raf, dexFile.getName() + "-strings.txt", item);
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -119,6 +117,7 @@ public class AppMethod {
                         e.printStackTrace();
                     }
                 }
+
             }
             raf.close();
         } catch (Exception exception) {
