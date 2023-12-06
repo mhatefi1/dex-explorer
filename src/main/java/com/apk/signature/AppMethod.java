@@ -61,7 +61,7 @@ public class AppMethod {
                     String address = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    String hexString = item.getDataAsHex(header,raf, address);
+                    String hexString = item.getDataAsHex(header, raf, address);
                     System.out.println(hexString);
                     System.out.println(util.hexStringToUTF8(hexString));
                 }
@@ -88,10 +88,12 @@ public class AppMethod {
                     System.out.println(res);
                 }
                 case write_methods_to_file -> {
+                    System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
+                    String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.writeToFile(header, raf, dexFile.getName() + "-methods.txt", item);
+                        appUtil.writeToFile(header, raf, dexFile.getName() + "-methods.txt", item, s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -103,7 +105,7 @@ public class AppMethod {
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.factorizeInFolder(item,s.equals("1"));
+                        appUtil.factorizeInFolder(item, s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();

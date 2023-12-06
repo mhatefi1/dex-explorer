@@ -60,7 +60,7 @@ public class AppString {
                     String hex_address = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    String utf8 = item.getDataAsUTF8(header,raf, hex_address);
+                    String utf8 = item.getDataAsUTF8(header, raf, hex_address);
                     System.out.println("data string:" + utf8);
                 }
                 case get_hex_address_from_hex_string_item -> {
@@ -86,10 +86,12 @@ public class AppString {
                     System.out.println("index [" + s + "]:" + res);
                 }
                 case write_strings_to_file -> {
+                    System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
+                    String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.writeToFile(header, raf, dexFile.getName() + "-strings.txt", item);
+                        appUtil.writeToFile(header, raf, dexFile.getName() + "-strings.txt", item, s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -101,7 +103,7 @@ public class AppString {
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.factorizeInFolder(item,s.equals("1"));
+                        appUtil.factorizeInFolder(item, s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();

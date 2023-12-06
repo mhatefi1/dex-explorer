@@ -18,7 +18,7 @@ public class AppClasses {
     private static final String compare_dex_file = "6";
     private static final String match_dex_with_signature = "7";
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         try {
             Util util = new Util();
             AppUtil appUtil = new AppUtil(util);
@@ -33,7 +33,7 @@ public class AppClasses {
                     "Choose your operation " + "\n" +
                             "0 to go back" + "\n" +
                             print_all + " print all classes " + "\n" +
-                           // get_method_item_from_hex_address + " print utf-8 class data use hex address " + "\n" +
+                            // get_method_item_from_hex_address + " print utf-8 class data use hex address " + "\n" +
                             get_hex_address_from_hex_method_item + " print hex address use hex string " + "\n" +
                             get_hex_method_from_method_item_index + " print hex string use index " + "\n" +
                             write_methods_to_file + " write dex classes to file " + "\n" +
@@ -78,10 +78,12 @@ public class AppClasses {
                     System.out.println(res);
                 }
                 case write_methods_to_file -> {
+                    System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
+                    String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.writeToFile(header, raf, dexFile.getName() + "-classes.txt", item);
+                        appUtil.writeToFile(header, raf, dexFile.getName() + "-classes.txt", item, s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -93,7 +95,7 @@ public class AppClasses {
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.factorizeInFolder(item,s.equals("1"));
+                        appUtil.factorizeInFolder(item, s.equals("1"));
                         System.out.println("done");
                     } catch (Exception e) {
                         e.printStackTrace();

@@ -153,7 +153,7 @@ public class AppUtil {
     }
 
 
-    public void writeToFile(HashMap<String, byte[]> header, RandomAccessFile raf, String fileName, Item tClass) {
+    public void writeToFile(HashMap<String, byte[]> header, RandomAccessFile raf, String fileName, Item tClass,boolean utf8) {
         try {
             byte[] header_ids_size = header.get(tClass.header_x_ids_size);
             byte[] header_ids_off = header.get(tClass.header_x_ids_off);
@@ -163,11 +163,20 @@ public class AppUtil {
             File f = new File(Util.TEMP_DEX_PATH + "\\" + fileName);
             BufferedWriter writer = new BufferedWriter(new FileWriter(f, false));
 
-            for (int i = 0; i < ids_count; i++) {
-                String hex = tClass.getDataAsHex(header, raf, ids_offset);
-                ids_offset = ids_offset + tClass.data_size;
-                writer.append(hex);
-                writer.append('\n');
+            if (utf8){
+                for (int i = 0; i < ids_count; i++) {
+                    String hex = tClass.getDataAsUTF8(header, raf, ids_offset);
+                    ids_offset = ids_offset + tClass.data_size;
+                    writer.append(hex);
+                    writer.append('\n');
+                }
+            } else {
+                for (int i = 0; i < ids_count; i++) {
+                    String hex = tClass.getDataAsHex(header, raf, ids_offset);
+                    ids_offset = ids_offset + tClass.data_size;
+                    writer.append(hex);
+                    writer.append('\n');
+                }
             }
             writer.close();
         } catch (Exception e) {
