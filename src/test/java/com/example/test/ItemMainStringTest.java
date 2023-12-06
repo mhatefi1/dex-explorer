@@ -9,7 +9,7 @@ import java.util.ArrayList;
 /**
  * Unit test for simple App.
  */
-public class AppMainStringTest {
+public class ItemMainStringTest {
     /**
      * Rigorous Test :-)
      */

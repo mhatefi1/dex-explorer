@@ -2,11 +2,10 @@ package com.example.test.Items;
 
 import java.util.HashMap;
 
-import com.example.test.App;
 import com.example.test.Util.Util;
 import org.apache.pdfbox.io.RandomAccessFile;
 
-public class ItemsString extends App {
+public class ItemsString extends Item {
 
 
     public final static int string_data_off_size = 4;
@@ -18,31 +17,6 @@ public class ItemsString extends App {
     public ItemsString() {
         super(string_data_off_size, header_x_ids_size, header_x_ids_off, common_file_name);
         util = new Util();
-    }
-
-    @Override
-    public void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
-        String hexString = util.stringToHexString(s);
-        byte[] header_ids_size = header.get(header_x_ids_size);
-        byte[] header_ids_off = header.get(header_x_ids_off);
-        long ids_count = util.getDecimalValue(header_ids_size);
-        long ids_offset = util.getDecimalValue(header_ids_off);
-        for (int i = 0; i < ids_count; i++) {
-            String hex = getDataAsHex(null, raf, ids_offset);
-            if (hex.equals(hexString)) {
-                System.out.println(hex);
-                System.out.println("index:" + i);
-                System.out.println("offset:" + util.decimalToStringHex(ids_offset));
-                System.out.println("****************************************************");
-            }
-            ids_offset = ids_offset + string_data_off_size;
-        }
-    }
-
-    @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
-        long start = util.stringHexToDecimal(offseString);
-        return getDataAsHex(header, raf, start);
     }
 
     @Override
@@ -76,5 +50,24 @@ public class ItemsString extends App {
     public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         String hex = getDataAsHex(header, raf, start);
         return util.hexStringToUTF8(hex);
+    }
+
+    @Override
+    public void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
+        String hexString = util.stringToHexString(s);
+        byte[] header_ids_size = header.get(header_x_ids_size);
+        byte[] header_ids_off = header.get(header_x_ids_off);
+        long ids_count = util.getDecimalValue(header_ids_size);
+        long ids_offset = util.getDecimalValue(header_ids_off);
+        for (int i = 0; i < ids_count; i++) {
+            String hex = getDataAsHex(null, raf, ids_offset);
+            if (hex.equals(hexString)) {
+                System.out.println(hex);
+                System.out.println("index:" + i);
+                System.out.println("offset:" + util.decimalToStringHex(ids_offset));
+                System.out.println("****************************************************");
+            }
+            ids_offset = ids_offset + string_data_off_size;
+        }
     }
 }

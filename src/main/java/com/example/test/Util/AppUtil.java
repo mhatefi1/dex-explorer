@@ -1,7 +1,6 @@
 package com.example.test.Util;
 
-import com.example.test.App;
-import com.example.test.Items.ItemsMethod;
+import com.example.test.Items.Item;
 import com.example.test.Model.ManifestModel;
 import org.apache.pdfbox.io.RandomAccessFile;
 
@@ -68,7 +67,7 @@ public class AppUtil {
         util.writeArrayToFile(receiver_list, Util.commonFolder + "\\" + "factorizedReceivers" + ".txt");
     }
 
-    public void factorizeInFolder(App tClass, boolean utf8) {
+    public void factorizeInFolder(Item tClass, boolean utf8) {
         try {
             System.out.println("***********" + tClass.common_file_name + "***********");
             ArrayList<File> fileList = new ArrayList<>();
@@ -78,11 +77,13 @@ public class AppUtil {
             String fileName = first_file.getAbsolutePath();
             System.out.println(fileName);
             ArrayList<String> finall = getFromDexAsArray(first_file, tClass, utf8);
-
+            System.out.println("this items count:" + finall.size());
             for (int i = 1; i < dexFileList.size(); i++) {
                 finall = util.removeDupe(finall);
+                System.out.println("common items count:" + finall.size());
                 System.out.println(dexFileList.get(i));
                 ArrayList<String> file_Strings = getFromDexAsArray(dexFileList.get(i), tClass, utf8);
+                System.out.println("this items count:" + file_Strings.size());
                 finall = util.getCommonOfArrayList(file_Strings, finall);
             }
             finall = util.removeDupe(finall);
@@ -95,7 +96,7 @@ public class AppUtil {
         }
     }
 
-    public ArrayList<String> getFromDexAsArray(File f, App tClass, boolean utf8) {
+    public ArrayList<String> getFromDexAsArray(File f, Item tClass, boolean utf8) {
         ArrayList<String> s = new ArrayList<>();
         try {
             RandomAccessFile raf = new RandomAccessFile(f, "r");
@@ -126,7 +127,7 @@ public class AppUtil {
         return s;
     }
 
-    public boolean fileMatch(String path, App tClass) {
+    public boolean fileMatch(String path, Item tClass) {
         File f = new File(path);
         boolean flag = false;
         try {
@@ -152,7 +153,7 @@ public class AppUtil {
     }
 
 
-    public void writeToFile(HashMap<String, byte[]> header, RandomAccessFile raf, String fileName, App tClass) {
+    public void writeToFile(HashMap<String, byte[]> header, RandomAccessFile raf, String fileName, Item tClass) {
         try {
             byte[] header_ids_size = header.get(tClass.header_x_ids_size);
             byte[] header_ids_off = header.get(tClass.header_x_ids_off);
@@ -162,29 +163,19 @@ public class AppUtil {
             File f = new File(Util.TEMP_DEX_PATH + "\\" + fileName);
             BufferedWriter writer = new BufferedWriter(new FileWriter(f, false));
 
-            if (tClass instanceof ItemsMethod) {
-                for (int i = 0; i < ids_count; i++) {
-                    String hex = tClass.getDataAsUTF8(header, raf, ids_offset);
-                    ids_offset = ids_offset + tClass.data_size;
-                    writer.append(hex);
-                    writer.append('\n');
-                }
-            } else {
-                for (int i = 0; i < ids_count; i++) {
-                    String hex = tClass.getDataAsHex(header, raf, ids_offset);
-                    ids_offset = ids_offset + tClass.data_size;
-                    writer.append(hex);
-                    writer.append('\n');
-                }
+            for (int i = 0; i < ids_count; i++) {
+                String hex = tClass.getDataAsHex(header, raf, ids_offset);
+                ids_offset = ids_offset + tClass.data_size;
+                writer.append(hex);
+                writer.append('\n');
             }
-
             writer.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void getAll(HashMap<String, byte[]> header, RandomAccessFile raf, App tClass) {
+    public void getAll(HashMap<String, byte[]> header, RandomAccessFile raf, Item tClass) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = util.getDecimalValue(header_ids_size);
@@ -196,7 +187,7 @@ public class AppUtil {
         }
     }
 
-    public void getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String s, App tClass) {
+    public void getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String s, Item tClass) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = util.getDecimalValue(header_ids_size);
@@ -212,7 +203,7 @@ public class AppUtil {
         }
     }
 
-    public String getByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, App tClass) {
+    public String getByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, Item tClass) {
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = util.getDecimalValue(header_ids_off);
         ids_offset = index * tClass.data_size + ids_offset;

@@ -1,6 +1,5 @@
 package com.example.test.Util;
 
-import com.example.test.App;
 import org.apache.pdfbox.io.RandomAccessFile;
 
 import java.io.*;
@@ -14,7 +13,7 @@ import java.util.zip.ZipFile;
 public class Util {
 
     public static String TEMP_DEX_PATH = "";
-    public static String commonFolder = "C:\\Users\\sedej\\Desktop\\remo-test";
+    public static String commonFolder = "C:\\Users\\sedej\\Desktop\\remo-test\\Newfolder";
 
     public static void runDuration(long startTime) {
         long endTime = System.currentTimeMillis();

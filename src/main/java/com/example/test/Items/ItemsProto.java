@@ -1,6 +1,5 @@
 package com.example.test.Items;
 
-import com.example.test.App;
 import com.example.test.Util.AppUtil;
 import com.example.test.Util.Util;
 import org.apache.pdfbox.io.RandomAccessFile;
@@ -8,22 +7,17 @@ import org.apache.pdfbox.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class ItemsProto extends App {
+public class ItemsProto extends Item {
     public static final int proto_data_size = 12;
     public final static String header_x_ids_size = "header_proto_ids_size";
     public final static String header_x_ids_off = "header_proto_ids_off";
     public final static String common_file_name = "factorizedProto";
     Util util;
-
+    AppUtil appUtil;
     public ItemsProto() {
         super(proto_data_size, header_x_ids_size, header_x_ids_off, common_file_name);
         util = new Util();
-    }
-
-    @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
-        long start = util.stringHexToDecimal(offseString);
-        return getDataAsHex(header, raf, start);
+        appUtil = new AppUtil(util);
     }
 
     @Override
@@ -36,7 +30,7 @@ public class ItemsProto extends App {
         long shorty_idx = util.getDecimalValue(shorty_idx_b);
         long return_type_idx = util.getDecimalValue(return_type_idx_b);
         long parameters_off = util.getDecimalValue(parameters_off_b);
-        return new AppUtil(util).getByIndex(header, raf, return_type_idx, new ItemsType());
+        return appUtil.getByIndex(header, raf, return_type_idx, new ItemsType());
     }
 
     @Override
