@@ -24,7 +24,7 @@ public class AppString {
         try {
             Util util = new Util();
             AppUtil appUtil = new AppUtil(util);
-            File dexFile = util.generateDex(args[0]);
+            File dexFile = util.generateDex(args[0]).get(0);
             Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
             RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
             ItemsString item = new ItemsString();
@@ -68,7 +68,7 @@ public class AppString {
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    appUtil.getAddressFromHexString(header, raf, s, item);
+                    appUtil.getAddressFromHexString(header, raf, s.toUpperCase(), item);
                 }
                 case get_hex_string_from_string_value -> {
                     System.out.println("Enter string : ");

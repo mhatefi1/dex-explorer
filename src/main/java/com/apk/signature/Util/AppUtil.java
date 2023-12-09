@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class AppUtil {
 
-    private static final String aapt2Path = "C:\\Users\\sedej\\AppData\\Local\\Android\\Sdk\\build-tools\\34.0.0\\aapt2.exe";
+    public static final String aapt2Path = "C:\\Users\\sedej\\AppData\\Local\\Android\\Sdk\\build-tools\\34.0.0\\aapt2.exe";
     Util util;
 
     public AppUtil(Util util) {
@@ -25,7 +25,7 @@ public class AppUtil {
         String fileName = first_file.getAbsolutePath();
         System.out.println(fileName);
 
-        String manifest = manifestUtil.dumpManifest(aapt2Path, first_file.getPath());
+        String manifest = manifestUtil.dumpManifest(first_file.getPath());
         ManifestModel manifestModel = manifestUtil.matchManifest(manifest);
 
         ArrayList<String> permission_list = manifestModel.getPermission();
@@ -42,7 +42,7 @@ public class AppUtil {
             receiver_list = util.removeDupe(receiver_list);
 
 
-            String manifest_ = manifestUtil.dumpManifest(aapt2Path, apk_list.get(i).getPath());
+            String manifest_ = manifestUtil.dumpManifest(apk_list.get(i).getPath());
             ManifestModel manifestModel_ = manifestUtil.matchManifest(manifest_);
 
             ArrayList<String> permission_list_ = manifestModel_.getPermission();
@@ -196,20 +196,23 @@ public class AppUtil {
         }
     }
 
-    public void getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String s, Item tClass) {
+    public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String s, Item tClass) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = util.getDecimalValue(header_ids_size);
         long ids_offset = util.getDecimalValue(header_ids_off);
+        boolean result = false;
         for (int i = 0; i < ids_count; i++) {
             String hex = tClass.getDataAsHex(header, raf, ids_offset);
             if (hex.equals(s)) {
                 System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
                 System.out.println("ids_index: " + i);
+                result = true;
                 break;
             }
             ids_offset = ids_offset + tClass.data_size;
         }
+        return result;
     }
 
     public String getByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, Item tClass) {

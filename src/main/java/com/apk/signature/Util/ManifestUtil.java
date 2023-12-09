@@ -26,22 +26,18 @@ public class ManifestUtil {
             switch (matcher.group(1)) {
                 case "permission", "uses-permission" -> {
                     match = matcher.group(3);
-                    System.out.println(match);
                     permission_list.add(match);
                 }
                 case "activity" -> {
                     match = matcher.group(3);
-                    System.out.println(match);
                     activity_list.add(match);
                 }
                 case "service" -> {
                     match = matcher.group(3);
-                    System.out.println(match);
                     service_list.add(match);
                 }
                 case "receiver" -> {
                     match = matcher.group(3);
-                    System.out.println(match);
                     receiver_list.add(match);
                 }
             }
@@ -54,8 +50,8 @@ public class ManifestUtil {
         return res;
     }
 
-    public String dumpManifest(String aapt, String path) {
-        String command = aapt + " dump xmltree --file AndroidManifest.xml " + path;
+    public String dumpManifest(String path) {
+        String command = AppUtil.aapt2Path + " dump xmltree --file AndroidManifest.xml " + path;
         return runCMD(command);
     }
 
@@ -73,10 +69,9 @@ public class ManifestUtil {
                 output.append(line).append("\n");
             }
 
-            int exitCode = process.waitFor();
-
-            System.out.println("Command output:\n" + output);
-            System.out.println("Exit code: " + exitCode);
+            //int exitCode = process.waitFor();
+            // System.out.println("Command output:\n" + output);
+            //System.out.println("Exit code: " + exitCode);
 
             res = output.toString();
         } catch (Exception e) {

@@ -22,7 +22,7 @@ public class AppClasses {
         try {
             Util util = new Util();
             AppUtil appUtil = new AppUtil(util);
-            File dexFile = util.generateDex(args[0]);
+            File dexFile = util.generateDex(args[0]).get(0);
             Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
             RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
             ItemsClass item = new ItemsClass();
@@ -67,7 +67,7 @@ public class AppClasses {
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    appUtil.getAddressFromHexString(header, raf, s, item);
+                    appUtil.getAddressFromHexString(header, raf, s.toUpperCase(), item);
                 }
                 case get_hex_method_from_method_item_index -> {
                     System.out.println("Enter class index: ");

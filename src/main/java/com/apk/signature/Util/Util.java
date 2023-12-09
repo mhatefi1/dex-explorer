@@ -13,12 +13,37 @@ import java.util.zip.ZipFile;
 public class Util {
 
     public static String TEMP_DEX_PATH = "";
-    public static String commonFolder = "C:\\Users\\sedej\\Desktop\\remo-test\\Newfolder";
+    public static String commonFolder = "C:\\Users\\sedej\\Desktop\\remo-test";
 
     public static void runDuration(long startTime) {
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
         System.out.println("Elapsed time: " + elapsedTime + " milliseconds");
+    }
+
+    private static File convertInputStreamToFile(InputStream is, String fileName) {
+        OutputStream outputStream = null;
+        File file = null;
+        try {
+            file = new File(fileName);
+            outputStream = new FileOutputStream(file);
+
+            int read;
+            byte[] bytes = new byte[1024];
+            while ((read = is.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, read);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return file;
     }
 
     public String getWorkingFilePath(File f) {
@@ -33,7 +58,7 @@ public class Util {
         return s.substring(0, dotIndex);
     }
 
-    public File generateDex(String path) {
+    public ArrayList<File> generateDex(String path) {
         File f = new File(path);
         if (path.endsWith(".apk") || path.endsWith(".zip")) {
             String fileName = f.getName();
@@ -41,9 +66,11 @@ public class Util {
             String folderPath = f.getParent();
             File extractPath = new File(folderPath, name);
             extractPath.mkdir();
-            return readDexFilesFromZip(path, extractPath.getAbsolutePath()).get(0);
+            return readDexFilesFromZip(path, extractPath.getAbsolutePath());
         }
-        return f;
+        ArrayList<File> list = new ArrayList<>();
+        list.add(f);
+        return list;
     }
 
     public ArrayList<String> getCommonOfArrayList(ArrayList<String> first, ArrayList<String> second) {
@@ -189,8 +216,14 @@ public class Util {
         ArrayList<File> fileList = new ArrayList<>();
         File f = new File(input);
         File[] listed = f.listFiles();
-        assert listed != null;
-        for (File file : listed) {
+        if (listed != null) {
+            for (File file : listed) {
+                if (file.getName().endsWith(format)) {
+                    fileList.add(file);
+                }
+            }
+        } else {
+            File file = new File(input);
             if (file.getName().endsWith(format)) {
                 fileList.add(file);
             }
@@ -241,41 +274,20 @@ public class Util {
     public boolean contains(ArrayList<String> list, ArrayList<String> subList) {
         boolean allItemsPresent = true;
 
-        for (String item : subList) {
-            if (!list.contains(item)) {
-                allItemsPresent = false;
-                break;
+        if (list != null && subList != null) {
+            for (String item : subList) {
+                if (!list.contains(item)) {
+                    allItemsPresent = false;
+                    break;
+                }
             }
+        } else {
+            allItemsPresent = false;
         }
         return allItemsPresent;
     }
 
-    private static File convertInputStreamToFile(InputStream is, String fileName) {
-        OutputStream outputStream = null;
-        File file = null;
-        try {
-            file = new File(fileName);
-            outputStream = new FileOutputStream(file);
-
-            int read;
-            byte[] bytes = new byte[1024];
-            while ((read = is.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, read);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            if (outputStream != null) {
-                outputStream.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return file;
-    }
-
-    public ArrayList<File> readDexFilesFromZip(String zipFilePath,String extractPath) {
+    public ArrayList<File> readDexFilesFromZip(String zipFilePath, String extractPath) {
         ArrayList<File> list = new ArrayList<>();
         try {
             try (ZipFile zipFile = new ZipFile(zipFilePath)) {
@@ -292,6 +304,21 @@ public class Util {
             exception.printStackTrace();
         }
         return list;
+    }
+
+    public String readFile(File file) {
+        String line;
+        StringBuilder output = new StringBuilder();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+            reader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return output.toString();
     }
 
     public HashMap<String, byte[]> getHeader(RandomAccessFile raf) {
