@@ -17,6 +17,55 @@ public class AppUtil {
         this.util = util;
     }
 
+    public boolean getAddressFromHexString2(HashMap<String, byte[]> header, RandomAccessFile raf, String s, Item tClass) {
+
+        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
+        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+        long ids_count = util.getDecimalValue(header_ids_size);
+        long ids_offset = util.getDecimalValue(header_ids_off);
+        for (int i = 0; i < ids_count; i++) {
+            boolean ss = searchByteByByte(raf, ids_offset, s);
+            if (ss) {
+                System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
+                System.out.println("ids_index: " + i);
+                return true;
+            }
+            ids_offset = ids_offset + tClass.data_size;
+        }
+        return false;
+    }
+
+    public boolean searchByteByByte(RandomAccessFile raf, long start, String text) {
+        byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, 4);
+        long offset = util.getDecimalValue(first_offset_of_string_data_b);
+        while (true) {
+            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
+            long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
+            offset++;
+            if (size_in_utf16_l < 127) {
+                break;
+            }
+        }
+
+        String[] splitText = new String[text.length() / 2];
+        for (int i = 0, j = 0; i < text.length(); i += 2, j++) {
+            splitText[j] = text.substring(i, i + 2);
+        }
+
+        for (String s : splitText) {
+            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+            String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
+            if (!hex.equals(s)) {
+
+                return false;
+            }
+            offset++;
+        }
+        byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+        String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
+        return hex.equals("00");
+    }
+
     public void getCommonInManifest() {
         ManifestUtil manifestUtil = new ManifestUtil();
 
@@ -153,7 +202,7 @@ public class AppUtil {
     }
 
 
-    public void writeToFile(HashMap<String, byte[]> header, RandomAccessFile raf, String fileName, Item tClass,boolean utf8) {
+    public void writeToFile(HashMap<String, byte[]> header, RandomAccessFile raf, String fileName, Item tClass, boolean utf8) {
         try {
             byte[] header_ids_size = header.get(tClass.header_x_ids_size);
             byte[] header_ids_off = header.get(tClass.header_x_ids_off);
@@ -163,7 +212,7 @@ public class AppUtil {
             File f = new File(Util.TEMP_DEX_PATH + "\\" + fileName);
             BufferedWriter writer = new BufferedWriter(new FileWriter(f, false));
 
-            if (utf8){
+            if (utf8) {
                 for (int i = 0; i < ids_count; i++) {
                     String hex = tClass.getDataAsUTF8(header, raf, ids_offset);
                     ids_offset = ids_offset + tClass.data_size;
