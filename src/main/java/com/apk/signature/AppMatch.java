@@ -81,7 +81,7 @@ public class AppMatch {
 
                 File dexFile = util.generateDex(file_i.getAbsolutePath()).get(0);
                 Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
-                boolean stringMatch, methodMatch;
+                boolean stringMatch = false, methodMatch = false;
                 try {
                     RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
                     HashMap<String, byte[]> header = util.getHeader(raf);
@@ -98,7 +98,6 @@ public class AppMatch {
                             }
                         }
                     }
-
                     if (methods.get(0).isEmpty())
                         methodMatch = true;
                     else {
