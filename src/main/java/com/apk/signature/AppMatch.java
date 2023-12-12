@@ -52,33 +52,61 @@ public class AppMatch {
                 String signature_txt = util.readFile(file_j);
                 SignatureModel signatureModel = new AppMatch().parseSignature(signature_txt);
                 ManifestModel signatureManifestModel = signatureModel.getManifestModel();
-                boolean permissionMatch = util.contains(appManifestModel.getPermission(), signatureManifestModel.getPermission());
-                boolean activitiesMatch = util.contains(appManifestModel.getActivities(), signatureManifestModel.getActivities());
-                boolean serviceMatch = util.contains(appManifestModel.getServices(), signatureManifestModel.getServices());
-                boolean receiverMatch = util.contains(appManifestModel.getReceivers(), signatureManifestModel.getReceivers());
+
+                boolean permissionMatch, activitiesMatch, serviceMatch, receiverMatch;
+
+                if (signatureManifestModel.getPermission().get(0).isEmpty())
+                    permissionMatch = true;
+                else
+                    permissionMatch = util.contains(appManifestModel.getPermission(), signatureManifestModel.getPermission());
+
+                if (signatureManifestModel.getActivities().get(0).isEmpty())
+                    activitiesMatch = true;
+                else
+                    activitiesMatch = util.contains(appManifestModel.getActivities(), signatureManifestModel.getActivities());
+
+                if (signatureManifestModel.getServices().get(0).isEmpty())
+                    serviceMatch = true;
+                else
+                    serviceMatch = util.contains(appManifestModel.getServices(), signatureManifestModel.getServices());
+
+                if (signatureManifestModel.getReceivers().get(0).isEmpty())
+                    receiverMatch = true;
+                else
+                    receiverMatch = util.contains(appManifestModel.getReceivers(), signatureManifestModel.getReceivers());
 
                 ArrayList<String> strings = signatureModel.getStrings();
                 ArrayList<String> methods = signatureModel.getMethods();
 
+
                 File dexFile = util.generateDex(file_i.getAbsolutePath()).get(0);
                 Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
-                boolean stringMatch = false, methodMatch = false;
+                boolean stringMatch, methodMatch;
                 try {
                     RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
                     HashMap<String, byte[]> header = util.getHeader(raf);
                     ItemsString itemsString = new ItemsString();
                     ItemsMethod itemsMethod = new ItemsMethod();
 
-                    for (String s : strings) {
-                        stringMatch = appUtil.getAddressFromHexString(header, raf, s.toUpperCase(), itemsString);
-                        if (stringMatch) {
-                            break;
+                    if (strings.get(0).isEmpty())
+                        stringMatch = true;
+                    else {
+                        for (String s : strings) {
+                            stringMatch = appUtil.getAddressFromHexString(header, raf, s.toUpperCase(), itemsString);
+                            if (stringMatch) {
+                                break;
+                            }
                         }
                     }
-                    for (String m : methods) {
-                        methodMatch = appUtil.getAddressFromHexString(header, raf, m.toUpperCase(), itemsMethod);
-                        if (methodMatch) {
-                            break;
+
+                    if (methods.get(0).isEmpty())
+                        methodMatch = true;
+                    else {
+                        for (String m : methods) {
+                            methodMatch = appUtil.getAddressFromHexString(header, raf, m.toUpperCase(), itemsMethod);
+                            if (methodMatch) {
+                                break;
+                            }
                         }
                     }
 
