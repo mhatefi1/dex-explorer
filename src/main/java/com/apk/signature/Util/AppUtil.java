@@ -17,14 +17,14 @@ public class AppUtil {
         this.util = util;
     }
 
-    public boolean getAddressFromHexString2(HashMap<String, byte[]> header, RandomAccessFile raf, String s, Item tClass) {
-
+    public boolean getAddressFromHexStringByteByByte(HashMap<String, byte[]> header, RandomAccessFile raf, String text, Item tClass) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = util.getDecimalValue(header_ids_size);
         long ids_offset = util.getDecimalValue(header_ids_off);
+        String[] splitText = util.splitTwoByTwo(text);
         for (int i = 0; i < ids_count; i++) {
-            boolean ss = searchByteByByte(raf, ids_offset, s);
+            boolean ss = searchByteByByte(raf, ids_offset, splitText);
             if (ss) {
                 System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
                 System.out.println("ids_index: " + i);
@@ -35,7 +35,26 @@ public class AppUtil {
         return false;
     }
 
-    public boolean searchByteByByte(RandomAccessFile raf, long start, String text) {
+    public boolean getAddressFromHexStringByteByByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, String text, Item tClass) {
+
+        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
+        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+        long ids_count = util.getDecimalValue(header_ids_size);
+        long ids_offset = util.getDecimalValue(header_ids_off);
+        String[] splitText = util.splitTwoByTwo(text);
+        for (int i = 0; i < ids_count; i++) {
+            boolean ss = searchByteByByte(stream, ids_offset, splitText);
+            if (ss) {
+                System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
+                System.out.println("ids_index: " + i);
+                return true;
+            }
+            ids_offset = ids_offset + tClass.data_size;
+        }
+        return false;
+    }
+
+    public boolean searchByteByByte(RandomAccessFile raf, long start, String[] splitText) {
         byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, 4);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
         while (true) {
@@ -47,21 +66,42 @@ public class AppUtil {
             }
         }
 
-        String[] splitText = new String[text.length() / 2];
-        for (int i = 0, j = 0; i < text.length(); i += 2, j++) {
-            splitText[j] = text.substring(i, i + 2);
-        }
-
         for (String s : splitText) {
             byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
             String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
             if (!hex.equals(s)) {
-
                 return false;
             }
             offset++;
         }
+
         byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+        String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
+        return hex.equals("00");
+    }
+
+    public boolean searchByteByByte(ByteArrayInputStream stream, long start, String[] splitText) {
+        byte[] first_offset_of_string_data_b = util.getBytesOfFile(stream, start, 4);
+        long offset = util.getDecimalValue(first_offset_of_string_data_b);
+        while (true) {
+            byte[] size_in_utf16_b = util.getBytesOfFile(stream, offset, 1);
+            long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
+            offset++;
+            if (size_in_utf16_l < 127) {
+                break;
+            }
+        }
+
+        for (String s : splitText) {
+            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(stream, offset, 1);
+            String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
+            if (!hex.equals(s)) {
+                return false;
+            }
+            offset++;
+        }
+
+        byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(stream, offset, 1);
         String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
         return hex.equals("00");
     }
