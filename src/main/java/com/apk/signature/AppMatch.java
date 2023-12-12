@@ -48,79 +48,115 @@ public class AppMatch {
             String manifest = manifestUtil.dumpManifest(file_i.getAbsolutePath());
             ManifestModel appManifestModel = manifestUtil.matchManifest(manifest);
 
+            ArrayList<String> manifestMatchedSignatures = new ArrayList<>();
+
+            boolean permissionMatch = false, activitiesMatch = false, serviceMatch = false, receiverMatch = false;
+            String signature_txt1 = "";
+            SignatureModel signatureModel1;
+            ManifestModel signatureManifestModel1;
             for (File file_j : fileSignatureList) {
-                String signature_txt = util.readFile(file_j);
-                SignatureModel signatureModel = new AppMatch().parseSignature(signature_txt);
-                ManifestModel signatureManifestModel = signatureModel.getManifestModel();
+                try {
+                    signature_txt1 = util.readFile(file_j);
+                    signatureModel1 = new AppMatch().parseSignature(signature_txt1);
+                    signatureManifestModel1 = signatureModel1.getManifestModel();
+                } catch (Exception e) {
+                    continue;
+                }
 
-                boolean permissionMatch, activitiesMatch, serviceMatch, receiverMatch;
+                boolean permissionEmpty = signatureManifestModel1.getPermission().get(0).isEmpty(),
+                        activitiesEmpty = signatureManifestModel1.getActivities().get(0).isEmpty(),
+                        serviceEmpty = signatureManifestModel1.getServices().get(0).isEmpty(),
+                        receiverEmpty = signatureManifestModel1.getReceivers().get(0).isEmpty();
 
-                if (signatureManifestModel.getPermission().get(0).isEmpty())
+                if (permissionEmpty) {
                     permissionMatch = true;
-                else
-                    permissionMatch = util.contains(appManifestModel.getPermission(), signatureManifestModel.getPermission());
+                } else {
+                    permissionMatch = util.contains(appManifestModel.getPermission(), signatureManifestModel1.getPermission());
+                }
 
-                if (signatureManifestModel.getActivities().get(0).isEmpty())
+                if (activitiesEmpty) {
                     activitiesMatch = true;
-                else
-                    activitiesMatch = util.contains(appManifestModel.getActivities(), signatureManifestModel.getActivities());
+                } else {
+                    activitiesMatch = util.contains(appManifestModel.getActivities(), signatureManifestModel1.getActivities());
+                }
 
-                if (signatureManifestModel.getServices().get(0).isEmpty())
+                if (serviceEmpty) {
                     serviceMatch = true;
-                else
-                    serviceMatch = util.contains(appManifestModel.getServices(), signatureManifestModel.getServices());
+                } else {
+                    serviceMatch = util.contains(appManifestModel.getServices(), signatureManifestModel1.getServices());
+                }
 
-                if (signatureManifestModel.getReceivers().get(0).isEmpty())
+                if (receiverEmpty) {
                     receiverMatch = true;
-                else
-                    receiverMatch = util.contains(appManifestModel.getReceivers(), signatureManifestModel.getReceivers());
+                } else {
+                    receiverMatch = util.contains(appManifestModel.getReceivers(), signatureManifestModel1.getReceivers());
+                }
+                boolean manifestEmpty = permissionEmpty && activitiesEmpty && serviceEmpty && receiverEmpty;
+                boolean manifestMatch = permissionMatch && activitiesMatch && serviceMatch && receiverMatch;
+
+                if (manifestMatch) {
+                    manifestMatchedSignatures.add(file_j.getAbsolutePath());
+                    if (!manifestEmpty) {
+                        break;
+                    }
+                }
+            }
+
+            for (String s : manifestMatchedSignatures) {
+                File file = new File(s);
+                String signature_txt = util.readFile(file);
+                SignatureModel signatureModel = new AppMatch().parseSignature(signature_txt);
 
                 ArrayList<String> strings = signatureModel.getStrings();
                 ArrayList<String> methods = signatureModel.getMethods();
 
+                ArrayList<File> dexFiles = util.generateDex(file_i.getAbsolutePath());
 
-                File dexFile = util.generateDex(file_i.getAbsolutePath()).get(0);
-                Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
-                boolean stringMatch = false, methodMatch = false;
-                try {
-                    RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
-                    HashMap<String, byte[]> header = util.getHeader(raf);
-                    ItemsString itemsString = new ItemsString();
-                    ItemsMethod itemsMethod = new ItemsMethod();
+                for (File dexFile : dexFiles) {
+                    Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
+                    boolean stringMatch = false, methodMatch = false;
+                    try {
+                        RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
+                        HashMap<String, byte[]> header = util.getHeader(raf);
+                        ItemsString itemsString = new ItemsString();
+                        ItemsMethod itemsMethod = new ItemsMethod();
 
-                    if (strings.get(0).isEmpty())
-                        stringMatch = true;
-                    else {
-                        for (String s : strings) {
-                            stringMatch = appUtil.getAddressFromHexString(header, raf, s.toUpperCase(), itemsString);
-                            if (stringMatch) {
-                                break;
+                        if (strings.get(0).isEmpty())
+                            stringMatch = true;
+                        else {
+                            for (String str : strings) {
+                                stringMatch = appUtil.getAddressFromHexString(header, raf, str.toUpperCase(), itemsString);
+                                if (stringMatch) {
+                                    break;
+                                }
                             }
                         }
-                    }
-                    if (methods.get(0).isEmpty())
-                        methodMatch = true;
-                    else {
-                        for (String m : methods) {
-                            methodMatch = appUtil.getAddressFromHexString(header, raf, m.toUpperCase(), itemsMethod);
-                            if (methodMatch) {
-                                break;
+
+                        if (methods.get(0).isEmpty())
+                            methodMatch = true;
+                        else {
+                            for (String m : methods) {
+                                methodMatch = appUtil.getAddressFromHexString(header, raf, m.toUpperCase(), itemsMethod);
+                                if (methodMatch) {
+                                    break;
+                                }
                             }
                         }
+
+                        boolean result = stringMatch && methodMatch;
+
+                        if (result) {
+                            System.out.println("!!!this is malware!!!" + " matched by: " + file.getName());
+                            break;
+                        } /*else {
+                            System.out.println("permissionMatch:" + permissionMatch + "-activitiesMatch:" + activitiesMatch +
+                                    "-serviceMatch:" + serviceMatch + "-receiverMatch:" + receiverMatch +
+                                    "-stringMatch:" + stringMatch + "-methodMatch:" + methodMatch);
+                        }*/
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-
-                    boolean result = permissionMatch && activitiesMatch && serviceMatch && receiverMatch && stringMatch && methodMatch;
-
-                    if (result) {
-                        System.out.println("!!!this is malware!!!");
-                    } else {
-                        System.out.println("permissionMatch:" + permissionMatch + "-activitiesMatch:" + activitiesMatch +
-                                "-serviceMatch:" + serviceMatch + "-receiverMatch:" + receiverMatch +
-                                "-stringMatch:" + stringMatch + "-methodMatch:" + methodMatch);
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
         }
