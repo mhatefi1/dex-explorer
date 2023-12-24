@@ -34,7 +34,7 @@ public class AppMatch {
 
         File fileTarget = new File(target_path);
         File fileSignature = new File(signature_path);
-
+        long start = System.currentTimeMillis();
         ArrayList<File> fileTargetList = util.getFileListByFormat(fileTarget.getAbsolutePath(), ".apk");
         ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt");
 
@@ -91,59 +91,37 @@ public class AppMatch {
                 } else {
                     receiverMatch = util.contains(appManifestModel.getReceivers(), signatureManifestModel1.getReceivers());
                 }
-                boolean manifestEmpty = permissionEmpty && activitiesEmpty && serviceEmpty && receiverEmpty;
                 boolean manifestMatch = permissionMatch && activitiesMatch && serviceMatch && receiverMatch;
 
                 if (manifestMatch) {
                     manifestMatchedSignatures.add(file_j.getAbsolutePath());
-                    if (!manifestEmpty) {
-                        break;
-                    }
                 }
             }
 
-            for (String s : manifestMatchedSignatures) {
-                File file = new File(s);
-                String signature_txt = util.readFile(file);
-                SignatureModel signatureModel = new AppMatch().parseSignature(signature_txt);
+            ArrayList<File> dexFiles = util.generateDex(file_i.getAbsolutePath());
+            boolean result = false;
+            for (File dexFile : dexFiles) {
+                Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
+                boolean stringMatch = false;
+                try {
+                    RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
+                    HashMap<String, byte[]> header = util.getHeader(raf);
+                    ItemsString itemsString = new ItemsString();
 
-                ArrayList<String> strings = signatureModel.getStrings();
-                ArrayList<String> methods = signatureModel.getMethods();
+                    for (String s : manifestMatchedSignatures) {
+                        File file = new File(s);
+                        String signature_txt = util.readFile(file);
+                        SignatureModel signatureModel = new AppMatch().parseSignature(signature_txt);
+                        ArrayList<String> strings = signatureModel.getStrings();
 
-                ArrayList<File> dexFiles = util.generateDex(file_i.getAbsolutePath());
-
-                for (File dexFile : dexFiles) {
-                    Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
-                    boolean stringMatch = false, methodMatch = false;
-                    try {
-                        RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
-                        HashMap<String, byte[]> header = util.getHeader(raf);
-                        ItemsString itemsString = new ItemsString();
-                        ItemsMethod itemsMethod = new ItemsMethod();
-
-                        if (strings.get(0).isEmpty())
-                            stringMatch = true;
-                        else {
-                            for (String str : strings) {
-                                stringMatch = appUtil.getAddressFromHexString(header, raf, str.toUpperCase(), itemsString);
-                                if (stringMatch) {
-                                    break;
-                                }
+                        for (String str : strings) {
+                            stringMatch = appUtil.getAddressFromHexStringByteByByteInPeriod(header, raf, str.toUpperCase(), itemsString, signatureModel.getStart(), signatureModel.getEnd());
+                            if (stringMatch) {
+                                break;
                             }
                         }
 
-                        if (methods.get(0).isEmpty())
-                            methodMatch = true;
-                        else {
-                            for (String m : methods) {
-                                methodMatch = appUtil.getAddressFromHexString(header, raf, m.toUpperCase(), itemsMethod);
-                                if (methodMatch) {
-                                    break;
-                                }
-                            }
-                        }
-
-                        boolean result = stringMatch && methodMatch;
+                        result = stringMatch;
 
                         if (result) {
                             System.out.println("!!!this is malware!!!" + " matched by: " + file.getName());
@@ -153,34 +131,52 @@ public class AppMatch {
                                     "-serviceMatch:" + serviceMatch + "-receiverMatch:" + receiverMatch +
                                     "-stringMatch:" + stringMatch + "-methodMatch:" + methodMatch);
                         }*/
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
+                    if (result)
+                        break;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
+
         }
+        Util.runDuration(start);
     }
 
     public SignatureModel parseSignature(String signature) {
-        String regex = "!(.*)@(.*)#(.*)\\$(.*)%(.*)\\^(.*)";
+        //String regex = "!(.*)@(.*)#(.*)\\$(.*)%(.*)\\^(.*)";
+        String regex = "!(.*)@(.*)#(.*)\\$(.*)%(.*)";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(signature);
 
         if (matcher.find()) {
+            int startIndex = 0;
+            int endIndex = 0;
             String permissions = matcher.group(1);
             String activities = matcher.group(2);
             String service = matcher.group(3);
             String receivers = matcher.group(4);
             String strings = matcher.group(5);
-            String methods = matcher.group(6);
+            if (strings.contains("[")) {
+                String reg = "(.+)\\[(.+)-(.+)]";
+                Pattern pattern1 = Pattern.compile(reg);
+                Matcher matcher1 = pattern1.matcher(strings);
+                if (matcher1.find()) {
+                    strings = matcher1.group(1);
+                    startIndex = Integer.parseInt(matcher1.group(2));
+                    endIndex = Integer.parseInt(matcher1.group(3));
+                }
+            }
+            //String methods = matcher.group(6);
+
 
             String[] permissions_list = permissions.split(",");
             String[] activities_list = activities.split(",");
             String[] service_list = service.split(",");
             String[] receivers_list = receivers.split(",");
             String[] strings_list = strings.split(",");
-            String[] methods_list = methods.split(",");
+            //String[] methods_list = methods.split(",");
 
             ManifestModel manifestModel = new ManifestModel();
 
@@ -207,7 +203,7 @@ public class AppMatch {
             }
 
             ArrayList<String> stringsArrayList = new ArrayList<>(Arrays.asList(strings_list));
-            ArrayList<String> methodArrayList = new ArrayList<>(Arrays.asList(methods_list));
+            //ArrayList<String> methodArrayList = new ArrayList<>(Arrays.asList(methods_list));
 
             manifestModel.setPermission(permissionArrayList);
             manifestModel.setActivities(activitiesArrayList);
@@ -218,7 +214,9 @@ public class AppMatch {
 
             signatureModel.setManifestModel(manifestModel);
             signatureModel.setStrings(stringsArrayList);
-            signatureModel.setMethods(methodArrayList);
+            signatureModel.setStart(startIndex);
+            signatureModel.setEnd(endIndex);
+            //signatureModel.setMethods(methodArrayList);
 
             return signatureModel;
         }

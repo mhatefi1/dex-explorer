@@ -35,6 +35,30 @@ public class AppUtil {
         return false;
     }
 
+    public boolean getAddressFromHexStringByteByByteInPeriod(HashMap<String, byte[]> header, RandomAccessFile raf, String text, Item tClass, int periodStartIndex, int periodEndIndex) {
+        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
+        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+        long ids_count = util.getDecimalValue(header_ids_size);
+        long ids_offset = util.getDecimalValue(header_ids_off);
+        if (periodStartIndex < ids_count) {
+            String[] splitText = util.splitTwoByTwo(text);
+            if (periodEndIndex > ids_count || periodEndIndex == 0) {
+                periodEndIndex = (int) ids_count;
+            }
+            ids_offset = ids_offset + (long) tClass.data_size * periodStartIndex;
+            for (int i = periodStartIndex; i <= periodEndIndex; i++) {
+                boolean ss = searchByteByByte(raf, ids_offset, splitText);
+                if (ss) {
+                    System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
+                    System.out.println("ids_index: " + i);
+                    return true;
+                }
+                ids_offset = ids_offset + tClass.data_size;
+            }
+        }
+        return false;
+    }
+
     public boolean getAddressFromHexStringByteByByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, String text, Item tClass) {
 
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
@@ -107,6 +131,7 @@ public class AppUtil {
     }
 
     public void getCommonInManifest() {
+        System.out.println("***********" + "factorizedManifest" + "***********");
         ManifestUtil manifestUtil = new ManifestUtil();
 
         ArrayList<File> apk_list = util.getFileListByFormat(Util.commonFolder, ".apk");
@@ -286,6 +311,25 @@ public class AppUtil {
     }
 
     public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String s, Item tClass) {
+        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
+        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+        long ids_count = util.getDecimalValue(header_ids_size);
+        long ids_offset = util.getDecimalValue(header_ids_off);
+        boolean result = false;
+        for (int i = 0; i < ids_count; i++) {
+            String hex = tClass.getDataAsHex(header, raf, ids_offset);
+            if (hex.equals(s)) {
+                System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
+                System.out.println("ids_index: " + i);
+                result = true;
+                break;
+            }
+            ids_offset = ids_offset + tClass.data_size;
+        }
+        return result;
+    }
+
+    public boolean getAddressFromHexStringInPeriod(HashMap<String, byte[]> header, RandomAccessFile raf, String s, Item tClass, int start, int end) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = util.getDecimalValue(header_ids_size);

@@ -12,6 +12,10 @@ public class AppCommon {
 
     public static void main(String[] args) {
         Scanner myObj = new Scanner(System.in);
+
+        System.out.println("Enter path:");
+        Util.commonFolder = myObj.nextLine();
+
         System.out.println(
                 "Choose your operation " + "\n" +
                         "0 to go back" + "\n" +
