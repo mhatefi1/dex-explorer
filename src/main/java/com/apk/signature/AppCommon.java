@@ -76,6 +76,8 @@ public class AppCommon {
                 }
             }
             case "4" -> {
+                System.out.println("Enter aapt2 file path:");
+                Util.aapt2Path = myObj.nextLine();
                 myObj.close();
                 System.out.println("waite ...");
                 try {
@@ -88,8 +90,12 @@ public class AppCommon {
             case "5" -> {
                 System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
                 String s = myObj.nextLine();
-                boolean utf8 = s.equals("1");
+
+                System.out.println("Enter aapt2 file path:");
+                Util.aapt2Path = myObj.nextLine();
                 myObj.close();
+
+                boolean utf8 = s.equals("1");
 
                 System.out.println("waite ...");
 

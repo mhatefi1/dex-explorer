@@ -14,6 +14,7 @@ public class Util {
 
     public static String TEMP_DEX_PATH = "";
     public static String commonFolder = "";
+    public static String aapt2Path = "";//public static String aapt2Path = "C:\\Users\\sedej\\AppData\\Local\\Android\\Sdk\\build-tools\\34.0.0\\aapt2.exe";
 
     public static void runDuration(long startTime) {
         long endTime = System.currentTimeMillis();

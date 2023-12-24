@@ -10,7 +10,6 @@ import java.util.HashMap;
 
 public class AppUtil {
 
-    public static final String aapt2Path = "C:\\Users\\sedej\\AppData\\Local\\Android\\Sdk\\build-tools\\34.0.0\\aapt2.exe";
     Util util;
 
     public AppUtil(Util util) {

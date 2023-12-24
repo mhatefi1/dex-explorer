@@ -28,6 +28,9 @@ public class AppMatch {
         System.out.println("Enter target file or folder");
         String target_path = myObj.nextLine();
 
+        System.out.println("Enter aapt2 file path:");
+        Util.aapt2Path = myObj.nextLine();
+
         Util util = new Util();
         AppUtil appUtil = new AppUtil(util);
         ManifestUtil manifestUtil = new ManifestUtil();
@@ -50,8 +53,8 @@ public class AppMatch {
 
             ArrayList<String> manifestMatchedSignatures = new ArrayList<>();
 
-            boolean permissionMatch = false, activitiesMatch = false, serviceMatch = false, receiverMatch = false;
-            String signature_txt1 = "";
+            boolean permissionMatch, activitiesMatch, serviceMatch, receiverMatch;
+            String signature_txt1;
             SignatureModel signatureModel1;
             ManifestModel signatureManifestModel1;
             for (File file_j : fileSignatureList) {

@@ -51,7 +51,7 @@ public class ManifestUtil {
     }
 
     public String dumpManifest(String path) {
-        String command = AppUtil.aapt2Path + " dump xmltree --file AndroidManifest.xml " + path;
+        String command = Util.aapt2Path + " dump xmltree --file AndroidManifest.xml " + path;
         return runCMD(command);
     }
 
