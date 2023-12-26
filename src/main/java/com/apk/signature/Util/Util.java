@@ -15,11 +15,51 @@ public class Util {
     public static String TEMP_DEX_PATH = "";
     public static String commonFolder = "";
     public static String aapt2Path = "";//public static String aapt2Path = "C:\\Users\\sedej\\AppData\\Local\\Android\\Sdk\\build-tools\\34.0.0\\aapt2.exe";
+    public static String RESET = "\u001B[0m";
+    public static String RED = "\u001B[31m";
+    public static String GREEN = "\u001B[32m";
+    public static String YELLOW = "\u001B[33m";
+    private static final String defaultAapt2Path = "C:\\scanner\\aapt2.exe";
 
     public static void runDuration(long startTime) {
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
         System.out.println("Elapsed time: " + elapsedTime + " milliseconds");
+    }
+
+    public static void printRed(String text) {
+        //System.out.println(RED + text + RESET);
+        System.out.println(text);
+    }
+
+    public static void printGreen(String text) {
+        //System.out.println(GREEN + text + RESET);
+        System.out.println(text);
+    }
+
+    public static void printYellow(String text) {
+        //System.out.println(YELLOW + text + RESET);
+        System.out.println(text);
+    }
+
+    public static String setAapt2Path(String path) {
+        if (path.isEmpty()) {
+            return defaultAapt2Path;
+        } else {
+            if (path.endsWith("aapt2.exe")) {
+                return path;
+            } else {
+                File f = new File(path);
+                File[] listed = f.listFiles();
+                assert listed != null;
+                for (File file : listed) {
+                    if (file.getName().endsWith("aapt2.exe")) {
+                        return file.getAbsolutePath();
+                    }
+                }
+            }
+        }
+        return "";
     }
 
     private static File convertInputStreamToFile(InputStream is, String fileName) {

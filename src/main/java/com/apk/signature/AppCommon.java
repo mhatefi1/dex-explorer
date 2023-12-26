@@ -76,8 +76,9 @@ public class AppCommon {
                 }
             }
             case "4" -> {
-                System.out.println("Enter aapt2 file path:");
-                Util.aapt2Path = myObj.nextLine();
+                //System.out.println("Enter aapt2 file path (default path is C:\\scanner\\aapt2.exe):");
+                //Util.aapt2Path = Util.setAapt2Path(myObj.nextLine());
+                Util.aapt2Path = Util.setAapt2Path("");
                 myObj.close();
                 System.out.println("waite ...");
                 try {
@@ -91,8 +92,9 @@ public class AppCommon {
                 System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
                 String s = myObj.nextLine();
 
-                System.out.println("Enter aapt2 file path:");
-                Util.aapt2Path = myObj.nextLine();
+                //System.out.println("Enter aapt2 file path (default path is C:\\scanner\\aapt2.exe):");
+                //Util.aapt2Path = Util.setAapt2Path(myObj.nextLine());
+                Util.aapt2Path = Util.setAapt2Path("");
                 myObj.close();
 
                 boolean utf8 = s.equals("1");

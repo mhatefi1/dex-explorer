@@ -17,6 +17,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.apk.signature.Util.Util.printGreen;
+import static com.apk.signature.Util.Util.printRed;
+
 public class AppMatch {
     Util util = new Util();
 
@@ -28,8 +31,9 @@ public class AppMatch {
         System.out.println("Enter target file or folder");
         String target_path = myObj.nextLine();
 
-        System.out.println("Enter aapt2 file path:");
-        Util.aapt2Path = myObj.nextLine();
+        //System.out.println("Enter aapt2 file path (default path is C:\\scanner\\aapt2.exe):");
+        //Util.aapt2Path = Util.setAapt2Path(myObj.nextLine());
+        Util.aapt2Path = Util.setAapt2Path("");
 
         Util util = new Util();
         AppUtil appUtil = new AppUtil(util);
@@ -102,7 +106,8 @@ public class AppMatch {
             }
 
             ArrayList<File> dexFiles = util.generateDex(file_i.getAbsolutePath());
-            boolean result = false;
+            boolean isMalware = false;
+            String result_detailes = "";
             for (File dexFile : dexFiles) {
                 Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
                 boolean stringMatch = false;
@@ -124,25 +129,26 @@ public class AppMatch {
                             }
                         }
 
-                        result = stringMatch;
+                        isMalware = stringMatch;
 
-                        if (result) {
-                            System.out.println("!!!this is malware!!!" + " matched by: " + file.getName());
+                        if (isMalware) {
+                            result_detailes = "!!!this is malware!!!" + " matched by: " + file.getName();
                             break;
-                        } /*else {
-                            System.out.println("permissionMatch:" + permissionMatch + "-activitiesMatch:" + activitiesMatch +
-                                    "-serviceMatch:" + serviceMatch + "-receiverMatch:" + receiverMatch +
-                                    "-stringMatch:" + stringMatch + "-methodMatch:" + methodMatch);
-                        }*/
+                        }
                     }
-                    if (result)
+                    if (isMalware) {
                         break;
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-
+            if (isMalware) {
+                printRed(result_detailes);
+            } else {
+                printGreen("Clean");
+            }
         }
         Util.runDuration(start);
     }

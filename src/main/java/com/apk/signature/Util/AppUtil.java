@@ -8,6 +8,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.apk.signature.Util.Util.*;
+
 public class AppUtil {
 
     Util util;
@@ -48,8 +50,11 @@ public class AppUtil {
             for (int i = periodStartIndex; i <= periodEndIndex; i++) {
                 boolean ss = searchByteByByte(raf, ids_offset, splitText);
                 if (ss) {
-                    System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
-                    System.out.println("ids_index: " + i);
+                    printYellow("{");
+                    printYellow("hex:" + text);
+                    printYellow("ids_offs: " + util.decimalToStringHex(ids_offset));
+                    printYellow("ids_index: " + i);
+                    printYellow("}");
                     return true;
                 }
                 ids_offset = ids_offset + tClass.data_size;
@@ -190,13 +195,13 @@ public class AppUtil {
             String fileName = first_file.getAbsolutePath();
             System.out.println(fileName);
             ArrayList<String> finall = getFromDexAsArray(first_file, tClass, utf8);
-            System.out.println("this items count:" + finall.size());
+            System.out.println("this item count:" + finall.size());
             for (int i = 1; i < dexFileList.size(); i++) {
                 finall = util.removeDupe(finall);
                 System.out.println("common items count:" + finall.size());
                 System.out.println(dexFileList.get(i));
                 ArrayList<String> file_Strings = getFromDexAsArray(dexFileList.get(i), tClass, utf8);
-                System.out.println("this items count:" + file_Strings.size());
+                System.out.println("this item count:" + file_Strings.size());
                 finall = util.getCommonOfArrayList(file_Strings, finall);
             }
             finall = util.removeDupe(finall);

@@ -68,7 +68,7 @@ public class AppString {
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    appUtil.getAddressFromHexString(header, raf, s.toUpperCase(), item);
+                    appUtil.getAddressFromHexStringByteByByte(header, raf, s.toUpperCase(), item);
                 }
                 case get_hex_string_from_string_value -> {
                     System.out.println("Enter string : ");
