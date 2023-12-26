@@ -119,7 +119,7 @@ public class AppMatch {
 
                         for (String str : strings) {
                             stringMatch = appUtil.getAddressFromHexStringByteByByteInPeriod(header, raf, str.toUpperCase(), itemsString, signatureModel.getStart(), signatureModel.getEnd());
-                            if (stringMatch) {
+                            if (!stringMatch) {
                                 break;
                             }
                         }
