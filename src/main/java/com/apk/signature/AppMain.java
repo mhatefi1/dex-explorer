@@ -15,7 +15,8 @@ public class AppMain {
                         "3 to class module" + "\n" +
                         "4 to extract dex files from apk" + "\n" +
                         "5 to get common files" + "\n" +
-                        "6 to match"
+                        "6 to match" + "\n" +
+                        "7 to generate signature"
         );
 
         String input = myObj.nextLine();
@@ -52,6 +53,10 @@ public class AppMain {
             }
             case "6" -> {
                 AppMatch.main(args);
+                myObj.close();
+            }
+            case "7" -> {
+                AppGenerateSignature.main(args);
                 myObj.close();
             }
         }

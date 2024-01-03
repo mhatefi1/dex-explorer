@@ -25,7 +25,7 @@ public class AppUtil {
         long ids_offset = util.getDecimalValue(header_ids_off);
         String[] splitText = util.splitTwoByTwo(text);
         for (int i = 0; i < ids_count; i++) {
-            boolean ss = searchByteByByte(raf, ids_offset, splitText);
+            boolean ss = searchByteByByteWithZero(raf, ids_offset, splitText);
             if (ss) {
                 System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
                 System.out.println("ids_index: " + i);
@@ -48,7 +48,7 @@ public class AppUtil {
             }
             ids_offset = ids_offset + (long) tClass.data_size * periodStartIndex;
             for (int i = periodStartIndex; i <= periodEndIndex; i++) {
-                boolean ss = searchByteByByte(raf, ids_offset, splitText);
+                boolean ss = searchByteByByteWithZero(raf, ids_offset, splitText);
                 if (ss) {
                     printYellow("{");
                     printYellow("hex:" + text);
@@ -106,6 +106,29 @@ public class AppUtil {
         byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
         String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
         return hex.equals("00");
+    }
+
+    public boolean searchByteByByteWithZero(RandomAccessFile raf, long start, String[] splitText) {
+        byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, 4);
+        long offset = util.getDecimalValue(first_offset_of_string_data_b);
+        while (true) {
+            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
+            long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
+            offset++;
+            if (size_in_utf16_l < 127) {
+                break;
+            }
+        }
+
+        for (String s : splitText) {
+            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+            String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
+            if (!hex.equals(s)) {
+                return false;
+            }
+            offset++;
+        }
+        return true;
     }
 
     public boolean searchByteByByte(ByteArrayInputStream stream, long start, String[] splitText) {
