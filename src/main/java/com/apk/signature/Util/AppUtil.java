@@ -18,25 +18,11 @@ public class AppUtil {
         this.util = util;
     }
 
-    public boolean getAddressFromHexStringByteByByte(HashMap<String, byte[]> header, RandomAccessFile raf, String text, Item tClass) {
-        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_count = util.getDecimalValue(header_ids_size);
-        long ids_offset = util.getDecimalValue(header_ids_off);
-        String[] splitText = util.splitTwoByTwo(text);
-        for (int i = 0; i < ids_count; i++) {
-            boolean ss = searchByteByByteWithZero(raf, ids_offset, splitText);
-            if (ss) {
-                System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
-                System.out.println("ids_index: " + i);
-                return true;
-            }
-            ids_offset = ids_offset + tClass.data_size;
-        }
-        return false;
+    public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String text, Item tClass) {
+        return getAddressFromHexString(header, raf, text, tClass, 0, 0);
     }
 
-    public boolean getAddressFromHexStringByteByByteInPeriod(HashMap<String, byte[]> header, RandomAccessFile raf, String text, Item tClass, int periodStartIndex, int periodEndIndex) {
+    public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String text, Item tClass, int periodStartIndex, int periodEndIndex) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = util.getDecimalValue(header_ids_size);
@@ -48,113 +34,17 @@ public class AppUtil {
             }
             ids_offset = ids_offset + (long) tClass.data_size * periodStartIndex;
             for (int i = periodStartIndex; i <= periodEndIndex; i++) {
-                boolean ss = searchByteByByteWithZero(raf, ids_offset, splitText);
+                boolean ss = tClass.searchDataByte(header, raf, ids_offset, splitText);
                 if (ss) {
-                    printYellow("{");
-                    printYellow("hex:" + text);
-                    printYellow("ids_offs: " + util.decimalToStringHex(ids_offset));
-                    printYellow("ids_index: " + i);
-                    printYellow("}");
+                    printYellow("{ hex:" + text);
+                    printYellow("  ids_offs: " + util.decimalToStringHex(ids_offset));
+                    printYellow("  ids_index: " + i + " }");
                     return true;
                 }
                 ids_offset = ids_offset + tClass.data_size;
             }
         }
         return false;
-    }
-
-    public boolean getAddressFromHexStringByteByByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, String text, Item tClass) {
-
-        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_count = util.getDecimalValue(header_ids_size);
-        long ids_offset = util.getDecimalValue(header_ids_off);
-        String[] splitText = util.splitTwoByTwo(text);
-        for (int i = 0; i < ids_count; i++) {
-            boolean ss = searchByteByByte(stream, ids_offset, splitText);
-            if (ss) {
-                System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
-                System.out.println("ids_index: " + i);
-                return true;
-            }
-            ids_offset = ids_offset + tClass.data_size;
-        }
-        return false;
-    }
-
-    public boolean searchByteByByte(RandomAccessFile raf, long start, String[] splitText) {
-        byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, 4);
-        long offset = util.getDecimalValue(first_offset_of_string_data_b);
-        while (true) {
-            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
-            long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
-            offset++;
-            if (size_in_utf16_l < 127) {
-                break;
-            }
-        }
-
-        for (String s : splitText) {
-            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
-            String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
-            if (!hex.equals(s)) {
-                return false;
-            }
-            offset++;
-        }
-
-        byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
-        String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
-        return hex.equals("00");
-    }
-
-    public boolean searchByteByByteWithZero(RandomAccessFile raf, long start, String[] splitText) {
-        byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, 4);
-        long offset = util.getDecimalValue(first_offset_of_string_data_b);
-        while (true) {
-            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
-            long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
-            offset++;
-            if (size_in_utf16_l < 127) {
-                break;
-            }
-        }
-
-        for (String s : splitText) {
-            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
-            String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
-            if (!hex.equals(s)) {
-                return false;
-            }
-            offset++;
-        }
-        return true;
-    }
-
-    public boolean searchByteByByte(ByteArrayInputStream stream, long start, String[] splitText) {
-        byte[] first_offset_of_string_data_b = util.getBytesOfFile(stream, start, 4);
-        long offset = util.getDecimalValue(first_offset_of_string_data_b);
-        while (true) {
-            byte[] size_in_utf16_b = util.getBytesOfFile(stream, offset, 1);
-            long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
-            offset++;
-            if (size_in_utf16_l < 127) {
-                break;
-            }
-        }
-
-        for (String s : splitText) {
-            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(stream, offset, 1);
-            String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
-            if (!hex.equals(s)) {
-                return false;
-            }
-            offset++;
-        }
-
-        byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(stream, offset, 1);
-        String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
-        return hex.equals("00");
     }
 
     public void getCommonInManifest() {
@@ -268,31 +158,6 @@ public class AppUtil {
         return s;
     }
 
-    public boolean fileMatch(String path, Item tClass) {
-        File f = new File(path);
-        boolean flag = false;
-        try {
-            ArrayList<String> finals = getFromDexAsArray(f, tClass, false);
-
-            String signature_path = "C:\\Users\\sedej\\Desktop\\crack\\crack-me2\\amn-temp\\classes.dex-methods.txt";
-            File signature_file = new File(signature_path);
-            ArrayList<String> signature = new ArrayList<>();
-
-            BufferedReader reader = new BufferedReader(new FileReader(signature_file));
-            String line = reader.readLine();
-            while (line != null) {
-                signature.add(line);
-                line = reader.readLine();
-            }
-            reader.close();
-            System.out.println(finals.size() + "+" + signature.size());
-            flag = util.contains(finals, signature);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return flag;
-    }
-
 
     public void writeToFile(HashMap<String, byte[]> header, RandomAccessFile raf, String fileName, Item tClass, boolean utf8) {
         try {
@@ -337,49 +202,18 @@ public class AppUtil {
         }
     }
 
-    public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String s, Item tClass) {
-        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_count = util.getDecimalValue(header_ids_size);
-        long ids_offset = util.getDecimalValue(header_ids_off);
-        boolean result = false;
-        for (int i = 0; i < ids_count; i++) {
-            String hex = tClass.getDataAsHex(header, raf, ids_offset);
-            if (hex.equals(s)) {
-                System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
-                System.out.println("ids_index: " + i);
-                result = true;
-                break;
-            }
-            ids_offset = ids_offset + tClass.data_size;
-        }
-        return result;
-    }
-
-    public boolean getAddressFromHexStringInPeriod(HashMap<String, byte[]> header, RandomAccessFile raf, String s, Item tClass, int start, int end) {
-        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_count = util.getDecimalValue(header_ids_size);
-        long ids_offset = util.getDecimalValue(header_ids_off);
-        boolean result = false;
-        for (int i = 0; i < ids_count; i++) {
-            String hex = tClass.getDataAsHex(header, raf, ids_offset);
-            if (hex.equals(s)) {
-                System.out.println("ids_offs: " + util.decimalToStringHex(ids_offset));
-                System.out.println("ids_index: " + i);
-                result = true;
-                break;
-            }
-            ids_offset = ids_offset + tClass.data_size;
-        }
-        return result;
-    }
-
-    public String getByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, Item tClass) {
+    public String getHexByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, Item tClass) {
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = util.getDecimalValue(header_ids_off);
         ids_offset = index * tClass.data_size + ids_offset;
         return tClass.getDataAsHex(header, raf, ids_offset);
+    }
+
+    public byte[] getByteByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, Item tClass) {
+        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+        long ids_offset = util.getDecimalValue(header_ids_off);
+        ids_offset = index * tClass.data_size + ids_offset;
+        return tClass.getDataAsByte(header, raf, ids_offset);
     }
 
 }

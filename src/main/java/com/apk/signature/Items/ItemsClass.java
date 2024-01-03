@@ -14,10 +14,23 @@ public class ItemsClass extends Item {
     public final static String common_file_name = "factorizedClasses";
     Util util;
     AppUtil appUtil;
+
     public ItemsClass() {
         super(class_data_size, header_x_ids_size, header_x_ids_off, common_file_name);
         util = new Util();
         appUtil = new AppUtil(util);
+    }
+
+    @Override
+    public boolean searchDataByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start, String[] splitText) {
+        byte[] class_data_b = util.getBytesOfFile(raf, start, class_data_size);
+        //return util.compareBytes(splitText, class_data_b);
+        return false;
+    }
+
+    @Override
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
+        return util.getBytesOfFile(raf, start, class_data_size);
     }
 
     @Override
@@ -28,12 +41,7 @@ public class ItemsClass extends Item {
 
     @Override
     public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
-        String hex = getDataAsHex(header,raf,start);
+        String hex = getDataAsHex(header, raf, start);
         return util.hexStringToUTF8(hex);
-    }
-
-    @Override
-    public void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
-
     }
 }

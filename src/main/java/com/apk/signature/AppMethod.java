@@ -17,8 +17,6 @@ public class AppMethod {
     private static final String get_hex_string_from_string_value = "4";
     private static final String get_hex_method_from_method_item_index = "5";
     private static final String write_methods_to_file = "6";
-    private static final String compare_dex_file = "7";
-    private static final String match_dex_with_signature = "8";
 
     public static void main(String[] args) {
         try {
@@ -39,11 +37,7 @@ public class AppMethod {
                             get_hex_address_from_hex_method_item + " get method index and offset by method; (input format:hex string)" + "\n" +
                             get_hex_string_from_string_value + " search method info by method name; (input format:utf8 string)" + "\n" +
                             get_hex_method_from_method_item_index + " search method id by index; (input format:number)" + "\n" +
-                            write_methods_to_file + " write dex methods to file " + "\n" +
-                            compare_dex_file + " compare dex files in a folder" + "\n" +
-                            match_dex_with_signature + " match dex with signature"
-
-            );
+                            write_methods_to_file + " write dex methods to file");
 
             String input = myObj.nextLine();
 
@@ -70,21 +64,28 @@ public class AppMethod {
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    appUtil.getAddressFromHexString(header, raf, s.toUpperCase(), item);
+                    boolean c = appUtil.getAddressFromHexString(header, raf, s.toUpperCase(), item);
+                    if (!c) {
+                        System.out.println("not found");
+                    }
                 }
                 case get_hex_string_from_string_value -> {
                     System.out.println("Enter method name : ");
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    item.find(header, raf, s);
+                    String hexString = util.stringToHexString(s);
+                    boolean c = appUtil.getAddressFromHexString(header, raf, hexString.toUpperCase(), item);
+                    if (!c) {
+                        System.out.println("not found");
+                    }
                 }
                 case get_hex_method_from_method_item_index -> {
                     System.out.println("Enter index: ");
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    String res = appUtil.getByIndex(header, raf, Long.parseLong(s), item);
+                    String res = appUtil.getHexByIndex(header, raf, Long.parseLong(s), item);
                     System.out.println(res);
                 }
                 case write_methods_to_file -> {
@@ -95,28 +96,6 @@ public class AppMethod {
                     try {
                         appUtil.writeToFile(header, raf, dexFile.getName() + "-methods.txt", item, s.equals("1"));
                         System.out.println("done");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                case compare_dex_file -> {
-                    System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
-                    String s = myObj.nextLine();
-                    myObj.close();
-                    System.out.println("waite ...");
-                    try {
-                        appUtil.factorizeInFolder(item, s.equals("1"));
-                        System.out.println("done");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                case match_dex_with_signature -> {
-                    myObj.close();
-                    System.out.println("waite ...");
-                    try {
-                        boolean result = appUtil.fileMatch("C:\\Users\\sedej\\Desktop\\crack\\crack-me2\\classes.dex", item);
-                        System.out.println("result:" + result);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

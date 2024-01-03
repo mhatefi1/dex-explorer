@@ -21,6 +21,24 @@ public class ItemsProto extends Item {
     }
 
     @Override
+    public boolean searchDataByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start, String[] splitText) {
+        return false;
+    }
+
+    @Override
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
+        byte[] proto_data_b = util.getBytesOfFile(raf, start, proto_data_size);
+
+        byte[] shorty_idx_b = Arrays.copyOfRange(proto_data_b, 0, 3);
+        byte[] return_type_idx_b = Arrays.copyOfRange(proto_data_b, 4, 7);
+        byte[] parameters_off_b = Arrays.copyOfRange(proto_data_b, 8, 11);
+        long shorty_idx = util.getDecimalValue(shorty_idx_b);
+        long return_type_idx = util.getDecimalValue(return_type_idx_b);
+        long parameters_off = util.getDecimalValue(parameters_off_b);
+        return appUtil.getByteByIndex(header, raf, return_type_idx, new ItemsType());
+    }
+
+    @Override
     public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         byte[] proto_data_b = util.getBytesOfFile(raf, start, proto_data_size);
 
@@ -30,16 +48,11 @@ public class ItemsProto extends Item {
         long shorty_idx = util.getDecimalValue(shorty_idx_b);
         long return_type_idx = util.getDecimalValue(return_type_idx_b);
         long parameters_off = util.getDecimalValue(parameters_off_b);
-        return appUtil.getByIndex(header, raf, return_type_idx, new ItemsType());
+        return appUtil.getHexByIndex(header, raf, return_type_idx, new ItemsType());
     }
 
     @Override
     public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         return null;
-    }
-
-    @Override
-    public void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
-
     }
 }

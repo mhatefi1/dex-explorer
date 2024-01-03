@@ -1,5 +1,6 @@
 package com.apk.signature.Items;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.apk.signature.Util.Util;
@@ -17,6 +18,63 @@ public class ItemsString extends Item {
     public ItemsString() {
         super(string_data_off_size, header_x_ids_size, header_x_ids_off, common_file_name);
         util = new Util();
+    }
+
+
+    @Override
+    public boolean searchDataByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start, String[] splitText) {
+        byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
+        long offset = util.getDecimalValue(first_offset_of_string_data_b);
+        while (true) {
+            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
+            long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
+            offset++;
+            if (size_in_utf16_l < 127) {
+                break;
+            }
+        }
+        for (String s : splitText) {
+            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+            String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
+            if (!hex.equals(s)) {
+                return false;
+            }
+            offset++;
+        }
+        /*byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+        String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
+        return hex.equals("00");*/
+        return true;
+    }
+
+    @Override
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
+        byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
+        long offset = util.getDecimalValue(first_offset_of_string_data_b);
+
+        while (true) {
+            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
+            long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
+            offset++;
+            if (size_in_utf16_l < 127) {
+                break;
+            }
+        }
+        ArrayList<Byte> list = new ArrayList<>();
+        while (true) {
+            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+            String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
+            if (hex.equals("00")) {
+                break;
+            }
+            list.add(a_string_bit_in_MUTF8_format_b[0]);
+            offset++;
+        }
+        byte[] result = new byte[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            result[i] = list.get(i);
+        }
+        return result;
     }
 
     @Override
@@ -50,24 +108,5 @@ public class ItemsString extends Item {
     public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         String hex = getDataAsHex(header, raf, start);
         return util.hexStringToUTF8(hex);
-    }
-
-    @Override
-    public void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
-        String hexString = util.stringToHexString(s);
-        byte[] header_ids_size = header.get(header_x_ids_size);
-        byte[] header_ids_off = header.get(header_x_ids_off);
-        long ids_count = util.getDecimalValue(header_ids_size);
-        long ids_offset = util.getDecimalValue(header_ids_off);
-        for (int i = 0; i < ids_count; i++) {
-            String hex = getDataAsHex(null, raf, ids_offset);
-            if (hex.equals(hexString)) {
-                System.out.println(hex);
-                System.out.println("index:" + i);
-                System.out.println("offset:" + util.decimalToStringHex(ids_offset));
-                System.out.println("****************************************************");
-            }
-            ids_offset = ids_offset + string_data_off_size;
-        }
     }
 }

@@ -22,23 +22,109 @@ public class ItemsMethod extends Item {
         appUtil = new AppUtil(util);
     }
 
+    private int compareBytes(String[] splitText, byte[] bytes, int size) {
+        int l = bytes.length;
+        int j = 0;
+        for (int i = size; i < splitText.length; i++) {
+            if (j < l) {
+                byte[] b = new byte[1];
+                b[0] = bytes[j];
+                String hex = util.getHexValue(b);
+                if (!hex.equals(splitText[i])) {
+                    return 0;
+                }
+
+                j++;
+            }
+        }
+        return size + l;
+    }
+
+    @Override
+    public boolean searchDataByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start, String[] splitText) {
+        byte[] method_data_b = util.getBytesOfFile(raf, start, method_data_size);
+
+        byte[] class_idx_b = Arrays.copyOfRange(method_data_b, 0, 1);
+        long class_idx = util.getDecimalValue(class_idx_b);
+        byte[] class_ = appUtil.getByteByIndex(header, raf, class_idx, new ItemsType());
+        int contains = compareBytes(splitText, class_, 0);
+        if (contains == 0) {
+            return false;
+        } else {
+            byte[] proto_idx_b = Arrays.copyOfRange(method_data_b, 2, 3);
+            long proto_idx = util.getDecimalValue(proto_idx_b);
+            byte[] proto = appUtil.getByteByIndex(header, raf, proto_idx, new ItemsProto());
+            int contains1 = compareBytes(splitText, proto, contains);
+            if (contains1 == 0) {
+                return false;
+            } else {
+                byte[] method_idx_b = Arrays.copyOfRange(method_data_b, 4, 7);
+                long method_idx = util.getDecimalValue(method_idx_b);
+                byte[] method = appUtil.getByteByIndex(header, raf, method_idx, new ItemsString());
+                int contains3 = compareBytes(splitText, method, contains1);
+                return contains3 == splitText.length;
+            }
+        }
+    }
+
+    @Override
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
+        byte[] method_data_b = util.getBytesOfFile(raf, start, method_data_size);
+
+        byte[] class_idx_b = Arrays.copyOfRange(method_data_b, 0, 1);
+        long class_idx = util.getDecimalValue(class_idx_b);
+        byte[] class_ = appUtil.getByteByIndex(header, raf, class_idx, new ItemsType());
+
+        byte[] proto_idx_b = Arrays.copyOfRange(method_data_b, 2, 3);
+        long proto_idx = util.getDecimalValue(proto_idx_b);
+        byte[] proto = appUtil.getByteByIndex(header, raf, proto_idx, new ItemsProto());
+
+        byte[] method_idx_b = Arrays.copyOfRange(method_data_b, 4, 7);
+        long method_idx = util.getDecimalValue(method_idx_b);
+        byte[] method = appUtil.getByteByIndex(header, raf, method_idx, new ItemsString());
+
+        int size = class_.length + proto.length + method.length;
+        byte[] result = new byte[size];
+        int j = 0;
+        int i = 0;
+        while (i < class_.length) {
+            result[i] = class_[j];
+            j++;
+            i++;
+        }
+        j = 0;
+        while (i < proto.length) {
+            result[i] = proto[j];
+            j++;
+            i++;
+        }
+        j = 0;
+        while (i < method.length) {
+            result[i] = proto[j];
+            j++;
+            i++;
+        }
+
+        return result;
+    }
+
     @Override
     public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         byte[] method_data_b = util.getBytesOfFile(raf, start, method_data_size);
 
         byte[] class_idx_b = Arrays.copyOfRange(method_data_b, 0, 1);
         long class_idx = util.getDecimalValue(class_idx_b);
-        String class_ = appUtil.getByIndex(header, raf, class_idx, new ItemsType());
+        String class_ = appUtil.getHexByIndex(header, raf, class_idx, new ItemsType());
 
         byte[] proto_idx_b = Arrays.copyOfRange(method_data_b, 2, 3);
         long proto_idx = util.getDecimalValue(proto_idx_b);
-        String proto = appUtil.getByIndex(header, raf, proto_idx, new ItemsProto());
+        String proto = appUtil.getHexByIndex(header, raf, proto_idx, new ItemsProto());
 
         byte[] method_idx_b = Arrays.copyOfRange(method_data_b, 4, 7);
         long method_idx = util.getDecimalValue(method_idx_b);
-        String method = appUtil.getByIndex(header, raf, method_idx, new ItemsString());
+        String method = appUtil.getHexByIndex(header, raf, method_idx, new ItemsString());
 
-        return proto + class_ + method;
+        return class_ + proto + method;
     }
 
     @Override
@@ -47,39 +133,16 @@ public class ItemsMethod extends Item {
 
         byte[] class_idx_b = Arrays.copyOfRange(method_data_b, 0, 1);
         long class_idx = util.getDecimalValue(class_idx_b);
-        String class_ = appUtil.getByIndex(header, raf, class_idx, new ItemsType());
+        String class_ = appUtil.getHexByIndex(header, raf, class_idx, new ItemsType());
 
         byte[] proto_idx_b = Arrays.copyOfRange(method_data_b, 2, 3);
         long proto_idx = util.getDecimalValue(proto_idx_b);
-        String proto = appUtil.getByIndex(header, raf, proto_idx, new ItemsProto());
+        String proto = appUtil.getHexByIndex(header, raf, proto_idx, new ItemsProto());
 
         byte[] method_idx_b = Arrays.copyOfRange(method_data_b, 4, 7);
         long method_idx = util.getDecimalValue(method_idx_b);
-        String method = appUtil.getByIndex(header, raf, method_idx, new ItemsString());
+        String method = appUtil.getHexByIndex(header, raf, method_idx, new ItemsString());
 
-        return util.hexStringToUTF8(proto) + "-" + util.hexStringToUTF8(class_) + "-" + util.hexStringToUTF8(method);
-    }
-
-    @Override
-    public void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
-        String hexString = util.stringToHexString(s);
-        System.out.println("string to hexString:" + hexString);
-        byte[] header_ids_size = header.get(header_x_ids_size);
-        byte[] header_ids_off = header.get(header_x_ids_off);
-        long ids_count = util.getDecimalValue(header_ids_size);
-        long ids_offset = util.getDecimalValue(header_ids_off);
-
-        for (int i = 0; i < ids_count; i++) {
-            String hex = getDataAsHex(header, raf, ids_offset);
-            if (hex.endsWith(hexString)) {
-                System.out.println("method data as hexString:" + hex);
-                System.out.println("index:" + i);
-                System.out.println("offset:" + util.decimalToStringHex(ids_offset));
-                String utf8 = getDataAsUTF8(header, raf, ids_offset);
-                System.out.println("parsed method data as UTF8:" + utf8);
-                System.out.println("****************************************************");
-            }
-            ids_offset = ids_offset + method_data_size;
-        }
+        return util.hexStringToUTF8(class_) + util.hexStringToUTF8(proto) + "-" + util.hexStringToUTF8(method);
     }
 }

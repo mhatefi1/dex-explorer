@@ -1,6 +1,5 @@
 package com.apk.signature;
 
-import com.apk.signature.Items.ItemsMethod;
 import com.apk.signature.Items.ItemsString;
 import com.apk.signature.Model.ManifestModel;
 import com.apk.signature.Model.SignatureModel;
@@ -31,8 +30,6 @@ public class AppMatch {
         System.out.println("Enter target file or folder");
         String target_path = myObj.nextLine();
 
-        //System.out.println("Enter aapt2 file path (default path is C:\\scanner\\aapt2.exe):");
-        //Util.aapt2Path = Util.setAapt2Path(myObj.nextLine());
         Util.aapt2Path = Util.setAapt2Path("");
 
         Util util = new Util();
@@ -123,7 +120,7 @@ public class AppMatch {
                         ArrayList<String> strings = signatureModel.getStrings();
 
                         for (String str : strings) {
-                            stringMatch = appUtil.getAddressFromHexStringByteByByteInPeriod(header, raf, str.toUpperCase(), itemsString, signatureModel.getStart(), signatureModel.getEnd());
+                            stringMatch = appUtil.getAddressFromHexString(header, raf, str.toUpperCase(), itemsString, signatureModel.getStart(), signatureModel.getEnd());
                             if (!stringMatch) {
                                 break;
                             }

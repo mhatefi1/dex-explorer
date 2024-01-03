@@ -22,10 +22,22 @@ public class ItemsType extends Item {
     }
 
     @Override
+    public boolean searchDataByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start, String[] splitText) {
+        return false;
+    }
+
+    @Override
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
+        byte[] type_data_b = util.getBytesOfFile(raf, start, type_data_size);
+        long descriptor_idx = util.getDecimalValue(type_data_b);
+        return appUtil.getByteByIndex(header, raf, descriptor_idx, new ItemsString());
+    }
+
+    @Override
     public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         byte[] type_data_b = util.getBytesOfFile(raf, start, type_data_size);
         long descriptor_idx = util.getDecimalValue(type_data_b);
-        return appUtil.getByIndex(header, raf, descriptor_idx, new ItemsString());
+        return appUtil.getHexByIndex(header, raf, descriptor_idx, new ItemsString());
     }
 
     @Override
@@ -33,8 +45,4 @@ public class ItemsType extends Item {
         return null;
     }
 
-    @Override
-    public void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s) {
-
-    }
 }

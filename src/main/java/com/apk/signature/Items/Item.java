@@ -18,9 +18,13 @@ public abstract class Item {
         this.common_file_name = common_file_name;
     }
 
-    public abstract String getDataAsHex(HashMap<String, byte[]> header,RandomAccessFile raf, long start);
+    public abstract boolean searchDataByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start, String[] splitText);
 
-    public abstract String getDataAsUTF8(HashMap<String, byte[]> header,RandomAccessFile raf, long start);
+    public abstract byte[] getDataAsByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start);
+
+    public abstract String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, long start);
+
+    public abstract String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start);
 
     public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, String offseString) {
         long start = new Util().stringHexToDecimal(offseString);
@@ -31,6 +35,4 @@ public abstract class Item {
         long start = new Util().stringHexToDecimal(offseString);
         return getDataAsUTF8(header, raf, start);
     }
-
-    public abstract void find(HashMap<String, byte[]> header, RandomAccessFile raf, String s);
 }
