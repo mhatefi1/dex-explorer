@@ -74,7 +74,6 @@ public class AppString {
                     myObj.close();
                     System.out.println("waite ...");
                     String hexString = util.stringToHexString(s);
-                    System.out.println(hexString);
                     boolean c = appUtil.getAddressFromHexString(header, raf, hexString.toUpperCase(), item);
                     if (!c) {
                         System.out.println("not found");
