@@ -14,7 +14,6 @@ public class Util {
 
     private static final String defaultAapt2Path = "C:\\scanner\\aapt2.exe";
     public static String TEMP_DEX_PATH = "";
-    public static String commonFolder = "";
     public static String aapt2Path = "";//public static String aapt2Path = "C:\\Users\\sedej\\AppData\\Local\\Android\\Sdk\\build-tools\\34.0.0\\aapt2.exe";
     public static String RESET = "\u001B[0m";
     public static String RED = "\u001B[31m";

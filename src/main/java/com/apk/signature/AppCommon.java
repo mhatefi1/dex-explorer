@@ -14,7 +14,7 @@ public class AppCommon {
         Scanner myObj = new Scanner(System.in);
 
         System.out.println("Enter path:");
-        Util.commonFolder = myObj.nextLine();
+        String path = myObj.nextLine();
 
         System.out.println(
                 "Choose your operation " + "\n" +
@@ -43,7 +43,7 @@ public class AppCommon {
                 myObj.close();
                 System.out.println("waite ...");
                 try {
-                    appUtil.factorizeInFolder(item, s.equals("1"));
+                    appUtil.factorizeInFolder(path, item, s.equals("1"));
                     System.out.println("done");
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -56,7 +56,7 @@ public class AppCommon {
                 myObj.close();
                 System.out.println("waite ...");
                 try {
-                    appUtil.factorizeInFolder(item, s.equals("1"));
+                    appUtil.factorizeInFolder(path, item, s.equals("1"));
                     System.out.println("done");
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -69,7 +69,7 @@ public class AppCommon {
                 myObj.close();
                 System.out.println("waite ...");
                 try {
-                    appUtil.factorizeInFolder(item, s.equals("1"));
+                    appUtil.factorizeInFolder(path, item, s.equals("1"));
                     System.out.println("done");
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -82,7 +82,7 @@ public class AppCommon {
                 myObj.close();
                 System.out.println("waite ...");
                 try {
-                    appUtil.getCommonInManifest();
+                    appUtil.getCommonInManifest(path);
                     System.out.println("done");
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -106,25 +106,25 @@ public class AppCommon {
                 ItemsClass itemsClass = new ItemsClass();
 
                 try {
-                    appUtil.getCommonInManifest();
+                    appUtil.getCommonInManifest(path);
                     System.out.println("done");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 try {
-                    appUtil.factorizeInFolder(itemsString, utf8);
+                    appUtil.factorizeInFolder(path, itemsString, utf8);
                     System.out.println("done");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 try {
-                    appUtil.factorizeInFolder(itemsMethod, utf8);
+                    appUtil.factorizeInFolder(path, itemsMethod, utf8);
                     System.out.println("done");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 try {
-                    appUtil.factorizeInFolder(itemsClass, utf8);
+                    appUtil.factorizeInFolder(path, itemsClass, utf8);
                     System.out.println("done");
                 } catch (Exception e) {
                     e.printStackTrace();

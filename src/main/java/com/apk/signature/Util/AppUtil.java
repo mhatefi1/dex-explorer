@@ -47,11 +47,11 @@ public class AppUtil {
         return false;
     }
 
-    public void getCommonInManifest() {
+    public void getCommonInManifest(String path) {
         System.out.println("***********" + "factorizedManifest" + "***********");
         ManifestUtil manifestUtil = new ManifestUtil();
 
-        ArrayList<File> apk_list = util.getFileListByFormat(Util.commonFolder, ".apk");
+        ArrayList<File> apk_list = util.getFileListByFormat(path, ".apk");
         File first_file = apk_list.get(0);
         String fileName = first_file.getAbsolutePath();
         System.out.println(fileName);
@@ -92,18 +92,18 @@ public class AppUtil {
         service_list = util.removeDupe(service_list);
         receiver_list = util.removeDupe(receiver_list);
 
-        util.writeArrayToFile(permission_list, Util.commonFolder + "\\" + "factorizedPermissions" + ".txt");
-        util.writeArrayToFile(activity_list, Util.commonFolder + "\\" + "factorizedActivities" + ".txt");
-        util.writeArrayToFile(service_list, Util.commonFolder + "\\" + "factorizedServices" + ".txt");
-        util.writeArrayToFile(receiver_list, Util.commonFolder + "\\" + "factorizedReceivers" + ".txt");
+        util.writeArrayToFile(permission_list, path + "\\" + "factorizedPermissions" + ".txt");
+        util.writeArrayToFile(activity_list, path + "\\" + "factorizedActivities" + ".txt");
+        util.writeArrayToFile(service_list, path + "\\" + "factorizedServices" + ".txt");
+        util.writeArrayToFile(receiver_list, path + "\\" + "factorizedReceivers" + ".txt");
     }
 
-    public void factorizeInFolder(Item tClass, boolean utf8) {
+    public void factorizeInFolder(String path, Item tClass, boolean utf8) {
         try {
             System.out.println("***********" + tClass.common_file_name + "***********");
             ArrayList<File> fileList = new ArrayList<>();
-            util.extractDex(Util.commonFolder);
-            ArrayList<File> dexFileList = util.getRecursiveFileListByFormat(fileList, Util.commonFolder, ".dex");
+            util.extractDex(path);
+            ArrayList<File> dexFileList = util.getRecursiveFileListByFormat(fileList, path, ".dex");
             File first_file = dexFileList.get(0);
             String fileName = first_file.getAbsolutePath();
             System.out.println(fileName);
@@ -120,7 +120,7 @@ public class AppUtil {
             finall = util.removeDupe(finall);
             System.out.println("common items count:" + finall.size());
             System.out.println("**********************");
-            util.writeArrayToFile(finall, Util.commonFolder + "\\" + tClass.common_file_name + ".txt");
+            util.writeArrayToFile(finall, path + "\\" + tClass.common_file_name + ".txt");
 
         } catch (Exception e) {
             e.printStackTrace();
