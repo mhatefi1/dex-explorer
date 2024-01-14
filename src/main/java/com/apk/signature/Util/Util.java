@@ -93,7 +93,7 @@ public class Util {
             return f.getParent();
     }
 
-    private String splitNameFromFormat(String s) {
+    public String splitNameFromFormat(String s) {
         int dotIndex = s.lastIndexOf(".");
         return s.substring(0, dotIndex);
     }
