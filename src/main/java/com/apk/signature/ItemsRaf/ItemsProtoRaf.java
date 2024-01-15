@@ -1,33 +1,33 @@
-package com.apk.signature.Items;
+package com.apk.signature.ItemsRaf;
 
 import com.apk.signature.Util.AppUtil;
 import com.apk.signature.Util.Util;
 import org.apache.pdfbox.io.RandomAccessFile;
 
-import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class ItemsProto extends Item {
+public class ItemsProtoRaf extends ItemRaf {
     public static final int proto_data_size = 12;
     public final static String header_x_ids_size = "header_proto_ids_size";
     public final static String header_x_ids_off = "header_proto_ids_off";
     public final static String common_file_name = "factorizedProto";
     Util util;
     AppUtil appUtil;
-    public ItemsProto() {
+
+    public ItemsProtoRaf() {
         super(proto_data_size, header_x_ids_size, header_x_ids_off, common_file_name);
         util = new Util();
         appUtil = new AppUtil(util);
     }
 
     @Override
-    public boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start, String[] splitText) {
+    public boolean searchDataByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start, String[] splitText) {
         return false;
     }
 
     @Override
-    public byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         byte[] proto_data_b = util.getBytesOfFile(raf, start, proto_data_size);
 
         byte[] shorty_idx_b = Arrays.copyOfRange(proto_data_b, 0, 3);
@@ -36,11 +36,11 @@ public class ItemsProto extends Item {
         long shorty_idx = util.getDecimalValue(shorty_idx_b);
         long return_type_idx = util.getDecimalValue(return_type_idx_b);
         long parameters_off = util.getDecimalValue(parameters_off_b);
-        return appUtil.getByteByIndex(header, raf, return_type_idx, new ItemsType());
+        return appUtil.getByteByIndex(header, raf, return_type_idx, new ItemsTypeRaf());
     }
 
     @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
+    public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         byte[] proto_data_b = util.getBytesOfFile(raf, start, proto_data_size);
 
         byte[] shorty_idx_b = Arrays.copyOfRange(proto_data_b, 0, 3);
@@ -49,11 +49,11 @@ public class ItemsProto extends Item {
         long shorty_idx = util.getDecimalValue(shorty_idx_b);
         long return_type_idx = util.getDecimalValue(return_type_idx_b);
         long parameters_off = util.getDecimalValue(parameters_off_b);
-        return appUtil.getHexByIndex(header, raf, return_type_idx, new ItemsType());
+        return appUtil.getHexByIndex(header, raf, return_type_idx, new ItemsTypeRaf());
     }
 
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
+    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         return null;
     }
 }

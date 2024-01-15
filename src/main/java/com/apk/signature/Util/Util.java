@@ -1,10 +1,13 @@
 package com.apk.signature.Util;
 
+import com.apk.signature.Model.ManifestModel;
+import com.apk.signature.Model.SignatureModel;
 import org.apache.pdfbox.io.RandomAccessFile;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.zip.ZipEntry;
@@ -86,6 +89,54 @@ public class Util {
         return file;
     }
 
+    public SignatureModel createSignatureModel(String permissions, String activities, String services, String receivers, String strings, int startIndex, int endIndex) {
+        String[] permissions_list = permissions.split(",");
+        String[] activities_list = activities.split(",");
+        String[] service_list = services.split(",");
+        String[] receivers_list = receivers.split(",");
+        String[] strings_list = strings.split(",");
+
+        ManifestModel manifestModel = new ManifestModel();
+
+        ArrayList<String> permissionArrayList = new ArrayList<>();
+        ArrayList<String> activitiesArrayList = new ArrayList<>();
+        ArrayList<String> serviceArrayList = new ArrayList<>();
+        ArrayList<String> receiversArrayList = new ArrayList<>();
+
+        for (String s : permissions_list) {
+            s = hexStringToUTF8(s);
+            permissionArrayList.add(s);
+        }
+        for (String s : activities_list) {
+            s = hexStringToUTF8(s);
+            activitiesArrayList.add(s);
+        }
+        for (String s : service_list) {
+            s = hexStringToUTF8(s);
+            serviceArrayList.add(s);
+        }
+        for (String s : receivers_list) {
+            s = hexStringToUTF8(s);
+            receiversArrayList.add(s);
+        }
+
+        ArrayList<String> stringsArrayList = new ArrayList<>(Arrays.asList(strings_list));
+
+        manifestModel.setPermission(permissionArrayList);
+        manifestModel.setActivities(activitiesArrayList);
+        manifestModel.setServices(serviceArrayList);
+        manifestModel.setReceivers(receiversArrayList);
+
+        SignatureModel signatureModel = new SignatureModel();
+
+        signatureModel.setManifestModel(manifestModel);
+        signatureModel.setStrings(stringsArrayList);
+        signatureModel.setStart(startIndex);
+        signatureModel.setEnd(endIndex);
+
+        return signatureModel;
+    }
+
     public String getWorkingFilePath(File f) {
         if (f.isDirectory())
             return f.getAbsolutePath();
@@ -94,8 +145,13 @@ public class Util {
     }
 
     public String splitNameFromFormat(String s) {
-        int dotIndex = s.lastIndexOf(".");
-        return s.substring(0, dotIndex);
+        try {
+            int dotIndex = s.lastIndexOf(".");
+            return s.substring(0, dotIndex);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return s;
     }
 
     public ArrayList<File> generateDex(String path) {
@@ -242,10 +298,10 @@ public class Util {
         File[] listed = f.listFiles();
         assert listed != null;
         for (File file : listed) {
-            if (file.getName().endsWith(format)) {
-                fileList.add(file);
-            } else if (file.isDirectory()) {
+            if (file.isDirectory()) {
                 getRecursiveFileListByFormat(fileList, file.getAbsolutePath(), format);
+            } else if (file.getName().endsWith(format)) {
+                fileList.add(file);
             }
         }
         return fileList;
@@ -369,6 +425,65 @@ public class Util {
         return splitText;
     }
 
+
+    public HashMap<String, byte[]> getHeader(ByteArrayInputStream raf) {
+
+        HashMap<String, byte[]> header = new HashMap<>();
+
+        try {
+            byte[] header_magic = getBytesOfFile(raf, 0, 8);
+            byte[] header_checksum = getBytesOfFile(raf, 8, 4);
+            byte[] header_signature = getBytesOfFile(raf, 12, 20);
+            byte[] header_file_size = getBytesOfFile(raf, 32, 4);
+            byte[] header_header_size = getBytesOfFile(raf, 36, 4);
+            byte[] header_endian_tag = getBytesOfFile(raf, 40, 4);
+            byte[] header_link_size = getBytesOfFile(raf, 44, 4);
+            byte[] header_link_off = getBytesOfFile(raf, 48, 4);
+            byte[] header_map_off = getBytesOfFile(raf, 52, 4);
+            byte[] header_string_ids_size = getBytesOfFile(raf, 56, 4);
+            byte[] header_string_ids_off = getBytesOfFile(raf, 60, 4);
+            byte[] header_type_ids_size = getBytesOfFile(raf, 64, 4);
+            byte[] header_type_ids_off = getBytesOfFile(raf, 68, 4);
+            byte[] header_proto_ids_size = getBytesOfFile(raf, 72, 4);
+            byte[] header_proto_ids_off = getBytesOfFile(raf, 76, 4);
+            byte[] header_field_ids_size = getBytesOfFile(raf, 80, 4);
+            byte[] header_field_ids_off = getBytesOfFile(raf, 84, 4);
+            byte[] header_method_ids_size = getBytesOfFile(raf, 88, 4);
+            byte[] header_method_ids_off = getBytesOfFile(raf, 92, 4);
+            byte[] header_class_ids_size = getBytesOfFile(raf, 96, 4);
+            byte[] header_class_ids_off = getBytesOfFile(raf, 100, 4);
+            byte[] header_data_size = getBytesOfFile(raf, 104, 4);
+            byte[] header_data_off = getBytesOfFile(raf, 108, 4);
+
+            header.put("header_magic", header_magic);
+            header.put("header_checksum", header_checksum);
+            header.put("header_signature", header_signature);
+            header.put("header_file_size", header_file_size);
+            header.put("header_header_size", header_header_size);
+            header.put("header_endian_tag", header_endian_tag);
+            header.put("header_link_size", header_link_size);
+            header.put("header_link_off", header_link_off);
+            header.put("header_map_off", header_map_off);
+            header.put("header_string_ids_size", header_string_ids_size);
+            header.put("header_string_ids_off", header_string_ids_off);
+            header.put("header_type_ids_size", header_type_ids_size);
+            header.put("header_type_ids_off", header_type_ids_off);
+            header.put("header_proto_ids_size", header_proto_ids_size);
+            header.put("header_proto_ids_off", header_proto_ids_off);
+            header.put("header_field_ids_size", header_field_ids_size);
+            header.put("header_field_ids_off", header_field_ids_off);
+            header.put("header_method_ids_size", header_method_ids_size);
+            header.put("header_method_ids_off", header_method_ids_off);
+            header.put("header_class_ids_size", header_class_ids_size);
+            header.put("header_class_ids_off", header_class_ids_off);
+            header.put("header_data_ids_size", header_data_size);
+            header.put("header_data_ids_off", header_data_off);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return header;
+    }
 
     public HashMap<String, byte[]> getHeader(RandomAccessFile raf) {
 

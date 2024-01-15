@@ -1,6 +1,7 @@
 package com.apk.signature.Util;
 
 import com.apk.signature.Items.Item;
+import com.apk.signature.ItemsRaf.ItemRaf;
 import com.apk.signature.Model.ManifestModel;
 import org.apache.pdfbox.io.RandomAccessFile;
 
@@ -18,11 +19,40 @@ public class AppUtil {
         this.util = util;
     }
 
-    public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String text, Item tClass) {
+    public boolean getAddressFromHexString(HashMap<String, byte[]> header, ByteArrayInputStream raf, String text, Item tClass) {
         return getAddressFromHexString(header, raf, text, tClass, 0, 0);
     }
 
-    public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String text, Item tClass, int periodStartIndex, int periodEndIndex) {
+    public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String text, ItemRaf tClass) {
+        return getAddressFromHexString(header, raf, text, tClass, 0, 0);
+    }
+
+    public boolean getAddressFromHexString(HashMap<String, byte[]> header, ByteArrayInputStream raf, String text, Item tClass, int periodStartIndex, int periodEndIndex) {
+        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
+        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+        long ids_count = util.getDecimalValue(header_ids_size);
+        long ids_offset = util.getDecimalValue(header_ids_off);
+        if (periodStartIndex < ids_count) {
+            String[] splitText = util.splitTwoByTwo(text);
+            if (periodEndIndex > ids_count || periodEndIndex == 0) {
+                periodEndIndex = (int) ids_count;
+            }
+            ids_offset = ids_offset + (long) tClass.data_size * periodStartIndex;
+            for (int i = periodStartIndex; i <= periodEndIndex; i++) {
+                boolean ss = tClass.searchDataByte(header, raf, ids_offset, splitText);
+                if (ss) {
+                    printYellow("{ hex:" + text);
+                    printYellow("  ids_offs: " + util.decimalToStringHex(ids_offset));
+                    printYellow("  ids_index: " + i + " }");
+                    return true;
+                }
+                ids_offset = ids_offset + tClass.data_size;
+            }
+        }
+        return false;
+    }
+
+    public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String text, ItemRaf tClass, int periodStartIndex, int periodEndIndex) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = util.getDecimalValue(header_ids_size);
@@ -98,7 +128,7 @@ public class AppUtil {
         util.writeArrayToFile(receiver_list, path + "\\" + "factorizedReceivers" + ".txt");
     }
 
-    public void factorizeInFolder(String path, Item tClass, boolean utf8) {
+    public void factorizeInFolder(String path, ItemRaf tClass, boolean utf8) {
         try {
             System.out.println("***********" + tClass.common_file_name + "***********");
             ArrayList<File> fileList = new ArrayList<>();
@@ -127,7 +157,7 @@ public class AppUtil {
         }
     }
 
-    public ArrayList<String> getFromDexAsArray(File f, Item tClass, boolean utf8) {
+    public ArrayList<String> getFromDexAsArray(File f, ItemRaf tClass, boolean utf8) {
         ArrayList<String> s = new ArrayList<>();
         try {
             RandomAccessFile raf = new RandomAccessFile(f, "r");
@@ -159,7 +189,7 @@ public class AppUtil {
     }
 
 
-    public void writeToFile(HashMap<String, byte[]> header, RandomAccessFile raf, String fileName, Item tClass, boolean utf8) {
+    public void writeToFile(HashMap<String, byte[]> header, RandomAccessFile raf, String fileName, ItemRaf tClass, boolean utf8) {
         try {
             byte[] header_ids_size = header.get(tClass.header_x_ids_size);
             byte[] header_ids_off = header.get(tClass.header_x_ids_off);
@@ -190,7 +220,38 @@ public class AppUtil {
         }
     }
 
-    public void getAll(HashMap<String, byte[]> header, RandomAccessFile raf, Item tClass) {
+    public void writeToFile(HashMap<String, byte[]> header, ByteArrayInputStream raf, String fileName, Item tClass, boolean utf8) {
+        try {
+            byte[] header_ids_size = header.get(tClass.header_x_ids_size);
+            byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+            long ids_count = util.getDecimalValue(header_ids_size);
+            long ids_offset = util.getDecimalValue(header_ids_off);
+
+            File f = new File(Util.TEMP_DEX_PATH + "\\" + fileName);
+            BufferedWriter writer = new BufferedWriter(new FileWriter(f, false));
+
+            if (utf8) {
+                for (int i = 0; i < ids_count; i++) {
+                    String hex = tClass.getDataAsUTF8(header, raf, ids_offset);
+                    ids_offset = ids_offset + tClass.data_size;
+                    writer.append(hex);
+                    writer.append('\n');
+                }
+            } else {
+                for (int i = 0; i < ids_count; i++) {
+                    String hex = tClass.getDataAsHex(header, raf, ids_offset);
+                    ids_offset = ids_offset + tClass.data_size;
+                    writer.append(hex);
+                    writer.append('\n');
+                }
+            }
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getAll(HashMap<String, byte[]> header, ByteArrayInputStream raf, Item tClass) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = util.getDecimalValue(header_ids_size);
@@ -202,14 +263,40 @@ public class AppUtil {
         }
     }
 
-    public String getHexByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, Item tClass) {
+    public void getAll(HashMap<String, byte[]> header, RandomAccessFile raf, ItemRaf tClass) {
+        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
+        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+        long ids_count = util.getDecimalValue(header_ids_size);
+        long ids_offset = util.getDecimalValue(header_ids_off);
+        for (int i = 0; i < ids_count; i++) {
+            String hex = tClass.getDataAsHex(header, raf, ids_offset);
+            ids_offset = ids_offset + tClass.data_size;
+            System.out.println(hex);
+        }
+    }
+
+    public String getHexByIndex(HashMap<String, byte[]> header, ByteArrayInputStream raf, long index, Item tClass) {
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = util.getDecimalValue(header_ids_off);
         ids_offset = index * tClass.data_size + ids_offset;
         return tClass.getDataAsHex(header, raf, ids_offset);
     }
 
-    public byte[] getByteByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, Item tClass) {
+    public String getHexByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, ItemRaf tClass) {
+        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+        long ids_offset = util.getDecimalValue(header_ids_off);
+        ids_offset = index * tClass.data_size + ids_offset;
+        return tClass.getDataAsHex(header, raf, ids_offset);
+    }
+
+    public byte[] getByteByIndex(HashMap<String, byte[]> header, ByteArrayInputStream raf, long index, Item tClass) {
+        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+        long ids_offset = util.getDecimalValue(header_ids_off);
+        ids_offset = index * tClass.data_size + ids_offset;
+        return tClass.getDataAsByte(header, raf, ids_offset);
+    }
+
+    public byte[] getByteByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, ItemRaf tClass) {
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = util.getDecimalValue(header_ids_off);
         ids_offset = index * tClass.data_size + ids_offset;

@@ -1,13 +1,12 @@
-package com.apk.signature.Items;
-
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
+package com.apk.signature.ItemsRaf;
 
 import com.apk.signature.Util.Util;
 import org.apache.pdfbox.io.RandomAccessFile;
 
-public class ItemsString extends Item {
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class ItemsStringRaf extends ItemRaf {
 
 
     public final static int string_data_off_size = 4;
@@ -16,14 +15,14 @@ public class ItemsString extends Item {
     public final static String common_file_name = "factorizedStrings";
     Util util;
 
-    public ItemsString() {
+    public ItemsStringRaf() {
         super(string_data_off_size, header_x_ids_size, header_x_ids_off, common_file_name);
         util = new Util();
     }
 
 
     @Override
-    public boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start, String[] splitText) {
+    public boolean searchDataByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start, String[] splitText) {
         byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
         while (true) {
@@ -49,7 +48,7 @@ public class ItemsString extends Item {
     }
 
     @Override
-    public byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
 
@@ -79,7 +78,7 @@ public class ItemsString extends Item {
     }
 
     @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
+    public String getDataAsHex(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
         StringBuilder stringBuilder = new StringBuilder();
@@ -105,8 +104,9 @@ public class ItemsString extends Item {
 
         return stringBuilder.toString();
     }
+
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
+    public String getDataAsUTF8(HashMap<String, byte[]> header, RandomAccessFile raf, long start) {
         String hex = getDataAsHex(header, raf, start);
         return util.hexStringToUTF8(hex);
     }

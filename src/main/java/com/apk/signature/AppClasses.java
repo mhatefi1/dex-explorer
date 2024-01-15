@@ -1,6 +1,7 @@
 package com.apk.signature;
 
 import com.apk.signature.Items.ItemsClass;
+import com.apk.signature.ItemsRaf.ItemsClassRaf;
 import com.apk.signature.Util.AppUtil;
 import com.apk.signature.Util.Util;
 import org.apache.pdfbox.io.RandomAccessFile;
@@ -23,7 +24,7 @@ public class AppClasses {
             File dexFile = util.generateDex(args[0]).get(0);
             Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
             RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
-            ItemsClass item = new ItemsClass();
+            ItemsClassRaf item = new ItemsClassRaf();
             HashMap<String, byte[]> header = util.getHeader(raf);
 
             Scanner myObj = new Scanner(System.in);

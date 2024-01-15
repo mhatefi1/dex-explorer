@@ -1,8 +1,9 @@
 package com.apk.signature;
 
-import com.apk.signature.Items.ItemsClass;
-import com.apk.signature.Items.ItemsMethod;
-import com.apk.signature.Items.ItemsString;
+
+import com.apk.signature.ItemsRaf.ItemsClassRaf;
+import com.apk.signature.ItemsRaf.ItemsMethodRaf;
+import com.apk.signature.ItemsRaf.ItemsStringRaf;
 import com.apk.signature.Util.AppUtil;
 import com.apk.signature.Util.Util;
 
@@ -37,7 +38,7 @@ public class AppCommon {
                 AppMain.main(args);
             }
             case "1" -> {
-                ItemsString item = new ItemsString();
+                ItemsStringRaf item = new ItemsStringRaf();
                 System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
                 String s = myObj.nextLine();
                 myObj.close();
@@ -50,7 +51,7 @@ public class AppCommon {
                 }
             }
             case "2" -> {
-                ItemsMethod item = new ItemsMethod();
+                ItemsMethodRaf item = new ItemsMethodRaf();
                 System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
                 String s = myObj.nextLine();
                 myObj.close();
@@ -63,7 +64,7 @@ public class AppCommon {
                 }
             }
             case "3" -> {
-                ItemsClass item = new ItemsClass();
+                ItemsClassRaf item = new ItemsClassRaf();
                 System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
                 String s = myObj.nextLine();
                 myObj.close();
@@ -101,9 +102,9 @@ public class AppCommon {
 
                 System.out.println("waite ...");
 
-                ItemsString itemsString = new ItemsString();
-                ItemsMethod itemsMethod = new ItemsMethod();
-                ItemsClass itemsClass = new ItemsClass();
+                ItemsStringRaf itemsString = new ItemsStringRaf();
+                ItemsMethodRaf itemsMethod = new ItemsMethodRaf();
+                ItemsClassRaf itemsClass = new ItemsClassRaf();
 
                 try {
                     appUtil.getCommonInManifest(path);

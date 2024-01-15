@@ -1,30 +1,25 @@
 package com.apk.signature;
 
 import com.apk.signature.DB.SQLiteJDBC;
-import com.apk.signature.Items.ItemsString;
+import com.apk.signature.ItemsRaf.ItemsStringRaf;
 import com.apk.signature.Model.ManifestModel;
 import com.apk.signature.Model.SignatureModel;
 import com.apk.signature.Util.AppUtil;
 import com.apk.signature.Util.ManifestUtil;
 import com.apk.signature.Util.Util;
-import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.io.RandomAccessFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import static com.apk.signature.Util.Util.printGreen;
 import static com.apk.signature.Util.Util.printRed;
 
-public class AppMatch {
+public class AppMatchRaf {
     Util util = new Util();
 
     public static void main(String[] args) {
@@ -40,12 +35,12 @@ public class AppMatch {
         Util util = new Util();
         AppUtil appUtil = new AppUtil(util);
         ManifestUtil manifestUtil = new ManifestUtil();
-        ItemsString itemsString = new ItemsString();
+
         File fileTarget = new File(target_path);
         File fileSignature = new File(signature_path);
         long start = System.currentTimeMillis();
         ArrayList<File> fileTargetList = new ArrayList<>();
-        fileTargetList = util.getRecursiveFileListByFormat(fileTargetList, fileTarget.getAbsolutePath(), ".apk");
+        fileTargetList = util.getRecursiveFileListByFormat(fileTargetList, fileTarget.getAbsolutePath(), "");
         ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt");
         ArrayList<File> dbSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".db");
         ArrayList<SignatureModel> signatureModels = new ArrayList<>();
@@ -53,7 +48,7 @@ public class AppMatch {
         for (File file : fileSignatureList) {
             try {
                 String signature_txt1 = util.readFile(file);
-                SignatureModel signatureModel1 = new AppMatch().parseSignature(signature_txt1);
+                SignatureModel signatureModel1 = new AppMatchRaf().parseSignature(signature_txt1);
                 signatureModel1.setName(file.getName());
                 signatureModels.add(signatureModel1);
             } catch (Exception ignored) {
@@ -64,6 +59,10 @@ public class AppMatch {
             SQLiteJDBC jdbc = new SQLiteJDBC(file);
             ArrayList<SignatureModel> dbList = jdbc.select();
             signatureModels.addAll(dbList);
+        }
+
+        if (fileTargetList.isEmpty()) {
+            fileTargetList = util.getFileListByFormat(fileTarget.getAbsolutePath(), ".dex");
         }
 
         for (File file_i : fileTargetList) {
@@ -113,51 +112,41 @@ public class AppMatch {
                 }
             }
 
-            boolean stringMatch = false;
+            ArrayList<File> dexFiles = util.generateDex(file_i.getAbsolutePath());
             boolean isMalware = false;
             String result_detailes = "";
-            try {
-                try (ZipFile zipFile = new ZipFile(file_i.getAbsolutePath())) {
-                    Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                    while (entries.hasMoreElements()) {
-                        ZipEntry entry = entries.nextElement();
-                        if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
-                            try {
-                                InputStream inputStream = zipFile.getInputStream(entry);
-                                byte[] bs = IOUtils.toByteArray(inputStream);
-                                ByteArrayInputStream stream = new ByteArrayInputStream(bs);
-                                HashMap<String, byte[]> header = util.getHeader(stream);
+            for (File dexFile : dexFiles) {
+                Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
+                boolean stringMatch = false;
+                try {
+                    RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
+                    HashMap<String, byte[]> header = util.getHeader(raf);
+                    ItemsStringRaf itemsString = new ItemsStringRaf();
 
-                                for (SignatureModel signatureModel : manifestMatchedSignatures) {
-                                    ArrayList<String> strings = signatureModel.getStrings();
+                    for (SignatureModel signatureModel : manifestMatchedSignatures) {
+                        ArrayList<String> strings = signatureModel.getStrings();
 
-                                    for (String str : strings) {
-                                        stringMatch = appUtil.getAddressFromHexString(header, stream, str.toUpperCase(),
-                                                itemsString, signatureModel.getStart(), signatureModel.getEnd());
-                                        if (!stringMatch) {
-                                            break;
-                                        }
-                                    }
-
-                                    isMalware = stringMatch;
-
-                                    if (isMalware) {
-                                        result_detailes = "!!!this is malware!!!" + " matched by: " + signatureModel.getName();
-                                        break;
-                                    }
-                                }
-                                if (isMalware) {
-                                    break;
-                                }
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        for (String str : strings) {
+                            stringMatch = appUtil.getAddressFromHexString(header, raf, str.toUpperCase(), itemsString, signatureModel.getStart(), signatureModel.getEnd());
+                            if (!stringMatch) {
+                                break;
                             }
                         }
+
+                        isMalware = stringMatch;
+
+                        if (isMalware) {
+                            result_detailes = "!!!this is malware!!!" + " matched by: " + signatureModel.getName();
+                            break;
+                        }
                     }
+                    if (isMalware) {
+                        break;
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
             if (isMalware) {
                 printRed(result_detailes);

@@ -9,15 +9,16 @@ public class AppMain {
     public static void main(String[] args) {
         Scanner myObj = new Scanner(System.in);
         System.out.println(
-                "Choose your operation " + "\n" +
-                        "1 to string module" + "\n" +
-                        "2 to method module" + "\n" +
-                        "3 to class module" + "\n" +
-                        "4 to extract dex files from apk" + "\n" +
-                        "5 to get common files" + "\n" +
-                        "6 to match" + "\n" +
-                        "7 to generate signature" + "\n" +
-                        "8 to convert text to sql"
+                """
+                        Choose your operation\s
+                        1 to string module
+                        2 to method module
+                        3 to class module
+                        4 to extract dex files from apk
+                        5 to get common files
+                        6 to match
+                        7 to generate signature
+                        8 to convert text to sql"""
         );
 
         String input = myObj.nextLine();
