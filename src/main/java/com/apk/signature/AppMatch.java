@@ -45,6 +45,7 @@ public class AppMatch {
         File fileSignature = new File(signature_path);
         long start = System.currentTimeMillis();
         ArrayList<File> fileTargetList = new ArrayList<>();
+        fileTargetList = util.getRecursiveFileListByFormat(fileTargetList, fileTarget.getAbsolutePath(), "");
         fileTargetList = util.getRecursiveFileListByFormat(fileTargetList, fileTarget.getAbsolutePath(), ".apk");
         ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt");
         ArrayList<File> dbSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".db");

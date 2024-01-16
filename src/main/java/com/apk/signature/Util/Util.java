@@ -293,7 +293,6 @@ public class Util {
     }
 
     public ArrayList<File> getRecursiveFileListByFormat(ArrayList<File> fileList, String input, String format) {
-
         File f = new File(input);
         File[] listed = f.listFiles();
         assert listed != null;
@@ -301,7 +300,13 @@ public class Util {
             if (file.isDirectory()) {
                 getRecursiveFileListByFormat(fileList, file.getAbsolutePath(), format);
             } else if (file.getName().endsWith(format)) {
-                fileList.add(file);
+                if (format.isEmpty()) {
+                    if (!file.getName().contains(".")) {
+                        fileList.add(file);
+                    }
+                } else {
+                    fileList.add(file);
+                }
             }
         }
         return fileList;
