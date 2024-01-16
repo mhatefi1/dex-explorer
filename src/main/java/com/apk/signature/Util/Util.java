@@ -3,6 +3,7 @@ package com.apk.signature.Util;
 import com.apk.signature.Model.ManifestModel;
 import com.apk.signature.Model.SignatureModel;
 import org.apache.pdfbox.io.RandomAccessFile;
+import org.fusesource.jansi.AnsiConsole;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -12,6 +13,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import static org.fusesource.jansi.Ansi.ansi;
 
 public class Util {
 
@@ -31,17 +34,26 @@ public class Util {
 
     public static void printRed(String text) {
         //System.out.println(RED + text + RESET);
-        System.out.println(text);
+        //System.out.println(text);
+        AnsiConsole.systemInstall();
+        System.out.println(ansi().fgRed().a(text).reset());
+        AnsiConsole.systemUninstall();
     }
 
     public static void printGreen(String text) {
         //System.out.println(GREEN + text + RESET);
-        System.out.println(text);
+        //System.out.println(text);
+        AnsiConsole.systemInstall();
+        System.out.println(ansi().fgGreen().a(text).reset());
+        AnsiConsole.systemUninstall();
     }
 
     public static void printYellow(String text) {
         //System.out.println(YELLOW + text + RESET);
-        System.out.println(text);
+        //System.out.println(text);
+        AnsiConsole.systemInstall();
+        System.out.println(ansi().fgYellow().a(text).reset());
+        AnsiConsole.systemUninstall();
     }
 
     public static String setAapt2Path(String path) {
