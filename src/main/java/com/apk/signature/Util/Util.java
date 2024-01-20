@@ -2,6 +2,7 @@ package com.apk.signature.Util;
 
 import com.apk.signature.Model.ManifestModel;
 import com.apk.signature.Model.SignatureModel;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.RandomAccessFile;
 import org.fusesource.jansi.AnsiConsole;
 
@@ -26,10 +27,11 @@ public class Util {
     public static String GREEN = "\u001B[32m";
     public static String YELLOW = "\u001B[33m";
 
-    public static void runDuration(long startTime) {
+    public static long runDuration(long startTime) {
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
         System.out.println("Elapsed time: " + elapsedTime + " milliseconds");
+        return elapsedTime;
     }
 
     public static void printRed(String text) {
@@ -99,6 +101,26 @@ public class Util {
             e.printStackTrace();
         }
         return file;
+    }
+
+    public String parseManifest(File file_i) {
+        try {
+            try (ZipFile zipFile = new ZipFile(file_i.getAbsolutePath())) {
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (!entry.isDirectory() && entry.getName().equals("AndroidManifest.xml")) {
+                        InputStream inputStream = zipFile.getInputStream(entry);
+                        byte[] bs = IOUtils.toByteArray(inputStream);
+                        inputStream.close();
+                        return new XMLReader().decompressXML(bs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+        return "not found";
     }
 
     public SignatureModel createSignatureModel(String permissions, String activities, String services, String receivers, String strings, int startIndex, int endIndex) {
@@ -213,6 +235,16 @@ public class Util {
 
     }
 
+    public void writeToFile(String text, String fileName) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, false));
+            writer.append(text);
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public String hexStringToUTF8(String hexString) {
         byte[] bytes = hexStringToByteArray(hexString);
         return new String(bytes, Charset.forName("Cp1252"));
@@ -307,19 +339,22 @@ public class Util {
     public ArrayList<File> getRecursiveFileListByFormat(ArrayList<File> fileList, String input, String format) {
         File f = new File(input);
         File[] listed = f.listFiles();
-        assert listed != null;
-        for (File file : listed) {
-            if (file.isDirectory()) {
-                getRecursiveFileListByFormat(fileList, file.getAbsolutePath(), format);
-            } else if (file.getName().endsWith(format)) {
-                if (format.isEmpty()) {
-                    if (!file.getName().contains(".")) {
+        if (listed != null) {
+            for (File file : listed) {
+                if (file.isDirectory()) {
+                    getRecursiveFileListByFormat(fileList, file.getAbsolutePath(), format);
+                } else if (file.getName().endsWith(format)) {
+                    if (format.isEmpty()) {
+                        if (!file.getName().contains(".")) {
+                            fileList.add(file);
+                        }
+                    } else {
                         fileList.add(file);
                     }
-                } else {
-                    fileList.add(file);
                 }
             }
+        } else {
+            printRed(format + " files list is null");
         }
         return fileList;
     }

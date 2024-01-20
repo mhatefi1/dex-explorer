@@ -2,16 +2,17 @@ package com.apk.signature;
 
 import com.apk.signature.DB.SQLiteJDBC;
 import com.apk.signature.Items.ItemsString;
+import com.apk.signature.Model.MalwareModel;
 import com.apk.signature.Model.ManifestModel;
+import com.apk.signature.Model.ScanResult;
 import com.apk.signature.Model.SignatureModel;
 import com.apk.signature.Util.AppUtil;
 import com.apk.signature.Util.ManifestUtil;
 import com.apk.signature.Util.Util;
+import com.google.gson.Gson;
 import org.apache.pdfbox.io.IOUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -25,28 +26,84 @@ import static com.apk.signature.Util.Util.printGreen;
 import static com.apk.signature.Util.Util.printRed;
 
 public class AppMatch {
+    private static int totalFiles, totalApk;
     Util util = new Util();
 
     public static void main(String[] args) {
-        Scanner myObj = new Scanner(System.in);
-        System.out.println("Enter signature file or folder");
-        String signature_path = myObj.nextLine();
+        String signature_path;
+        String target_path;
+        ArrayList<File> AllTargetFilePath = new ArrayList<>();
+        AppMatch appMatch = new AppMatch();
+        if (args.length > 0 && args[0].equals("6")) {
+            signature_path = args[1];
+            target_path = args[2];
+            File file = new File(target_path);
+            if (file.getName().endsWith(".txt")) {
+                AllTargetFilePath = appMatch.getArgsFileSignatureList(target_path);
+            } else {
+                AllTargetFilePath.add(file);
+            }
+        } else {
+            Scanner myObj = new Scanner(System.in);
+            System.out.println("Enter signature file or folder");
+            signature_path = myObj.nextLine();
 
-        System.out.println("Enter target file or folder");
-        String target_path = myObj.nextLine();
+            System.out.println("Enter target file or folder");
+            target_path = myObj.nextLine();
+        }
 
+        File fileSignature = new File(signature_path);
+        if (!fileSignature.exists()) {
+            printRed("signature path doesn't exist");
+            System.exit(0);
+        }
+
+        File targetFile = new File(target_path);
+        if (!targetFile.exists()) {
+            printRed("target path doesn't exist");
+            System.exit(0);
+        }
         Util.aapt2Path = Util.setAapt2Path("");
 
         Util util = new Util();
-        AppUtil appUtil = new AppUtil(util);
-        ManifestUtil manifestUtil = new ManifestUtil();
-        ItemsString itemsString = new ItemsString();
-        File fileTarget = new File(target_path);
-        File fileSignature = new File(signature_path);
+
+        ArrayList<SignatureModel> signatureModels = appMatch.getSigModel(fileSignature);
+
+        if (AllTargetFilePath.isEmpty()) {
+            AllTargetFilePath.add(targetFile);
+        }
+
         long start = System.currentTimeMillis();
-        ArrayList<File> fileTargetList = new ArrayList<>();
-        fileTargetList = util.getRecursiveFileListByFormat(fileTargetList, fileTarget.getAbsolutePath(), "");
-        fileTargetList = util.getRecursiveFileListByFormat(fileTargetList, fileTarget.getAbsolutePath(), ".apk");
+        ArrayList<MalwareModel> malwareList = new ArrayList<>();
+        for (File f : AllTargetFilePath) {
+            ArrayList<File> targetFileList = new ArrayList<>();
+            if (f.isDirectory()) {
+                targetFileList = util.getRecursiveFileListByFormat(targetFileList, f.getAbsolutePath(), "");
+                targetFileList = util.getRecursiveFileListByFormat(targetFileList, f.getAbsolutePath(), ".apk");
+            } else {
+                targetFileList.add(f);
+            }
+            ArrayList<MalwareModel> list = appMatch.match(targetFileList, signatureModels);
+            malwareList.addAll(list);
+        }
+
+        long time = Util.runDuration(start);
+        ScanResult scanResult = new ScanResult();
+        scanResult.setTotalFiles(totalFiles);
+        scanResult.setTotalApk(totalApk);
+        scanResult.setTotalSignature(signatureModels.size());
+        scanResult.setTotalMalware(malwareList.size());
+        scanResult.setTotalTime(time);
+        scanResult.setMalwareList(malwareList);
+
+        Gson gson = new Gson();
+        String json = gson.toJson(scanResult);
+
+        System.out.println(json);
+        new Util().writeToFile(json, System.getProperty("user.dir") + "\\report-" + System.currentTimeMillis() + ".json");
+    }
+
+    private ArrayList<SignatureModel> getSigModel(File fileSignature) {
         ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt");
         ArrayList<File> dbSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".db");
         ArrayList<SignatureModel> signatureModels = new ArrayList<>();
@@ -66,10 +123,18 @@ public class AppMatch {
             ArrayList<SignatureModel> dbList = jdbc.select();
             signatureModels.addAll(dbList);
         }
+        return signatureModels;
+    }
 
+    private ArrayList<MalwareModel> match(ArrayList<File> fileTargetList, ArrayList<SignatureModel> signatureModels) {
+        AppUtil appUtil = new AppUtil(util);
+        ArrayList<MalwareModel> malwareModels = new ArrayList<>();
+        ManifestUtil manifestUtil = new ManifestUtil();
+        ItemsString itemsString = new ItemsString();
         for (File file_i : fileTargetList) {
             System.out.println("**********************************************************");
             System.out.println(file_i.getAbsolutePath());
+            MalwareModel malwareModel = new MalwareModel();
             String manifest = manifestUtil.dumpManifest(file_i.getAbsolutePath());
             ManifestModel appManifestModel = manifestUtil.matchManifest(manifest);
 
@@ -141,9 +206,11 @@ public class AppMatch {
                                     }
 
                                     isMalware = stringMatch;
-
                                     if (isMalware) {
                                         result_detailes = "!!!this is malware!!!" + " matched by: " + signatureModel.getName();
+                                        malwareModel.setMalwareFamily(signatureModel.getName());
+                                        malwareModel.setAppName(file_i.getAbsolutePath());
+                                        malwareModels.add(malwareModel);
                                         break;
                                     }
                                 }
@@ -156,6 +223,7 @@ public class AppMatch {
                             }
                         }
                     }
+                    totalApk++;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -165,8 +233,25 @@ public class AppMatch {
             } else {
                 printGreen("Clean");
             }
+
+            totalFiles++;
         }
-        Util.runDuration(start);
+        return malwareModels;
+    }
+
+    private ArrayList<File> getArgsFileSignatureList(String path) {
+        ArrayList<File> argsFileSignatureList = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+                File file = new File(line);
+                argsFileSignatureList.add(file);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return argsFileSignatureList;
     }
 
     public SignatureModel parseSignature(String signature) {
