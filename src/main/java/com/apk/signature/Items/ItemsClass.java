@@ -19,30 +19,30 @@ public class ItemsClass extends Item {
     public ItemsClass() {
         super(class_data_size, header_x_ids_size, header_x_ids_off, common_file_name);
         util = new Util();
-        appUtil = new AppUtil(util);
+        appUtil = new AppUtil();
     }
 
     @Override
-    public boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start, String[] splitText) {
-        byte[] class_data_b = util.getBytesOfFile(raf, start, class_data_size);
+    public boolean searchDataByte(HashMap<String, byte[]> header, byte[] stream, long start, String[] splitText) {
+        byte[] class_data_b = util.getBytesOfFile(stream, start, class_data_size);
         //return util.compareBytes(splitText, class_data_b);
         return false;
     }
 
     @Override
-    public byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
-        return util.getBytesOfFile(raf, start, class_data_size);
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, byte[] stream, long start) {
+        return util.getBytesOfFile(stream, start, class_data_size);
     }
 
     @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
-        byte[] class_data_b = util.getBytesOfFile(raf, start, class_data_size);
+    public String getDataAsHex(HashMap<String, byte[]> header, byte[] stream, long start) {
+        byte[] class_data_b = util.getBytesOfFile(stream, start, class_data_size);
         return util.byteToStringHex(class_data_b);
     }
 
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
-        String hex = getDataAsHex(header, raf, start);
+    public String getDataAsUTF8(HashMap<String, byte[]> header, byte[] stream, long start) {
+        String hex = getDataAsHex(header, stream, start);
         return util.hexStringToUTF8(hex);
     }
 }

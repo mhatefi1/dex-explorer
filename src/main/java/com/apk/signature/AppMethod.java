@@ -1,14 +1,23 @@
 package com.apk.signature;
 
+import com.apk.signature.ItemB.ItemsMethodB;
 import com.apk.signature.Items.ItemsMethod;
+import com.apk.signature.Items.ItemsString;
 import com.apk.signature.ItemsRaf.ItemsMethodRaf;
+import com.apk.signature.ItemsRaf.ItemsStringRaf;
 import com.apk.signature.Util.AppUtil;
 import com.apk.signature.Util.Util;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.RandomAccessFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class AppMethod {
 
@@ -21,15 +30,24 @@ public class AppMethod {
 
     public static void main(String[] args) {
         try {
-            Util util = new Util();
-            AppUtil appUtil = new AppUtil(util);
-            File dexFile = util.generateDex(args[0]).get(0);
-            Util.TEMP_DEX_PATH = util.getWorkingFilePath(dexFile);
-            RandomAccessFile raf = new RandomAccessFile(dexFile, "r");
-            ItemsMethodRaf item = new ItemsMethodRaf();
-            HashMap<String, byte[]> header = util.getHeader(raf);
-
             Scanner myObj = new Scanner(System.in);
+            AppUtil util = new AppUtil();
+            ItemsMethodB item = new ItemsMethodB();
+            File file = null;
+
+            if (args.length > 0) {
+                try {
+                    file = util.generateDex(args[1]).get(0);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    Util.printRed("Enter file path for second argument or run with no argument");
+                    System.exit(0);
+                }
+            } else {
+                System.out.println("Enter file path");
+                String path = myObj.nextLine();
+                file = new File(path);
+            }
+
             System.out.println(
                     "Choose your operation " + "\n" +
                             "0 to go back" + "\n" +
@@ -48,26 +66,95 @@ public class AppMethod {
                     AppMain.main(args);
                 }
                 case print_all -> {
-                    appUtil.getAll(header, raf, item);
                     myObj.close();
+                    try {
+                        try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                            while (entries.hasMoreElements()) {
+                                ZipEntry entry = entries.nextElement();
+                                if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                                    try {
+                                        InputStream inputStream = zipFile.getInputStream(entry);
+                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
+
+                                        util.getAll(header, stream, item);
+
+                                        stream.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 case get_method_item_from_hex_address -> {
                     System.out.println("Enter hex address:");
                     String address = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    String hexString = item.getDataAsHex(header, raf, address);
-                    System.out.println(hexString);
-                    System.out.println(util.hexStringToUTF8(hexString));
+                    try {
+                        try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                            while (entries.hasMoreElements()) {
+                                ZipEntry entry = entries.nextElement();
+                                if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                                    try {
+                                        InputStream inputStream = zipFile.getInputStream(entry);
+                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
+
+                                        String hexString = item.getDataAsHex(header, stream, address);
+                                        System.out.println(hexString);
+                                        System.out.println(util.hexStringToUTF8(hexString));
+
+                                        stream.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 case get_hex_address_from_hex_method_item -> {
                     System.out.println("Enter hex string: ");
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    boolean c = appUtil.getAddressFromHexString(header, raf, s.toUpperCase(), item);
-                    if (!c) {
-                        System.out.println("not found");
+                    try {
+                        try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                            while (entries.hasMoreElements()) {
+                                ZipEntry entry = entries.nextElement();
+                                if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                                    try {
+                                        InputStream inputStream = zipFile.getInputStream(entry);
+                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
+
+                                        boolean c = util.getAddressFromHexString(header, stream, s.toUpperCase(), item);
+                                        if (!c) {
+                                            System.out.println("not found");
+                                        }
+
+                                        stream.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
                 case get_hex_string_from_string_value -> {
@@ -75,10 +162,33 @@ public class AppMethod {
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    String hexString = util.stringToHexString(s);
-                    boolean c = appUtil.getAddressFromHexString(header, raf, hexString.toUpperCase(), item);
-                    if (!c) {
-                        System.out.println("not found");
+                    try {
+                        try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                            while (entries.hasMoreElements()) {
+                                ZipEntry entry = entries.nextElement();
+                                if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                                    try {
+                                        InputStream inputStream = zipFile.getInputStream(entry);
+                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
+
+                                        String hexString = util.stringToHexString(s);
+                                        boolean c = util.getAddressFromHexString(header, stream, hexString.toUpperCase(), item);
+                                        if (!c) {
+                                            System.out.println("not found");
+                                        }
+
+                                        stream.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
                 case get_hex_method_from_method_item_index -> {
@@ -86,8 +196,31 @@ public class AppMethod {
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    String res = appUtil.getHexByIndex(header, raf, Long.parseLong(s), item);
-                    System.out.println(res);
+                    try {
+                        try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                            while (entries.hasMoreElements()) {
+                                ZipEntry entry = entries.nextElement();
+                                if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                                    try {
+                                        InputStream inputStream = zipFile.getInputStream(entry);
+                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
+
+                                        String res = util.getHexByIndex(header, stream, Long.parseLong(s), item);
+                                        System.out.println(res);
+
+                                        stream.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 case write_methods_to_file -> {
                     System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
@@ -95,14 +228,36 @@ public class AppMethod {
                     myObj.close();
                     System.out.println("waite ...");
                     try {
-                        appUtil.writeToFile(header, raf, dexFile.getName() + "-methods.txt", item, s.equals("1"));
-                        System.out.println("done");
+                        try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                            while (entries.hasMoreElements()) {
+                                ZipEntry entry = entries.nextElement();
+                                if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                                    try {
+                                        InputStream inputStream = zipFile.getInputStream(entry);
+                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
+
+                                        try {
+                                            util.writeToFile(header, stream, file.getName() + "-methods.txt", item, s.equals("1"));
+                                            System.out.println("done");
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        stream.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
-            raf.close();
         } catch (Exception exception) {
             exception.printStackTrace();
         }

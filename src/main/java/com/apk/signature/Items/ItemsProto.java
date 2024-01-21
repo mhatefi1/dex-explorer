@@ -18,17 +18,17 @@ public class ItemsProto extends Item {
     public ItemsProto() {
         super(proto_data_size, header_x_ids_size, header_x_ids_off, common_file_name);
         util = new Util();
-        appUtil = new AppUtil(util);
+        appUtil = new AppUtil();
     }
 
     @Override
-    public boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start, String[] splitText) {
+    public boolean searchDataByte(HashMap<String, byte[]> header, byte[] stream, long start, String[] splitText) {
         return false;
     }
 
     @Override
-    public byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
-        byte[] proto_data_b = util.getBytesOfFile(raf, start, proto_data_size);
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, byte[] stream, long start) {
+        byte[] proto_data_b = util.getBytesOfFile(stream, start, proto_data_size);
 
         byte[] shorty_idx_b = Arrays.copyOfRange(proto_data_b, 0, 3);
         byte[] return_type_idx_b = Arrays.copyOfRange(proto_data_b, 4, 7);
@@ -36,12 +36,12 @@ public class ItemsProto extends Item {
         long shorty_idx = util.getDecimalValue(shorty_idx_b);
         long return_type_idx = util.getDecimalValue(return_type_idx_b);
         long parameters_off = util.getDecimalValue(parameters_off_b);
-        return appUtil.getByteByIndex(header, raf, return_type_idx, new ItemsType());
+        return appUtil.getByteByIndex(header, stream, return_type_idx, new ItemsType());
     }
 
     @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
-        byte[] proto_data_b = util.getBytesOfFile(raf, start, proto_data_size);
+    public String getDataAsHex(HashMap<String, byte[]> header, byte[] stream, long start) {
+        byte[] proto_data_b = util.getBytesOfFile(stream, start, proto_data_size);
 
         byte[] shorty_idx_b = Arrays.copyOfRange(proto_data_b, 0, 3);
         byte[] return_type_idx_b = Arrays.copyOfRange(proto_data_b, 4, 7);
@@ -49,11 +49,11 @@ public class ItemsProto extends Item {
         long shorty_idx = util.getDecimalValue(shorty_idx_b);
         long return_type_idx = util.getDecimalValue(return_type_idx_b);
         long parameters_off = util.getDecimalValue(parameters_off_b);
-        return appUtil.getHexByIndex(header, raf, return_type_idx, new ItemsType());
+        return appUtil.getHexByIndex(header, stream, return_type_idx, new ItemsType());
     }
 
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
+    public String getDataAsUTF8(HashMap<String, byte[]> header, byte[] stream, long start) {
         return null;
     }
 }

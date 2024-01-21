@@ -27,8 +27,7 @@ public class AppCommon {
                         "5 to get all"
         );
 
-        Util util = new Util();
-        AppUtil appUtil = new AppUtil(util);
+        AppUtil appUtil = new AppUtil();
 
         String input = myObj.nextLine();
 

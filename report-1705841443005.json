@@ -1,0 +1,16 @@
+{
+  "totalFiles": 5,
+  "totalApk": 0,
+  "totalMalware": 0,
+  "totalSignature": 1,
+  "totalTime": 535,
+  "totalUnscannable": 5,
+  "unscannableList": [
+    "C:\\Users\\sedej\\Desktop\\ww\\26c808e0-sample",
+    "C:\\Users\\sedej\\Desktop\\ww\\7ef647a1-sample",
+    "C:\\Users\\sedej\\Desktop\\ww\\z60c747a1-sample",
+    "C:\\Users\\sedej\\Desktop\\ww\\6ef647a1-sample.apk",
+    "C:\\Users\\sedej\\Desktop\\ww\\def647a1-sample.apk"
+  ],
+  "malwareList": []
+}

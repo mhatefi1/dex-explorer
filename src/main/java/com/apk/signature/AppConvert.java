@@ -1,25 +1,14 @@
 package com.apk.signature;
 
 import com.apk.signature.DB.SQLiteJDBC;
-import com.apk.signature.Items.ItemsString;
 import com.apk.signature.Model.DBModel;
-import com.apk.signature.Model.ManifestModel;
-import com.apk.signature.Model.SignatureModel;
-import com.apk.signature.Util.AppUtil;
-import com.apk.signature.Util.ManifestUtil;
 import com.apk.signature.Util.Util;
-import org.apache.pdfbox.io.RandomAccessFile;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.apk.signature.Util.Util.printGreen;
-import static com.apk.signature.Util.Util.printRed;
 
 public class AppConvert {
 

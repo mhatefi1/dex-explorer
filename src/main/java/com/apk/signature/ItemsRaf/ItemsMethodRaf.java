@@ -19,7 +19,7 @@ public class ItemsMethodRaf extends ItemRaf {
     public ItemsMethodRaf() {
         super(method_data_size, header_x_ids_size, header_x_ids_off, common_file_name);
         util = new Util();
-        appUtil = new AppUtil(util);
+        appUtil = new AppUtil();
     }
 
     private int compareBytes(String[] splitText, byte[] bytes, int size) {

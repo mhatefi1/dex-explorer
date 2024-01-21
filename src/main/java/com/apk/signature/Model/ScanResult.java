@@ -8,9 +8,29 @@ public class ScanResult {
     public int totalMalware;
     public int totalSignature;
     public long totalTime;
+
+    public int totalUnscannable;
+
+    public ArrayList<String> unscannableList;
     ArrayList<MalwareModel> malwareList;
 
     public ScanResult() {
+    }
+
+    public ArrayList<String> getUnscannableList() {
+        return unscannableList;
+    }
+
+    public void setUnscannableList(ArrayList<String> unscannableList) {
+        this.unscannableList = unscannableList;
+    }
+
+    public int getTotalUnscannable() {
+        return totalUnscannable;
+    }
+
+    public void setTotalUnscannable(int totalUnscannable) {
+        this.totalUnscannable = totalUnscannable;
     }
 
     public int getTotalSignature() {

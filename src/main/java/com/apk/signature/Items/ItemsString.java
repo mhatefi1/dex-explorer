@@ -23,11 +23,11 @@ public class ItemsString extends Item {
 
 
     @Override
-    public boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start, String[] splitText) {
-        byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
+    public boolean searchDataByte(HashMap<String, byte[]> header, byte[] stream, long start, String[] splitText) {
+        byte[] first_offset_of_string_data_b = util.getBytesOfFile(stream, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
         while (true) {
-            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
+            byte[] size_in_utf16_b = util.getBytesOfFile(stream, offset, 1);
             long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
             offset++;
             if (size_in_utf16_l < 127) {
@@ -35,7 +35,7 @@ public class ItemsString extends Item {
             }
         }
         for (String s : splitText) {
-            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(stream, offset, 1);
             String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
             if (!hex.equals(s)) {
                 return false;
@@ -49,12 +49,12 @@ public class ItemsString extends Item {
     }
 
     @Override
-    public byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
-        byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, byte[] stream, long start) {
+        byte[] first_offset_of_string_data_b = util.getBytesOfFile(stream, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
 
         while (true) {
-            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
+            byte[] size_in_utf16_b = util.getBytesOfFile(stream, offset, 1);
             long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
             offset++;
             if (size_in_utf16_l < 127) {
@@ -63,7 +63,7 @@ public class ItemsString extends Item {
         }
         ArrayList<Byte> list = new ArrayList<>();
         while (true) {
-            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(stream, offset, 1);
             String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
             if (hex.equals("00")) {
                 break;
@@ -79,13 +79,13 @@ public class ItemsString extends Item {
     }
 
     @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
-        byte[] first_offset_of_string_data_b = util.getBytesOfFile(raf, start, string_data_off_size);
+    public String getDataAsHex(HashMap<String, byte[]> header, byte[] stream, long start) {
+        byte[] first_offset_of_string_data_b = util.getBytesOfFile(stream, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
         StringBuilder stringBuilder = new StringBuilder();
 
         while (true) {
-            byte[] size_in_utf16_b = util.getBytesOfFile(raf, offset, 1);
+            byte[] size_in_utf16_b = util.getBytesOfFile(stream, offset, 1);
             long size_in_utf16_l = util.getDecimalValue(size_in_utf16_b);
             offset++;
             if (size_in_utf16_l < 127) {
@@ -94,7 +94,7 @@ public class ItemsString extends Item {
         }
 
         while (true) {
-            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
+            byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(stream, offset, 1);
             String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
             if (hex.equals("00")) {
                 break;
@@ -106,8 +106,8 @@ public class ItemsString extends Item {
         return stringBuilder.toString();
     }
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream raf, long start) {
-        String hex = getDataAsHex(header, raf, start);
+    public String getDataAsUTF8(HashMap<String, byte[]> header, byte[] stream, long start) {
+        String hex = getDataAsHex(header, stream, start);
         return util.hexStringToUTF8(hex);
     }
 }

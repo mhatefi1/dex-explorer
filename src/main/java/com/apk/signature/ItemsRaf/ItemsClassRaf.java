@@ -18,7 +18,7 @@ public class ItemsClassRaf extends ItemRaf {
     public ItemsClassRaf() {
         super(class_data_size, header_x_ids_size, header_x_ids_off, common_file_name);
         util = new Util();
-        appUtil = new AppUtil(util);
+        appUtil = new AppUtil();
     }
 
     @Override

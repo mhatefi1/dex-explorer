@@ -10,9 +10,60 @@ import java.util.Scanner;
 public class AppMain {
 
     public static void main(String[] args) {
-        if (args.length == 3) {
-            if (Objects.equals(args[0], "6")) {
-                AppMatch.main(args);
+        if (args.length > 0) {
+            switch (args[0]) {
+                case "1":
+                    AppString.main(args);
+                    break;
+                case "2":
+                    AppMethod.main(args);
+                    break;
+                case "3":
+                    AppClasses.main(args);
+                    break;
+                case "4":
+                    try {
+                        String s = args[1];
+                        System.out.println("waite ...");
+                        Util util = new Util();
+                        util.extractDex(s);
+                        System.out.println("done");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case "5":
+                    AppCommon.main(args);
+                    break;
+                case "6":
+                    AppMatch.main(args);
+                    break;
+                case "7":
+                    AppGenerateSignature.main(args);
+                    break;
+                case "8":
+                    AppConvert.main(args);
+                    break;
+                case "9":
+                    System.out.println("Enter file path: ");
+                    String s = args[1];
+                    File file = new File(s);
+                    if (file.exists()) {
+                        ArrayList<File> list = new ArrayList<>();
+                        if (file.isDirectory()) {
+                            list = new Util().getFileListByFormat(file.getAbsolutePath(), "");
+                        } else {
+                            list.add(file);
+                        }
+                        for (File file1 : list) {
+                            System.out.println("**********" + file1.getAbsolutePath() + "**********");
+                            String manifest = new Util().parseManifest(file1);
+                            System.out.println(manifest);
+                        }
+                    } else {
+                        System.out.println("file not found");
+                    }
+                    break;
             }
         } else {
 
@@ -28,7 +79,7 @@ public class AppMain {
                             6 to match
                             7 to generate signature
                             8 to convert text to sql
-                            10 to decode manifest"""
+                            9 to decode manifest"""
             );
 
             String input = myObj.nextLine();
