@@ -1,30 +1,26 @@
 package com.apk.signature.Util;
 
-import com.apk.signature.ItemB.ItemB;
+
 import com.apk.signature.Items.Item;
 import com.apk.signature.ItemsRaf.ItemRaf;
 import com.apk.signature.Model.ManifestModel;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.RandomAccessFile;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
-public class AppUtil extends Util {
+public class AppUtil extends ManifestUtil {
     public AppUtil() {
 
     }
 
     public boolean getAddressFromHexString(HashMap<String, byte[]> header, byte[] stream, String text, Item tClass) {
         return getAddressFromHexString(header, stream, text, tClass, 0, 0);
-    }
-
-    public boolean getAddressFromHexString(HashMap<String, byte[]> header, ByteArrayInputStream stream, String text, ItemB tClass) {
-        return getAddressFromHexString(header, stream, text, tClass, 0, 0);
-    }
-
-    public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String text, ItemRaf tClass) {
-        return getAddressFromHexString(header, raf, text, tClass, 0, 0);
     }
 
     public boolean getAddressFromHexString(HashMap<String, byte[]> header, byte[] stream, String text, Item tClass, int periodStartIndex, int periodEndIndex) {
@@ -52,123 +48,19 @@ public class AppUtil extends Util {
         return false;
     }
 
-    public boolean getAddressFromHexString(HashMap<String, byte[]> header, ByteArrayInputStream stream, String text, ItemB tClass, int periodStartIndex, int periodEndIndex) {
-        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_count = super.getDecimalValue(header_ids_size);
-        long ids_offset = super.getDecimalValue(header_ids_off);
-        if (periodStartIndex < ids_count) {
-            String[] splitText = super.splitTwoByTwo(text);
-            if (periodEndIndex > ids_count || periodEndIndex == 0) {
-                periodEndIndex = (int) ids_count;
-            }
-            ids_offset = ids_offset + (long) tClass.data_size * periodStartIndex;
-            for (int i = periodStartIndex; i <= periodEndIndex; i++) {
-                boolean ss = tClass.searchDataByte(header, stream, ids_offset, splitText);
-                if (ss) {
-                    printYellow("{ hex:" + text);
-                    printYellow("  ids_offs: " + super.decimalToStringHex(ids_offset));
-                    printYellow("  ids_index: " + i + " }");
-                    return true;
-                }
-                ids_offset = ids_offset + tClass.data_size;
-            }
-        }
-        return false;
-    }
-
-    public boolean getAddressFromHexString(HashMap<String, byte[]> header, RandomAccessFile raf, String text, ItemRaf tClass, int periodStartIndex, int periodEndIndex) {
-        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_count = super.getDecimalValue(header_ids_size);
-        long ids_offset = super.getDecimalValue(header_ids_off);
-        if (periodStartIndex < ids_count) {
-            String[] splitText = super.splitTwoByTwo(text);
-            if (periodEndIndex > ids_count || periodEndIndex == 0) {
-                periodEndIndex = (int) ids_count;
-            }
-            ids_offset = ids_offset + (long) tClass.data_size * periodStartIndex;
-            for (int i = periodStartIndex; i <= periodEndIndex; i++) {
-                boolean ss = tClass.searchDataByte(header, raf, ids_offset, splitText);
-                if (ss) {
-                    printYellow("{ hex:" + text);
-                    printYellow("  ids_offs: " + super.decimalToStringHex(ids_offset));
-                    printYellow("  ids_index: " + i + " }");
-                    return true;
-                }
-                ids_offset = ids_offset + tClass.data_size;
-            }
-        }
-        return false;
-    }
-
-    public void getCommonInManifest(String path) {
-        System.out.println("***********" + "factorizedManifest" + "***********");
-        ManifestUtil manifestUtil = new ManifestUtil();
-
-        ArrayList<File> apk_list = super.getFileListByFormat(path, ".apk");
-        File first_file = apk_list.get(0);
-        String fileName = first_file.getAbsolutePath();
-        System.out.println(fileName);
-
-        String manifest = manifestUtil.dumpManifest(first_file.getPath());
-        ManifestModel manifestModel = manifestUtil.matchDumpedManifest(manifest);
-
-        ArrayList<String> permission_list = manifestModel.getPermission();
-        ArrayList<String> activity_list = manifestModel.getActivities();
-        ArrayList<String> service_list = manifestModel.getServices();
-        ArrayList<String> receiver_list = manifestModel.getReceivers();
-
-        for (int i = 1; i < apk_list.size(); i++) {
-            System.out.println(apk_list.get(i));
-
-            permission_list = super.removeDupe(permission_list);
-            activity_list = super.removeDupe(activity_list);
-            service_list = super.removeDupe(service_list);
-            receiver_list = super.removeDupe(receiver_list);
-
-
-            String manifest_ = manifestUtil.dumpManifest(apk_list.get(i).getPath());
-            ManifestModel manifestModel_ = manifestUtil.matchDumpedManifest(manifest_);
-
-            ArrayList<String> permission_list_ = manifestModel_.getPermission();
-            ArrayList<String> activity_list_ = manifestModel_.getActivities();
-            ArrayList<String> service_list_ = manifestModel_.getServices();
-            ArrayList<String> receiver_list_ = manifestModel_.getReceivers();
-
-            permission_list = super.getCommonOfArrayList(permission_list_, permission_list);
-            activity_list = super.getCommonOfArrayList(activity_list_, activity_list);
-            service_list = super.getCommonOfArrayList(service_list_, service_list);
-            receiver_list = super.getCommonOfArrayList(receiver_list_, receiver_list);
-        }
-
-        permission_list = super.removeDupe(permission_list);
-        activity_list = super.removeDupe(activity_list);
-        service_list = super.removeDupe(service_list);
-        receiver_list = super.removeDupe(receiver_list);
-
-        super.writeArrayToFile(permission_list, path + "\\" + "factorizedPermissions" + ".txt");
-        super.writeArrayToFile(activity_list, path + "\\" + "factorizedActivities" + ".txt");
-        super.writeArrayToFile(service_list, path + "\\" + "factorizedServices" + ".txt");
-        super.writeArrayToFile(receiver_list, path + "\\" + "factorizedReceivers" + ".txt");
-    }
-
-    public void factorizeInFolder(String path, ItemRaf tClass, boolean utf8) {
+    public void factorizeInFolder(String path, Item tClass, boolean utf8) {
         try {
             System.out.println("***********" + tClass.common_file_name + "***********");
-            ArrayList<File> fileList = new ArrayList<>();
-            super.extractDex(path);
-            ArrayList<File> dexFileList = super.getRecursiveFileListByFormat(fileList, path, ".dex");
-            File first_file = dexFileList.get(0);
-            String fileName = first_file.getAbsolutePath();
-            System.out.println(fileName);
+            ArrayList<File> temp = new ArrayList<>();
+            ArrayList<File> apkFileList = super.getRecursiveFileListByFormat(temp, path, ".apk", true);
+            File first_file = apkFileList.get(0);
             ArrayList<String> finall = getFromDexAsArray(first_file, tClass, utf8);
             System.out.println("this item count:" + finall.size());
-            for (int i = 1; i < dexFileList.size(); i++) {
+            for (int i = 1; i < apkFileList.size(); i++) {
                 finall = super.removeDupe(finall);
                 System.out.println("common items count:" + finall.size());
-                System.out.println(dexFileList.get(i));
-                ArrayList<String> file_Strings = getFromDexAsArray(dexFileList.get(i), tClass, utf8);
+                System.out.println(apkFileList.get(i));
+                ArrayList<String> file_Strings = getFromDexAsArray(apkFileList.get(i), tClass, utf8);
                 System.out.println("this item count:" + file_Strings.size());
                 finall = super.getCommonOfArrayList(file_Strings, finall);
             }
@@ -182,37 +74,47 @@ public class AppUtil extends Util {
         }
     }
 
-    public ArrayList<String> getFromDexAsArray(File f, ItemRaf tClass, boolean utf8) {
+    public ArrayList<String> getFromDexAsArray(File file, Item tClass, boolean utf8) {
         ArrayList<String> s = new ArrayList<>();
         try {
-            RandomAccessFile raf = new RandomAccessFile(f, "r");
-            HashMap<String, byte[]> header = super.getHeader(raf);
-            byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-            byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-            long ids_count = super.getDecimalValue(header_ids_size);
-            long ids_offset = super.getDecimalValue(header_ids_off);
+            try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                        try {
+                            InputStream inputStream = zipFile.getInputStream(entry);
+                            byte[] bs = IOUtils.toByteArray(inputStream);
+                            HashMap<String, byte[]> header = super.getHeader(bs);
+                            byte[] header_ids_size = header.get(tClass.header_x_ids_size);
+                            byte[] header_ids_off = header.get(tClass.header_x_ids_off);
+                            long ids_count = super.getDecimalValue(header_ids_size);
+                            long ids_offset = super.getDecimalValue(header_ids_off);
 
-            if (utf8) {
-                for (int i = 0; i < ids_count; i++) {
-                    String data = tClass.getDataAsUTF8(header, raf, ids_offset);
-                    ids_offset = ids_offset + tClass.data_size;
-                    s.add(data);
-                }
-            } else {
-                for (int i = 0; i < ids_count; i++) {
-                    String data = tClass.getDataAsHex(header, raf, ids_offset);
-                    ids_offset = ids_offset + tClass.data_size;
-                    s.add(data);
+                            if (utf8) {
+                                for (int i = 0; i < ids_count; i++) {
+                                    String data = tClass.getDataAsUTF8(header, bs, ids_offset);
+                                    ids_offset = ids_offset + tClass.data_size;
+                                    s.add(data);
+                                }
+                            } else {
+                                for (int i = 0; i < ids_count; i++) {
+                                    String data = tClass.getDataAsHex(header, bs, ids_offset);
+                                    ids_offset = ids_offset + tClass.data_size;
+                                    s.add(data);
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
-
-            raf.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return s;
     }
-
 
     public void writeToFile(HashMap<String, byte[]> header, byte[] raf, String fileName, Item tClass, boolean utf8) {
         try {
@@ -276,49 +178,6 @@ public class AppUtil extends Util {
         }
     }
 
-    public void writeToFile(HashMap<String, byte[]> header, ByteArrayInputStream raf, String fileName, ItemB tClass, boolean utf8) {
-        try {
-            byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-            byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-            long ids_count = super.getDecimalValue(header_ids_size);
-            long ids_offset = super.getDecimalValue(header_ids_off);
-
-            File f = new File(Util.TEMP_DEX_PATH + "\\" + fileName);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(f, false));
-
-            if (utf8) {
-                for (int i = 0; i < ids_count; i++) {
-                    String hex = tClass.getDataAsUTF8(header, raf, ids_offset);
-                    ids_offset = ids_offset + tClass.data_size;
-                    writer.append(hex);
-                    writer.append('\n');
-                }
-            } else {
-                for (int i = 0; i < ids_count; i++) {
-                    String hex = tClass.getDataAsHex(header, raf, ids_offset);
-                    ids_offset = ids_offset + tClass.data_size;
-                    writer.append(hex);
-                    writer.append('\n');
-                }
-            }
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void getAll(HashMap<String, byte[]> header, ByteArrayInputStream raf, ItemB tClass) {
-        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_count = super.getDecimalValue(header_ids_size);
-        long ids_offset = super.getDecimalValue(header_ids_off);
-        for (int i = 0; i < ids_count; i++) {
-            String hex = tClass.getDataAsHex(header, raf, ids_offset);
-            ids_offset = ids_offset + tClass.data_size;
-            System.out.println(hex);
-        }
-    }
-
     public void getAll(HashMap<String, byte[]> header, byte[] raf, Item tClass) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
@@ -350,13 +209,6 @@ public class AppUtil extends Util {
         return tClass.getDataAsHex(header, raf, ids_offset);
     }
 
-    public String getHexByIndex(HashMap<String, byte[]> header, ByteArrayInputStream raf, long index, ItemB tClass) {
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_offset = super.getDecimalValue(header_ids_off);
-        ids_offset = index * tClass.data_size + ids_offset;
-        return tClass.getDataAsHex(header, raf, ids_offset);
-    }
-
     public String getHexByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, ItemRaf tClass) {
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = super.getDecimalValue(header_ids_off);
@@ -369,13 +221,6 @@ public class AppUtil extends Util {
         long ids_offset = super.getDecimalValue(header_ids_off);
         ids_offset = index * tClass.data_size + ids_offset;
         return tClass.getDataAsByte(header, raf, ids_offset);
-    }
-
-    public byte[] getByteByIndex(HashMap<String, byte[]> header, ByteArrayInputStream stream, long index, ItemB tClass) {
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_offset = super.getDecimalValue(header_ids_off);
-        ids_offset = index * tClass.data_size + ids_offset;
-        return tClass.getDataAsByte(header, stream, ids_offset);
     }
 
     public byte[] getByteByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, ItemRaf tClass) {

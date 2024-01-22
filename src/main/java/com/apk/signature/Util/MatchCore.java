@@ -22,11 +22,11 @@ public class MatchCore {
 
     AppUtil util = new AppUtil();
     private int totalFiles, totalApk, unscannable;
-    private ArrayList<String> unScannedList = new ArrayList<>();
+    private final ArrayList<String> unscannables = new ArrayList<>();
 
     public ArrayList<SignatureModel> getSigModel(File fileSignature) {
-        ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt");
-        ArrayList<File> dbSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".db");
+        ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt", false);
+        ArrayList<File> dbSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".db", false);
         ArrayList<SignatureModel> signatureModels = new ArrayList<>();
 
         for (File file : fileSignatureList) {
@@ -62,9 +62,11 @@ public class MatchCore {
             String manifest = manifestUtil.decodeManifest(file_i);
             if (manifest.isEmpty()) {
                 unscannable++;
-                unScannedList.add(file_i.getAbsolutePath());
+                unscannables.add(file_i.getAbsolutePath());
                 printYellow("Unscannable");
                 continue;
+            } else {
+                totalApk++;
             }
             //ManifestModel appManifestModel = manifestUtil.matchDumpedManifest(manifest);
             ManifestModel appManifestModel = manifestUtil.matchDecodedManifest(manifest);
@@ -122,16 +124,12 @@ public class MatchCore {
                     while (entries.hasMoreElements()) {
                         ZipEntry entry = entries.nextElement();
                         if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
-                            totalApk++;
                             try {
                                 InputStream inputStream = zipFile.getInputStream(entry);
                                 byte[] bs = IOUtils.toByteArray(inputStream);
-                                //ByteArrayInputStream stream = new ByteArrayInputStream(bs);
                                 HashMap<String, byte[]> header = util.getHeader(bs);
-
                                 for (SignatureModel signatureModel : manifestMatchedSignatures) {
                                     ArrayList<String> strings = signatureModel.getStrings();
-
                                     for (String str : strings) {
                                         stringMatch = util.getAddressFromHexString(header, bs, str.toUpperCase(),
                                                 itemsString, signatureModel.getStart(), signatureModel.getEnd());
@@ -139,7 +137,6 @@ public class MatchCore {
                                             break;
                                         }
                                     }
-
                                     isMalware = stringMatch;
                                     if (isMalware) {
                                         result_detailes = "!!!this is malware!!!" + " matched by: " + signatureModel.getName();
@@ -162,7 +159,7 @@ public class MatchCore {
             } catch (IOException e) {
                 e.printStackTrace();
                 unscannable++;
-                unScannedList.add(file_i.getAbsolutePath());
+                unscannables.add(file_i.getAbsolutePath());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -223,32 +220,16 @@ public class MatchCore {
         return totalFiles;
     }
 
-    public void setTotalFiles(int totalFiles) {
-        this.totalFiles = totalFiles;
-    }
-
     public int getTotalApk() {
         return totalApk;
-    }
-
-    public void setTotalApk(int totalApk) {
-        this.totalApk = totalApk;
     }
 
     public int getUnscannable() {
         return unscannable;
     }
 
-    public void setUnscannable(int unscannable) {
-        this.unscannable = unscannable;
-    }
-
-    public ArrayList<String> getUnScannedList() {
-        return unScannedList;
-    }
-
-    public void setUnScannedList(ArrayList<String> unScannedList) {
-        this.unScannedList = unScannedList;
+    public ArrayList<String> getUnscannables() {
+        return unscannables;
     }
 
     public AppUtil getUtil() {

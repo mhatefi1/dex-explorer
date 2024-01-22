@@ -1,5 +1,6 @@
 package com.apk.signature;
 
+import com.apk.signature.Util.ManifestUtil;
 import com.apk.signature.Util.Util;
 
 import java.io.File;
@@ -50,13 +51,13 @@ public class AppMain {
                     if (file.exists()) {
                         ArrayList<File> list = new ArrayList<>();
                         if (file.isDirectory()) {
-                            list = new Util().getFileListByFormat(file.getAbsolutePath(), "");
+                            list = new Util().getFileListByFormat(file.getAbsolutePath(), "", false);
                         } else {
                             list.add(file);
                         }
                         for (File file1 : list) {
                             System.out.println("**********" + file1.getAbsolutePath() + "**********");
-                            String manifest = new Util().parseManifest(file1);
+                            String manifest = new ManifestUtil().parseManifest(file1);
                             System.out.println(manifest);
                         }
                     } else {
@@ -133,13 +134,13 @@ public class AppMain {
                     if (file.exists()) {
                         ArrayList<File> list = new ArrayList<>();
                         if (file.isDirectory()) {
-                            list = new Util().getFileListByFormat(file.getAbsolutePath(), "");
+                            list = new Util().getFileListByFormat(file.getAbsolutePath(), "", false);
                         } else {
                             list.add(file);
                         }
                         for (File file1 : list) {
                             System.out.println("**********" + file1.getAbsolutePath() + "**********");
-                            String manifest = new Util().parseManifest(file1);
+                            String manifest = new ManifestUtil().parseManifest(file1);
                             System.out.println(manifest);
                         }
                     } else {

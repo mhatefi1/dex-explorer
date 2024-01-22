@@ -2,22 +2,18 @@ package com.apk.signature.Util;
 
 import com.apk.signature.Model.ManifestModel;
 import com.apk.signature.Model.SignatureModel;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.RandomAccessFile;
 import org.fusesource.jansi.AnsiConsole;
 
-import java.io.*;
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
-public class Util {
+public class Util extends FileUtil {
 
     private static final String defaultAapt2Path = "C:\\scanner\\aapt2.exe";
     public static String TEMP_DEX_PATH = "";
@@ -78,51 +74,6 @@ public class Util {
         return "";
     }
 
-    private static File convertInputStreamToFile(InputStream is, String fileName) {
-        OutputStream outputStream = null;
-        File file = null;
-        try {
-            file = new File(fileName);
-            outputStream = new FileOutputStream(file);
-
-            int read;
-            byte[] bytes = new byte[1024];
-            while ((read = is.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, read);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            if (outputStream != null) {
-                outputStream.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return file;
-    }
-
-    public String parseManifest(File file_i) {
-        try {
-            try (ZipFile zipFile = new ZipFile(file_i.getAbsolutePath())) {
-                Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                while (entries.hasMoreElements()) {
-                    ZipEntry entry = entries.nextElement();
-                    if (!entry.isDirectory() && entry.getName().equals("AndroidManifest.xml")) {
-                        InputStream inputStream = zipFile.getInputStream(entry);
-                        byte[] bs = IOUtils.toByteArray(inputStream);
-                        inputStream.close();
-                        return new XMLReader().decompressXML(bs);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-        return "not found";
-    }
-
     public SignatureModel createSignatureModel(String permissions, String activities, String services, String receivers, String strings, int startIndex, int endIndex) {
         String[] permissions_list = permissions.split(",");
         String[] activities_list = activities.split(",");
@@ -171,38 +122,6 @@ public class Util {
         return signatureModel;
     }
 
-    public String getWorkingFilePath(File f) {
-        if (f.isDirectory())
-            return f.getAbsolutePath();
-        else
-            return f.getParent();
-    }
-
-    public String splitNameFromFormat(String s) {
-        try {
-            int dotIndex = s.lastIndexOf(".");
-            return s.substring(0, dotIndex);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return s;
-    }
-
-    public ArrayList<File> generateDex(String path) {
-        File f = new File(path);
-        if (path.endsWith(".apk") || path.endsWith(".zip")) {
-            String fileName = f.getName();
-            String name = splitNameFromFormat(fileName);
-            String folderPath = f.getParent();
-            File extractPath = new File(folderPath, name);
-            extractPath.mkdir();
-            return readDexFilesFromZip(path, extractPath.getAbsolutePath());
-        }
-        ArrayList<File> list = new ArrayList<>();
-        list.add(f);
-        return list;
-    }
-
     public ArrayList<String> getCommonOfArrayList(ArrayList<String> first, ArrayList<String> second) {
         ArrayList<String> result = new ArrayList<>();
         try {
@@ -218,31 +137,6 @@ public class Util {
         }
 
         return result;
-    }
-
-    public void writeArrayToFile(ArrayList<String> arrayList, String fileName) {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, false));
-
-            for (String string : arrayList) {
-                writer.append(string);
-                writer.append('\n');
-            }
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public void writeToFile(String text, String fileName) {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, false));
-            writer.append(text);
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public String hexStringToUTF8(String hexString) {
@@ -281,19 +175,6 @@ public class Util {
         return bytes;
     }
 
-    public byte[] getBytesOfFile(ByteArrayInputStream inputStream, long offset, long size) {
-        byte[] bytes = new byte[(int) size];
-        try {
-            inputStream.mark(0);
-            inputStream.skip(offset);
-            inputStream.read(bytes);
-            inputStream.reset();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return bytes;
-    }
-
     public byte[] getBytesOfFile(byte[] byteArray, long offset, long size) {
         byte[] bytes = new byte[(int) size];
         try {
@@ -302,90 +183,6 @@ public class Util {
             e.printStackTrace();
         }
         return bytes;
-    }
-
-    public boolean searchInFile(File file, String searchString) {
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.contains(searchString)) {
-                    return true;
-                }
-            }
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public void extractDex(String s) {
-        try {
-            File file = new File(s);
-
-            if (file.isFile()) {
-                String name = splitNameFromFormat(s);
-                File ext = new File(name);
-                boolean dir = ext.mkdir();
-                if (dir) {
-                    readDexFilesFromZip(s, ext.getAbsolutePath());
-                }
-            } else {
-                ArrayList<File> apk = getFileListByFormat(s, ".apk");
-                for (File f : apk) {
-                    extractDex(f.getAbsolutePath());
-                }
-                ArrayList<File> zip = getFileListByFormat(s, ".zip");
-                for (File f : zip) {
-                    extractDex(f.getAbsolutePath());
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("failed");
-            e.printStackTrace();
-        }
-    }
-
-    public ArrayList<File> getRecursiveFileListByFormat(ArrayList<File> fileList, String input, String format) {
-        File f = new File(input);
-        File[] listed = f.listFiles();
-        if (listed != null) {
-            for (File file : listed) {
-                if (file.isDirectory()) {
-                    getRecursiveFileListByFormat(fileList, file.getAbsolutePath(), format);
-                } else if (file.getName().endsWith(format)) {
-                    if (format.isEmpty()) {
-                        if (!file.getName().contains(".")) {
-                            fileList.add(file);
-                        }
-                    } else {
-                        fileList.add(file);
-                    }
-                }
-            }
-        } else {
-            printRed(format + " files list is null");
-        }
-        return fileList;
-    }
-
-    public ArrayList<File> getFileListByFormat(String input, String format) {
-        ArrayList<File> fileList = new ArrayList<>();
-        File f = new File(input);
-        File[] listed = f.listFiles();
-        if (listed != null) {
-            for (File file : listed) {
-                if (file.getName().endsWith(format)) {
-                    fileList.add(file);
-                }
-            }
-        } else {
-            File file = new File(input);
-            if (file.getName().endsWith(format)) {
-                fileList.add(file);
-            }
-        }
-        return fileList;
     }
 
     public String byteToStringHex(byte[] byteArray) {
@@ -444,40 +241,6 @@ public class Util {
         return allItemsPresent;
     }
 
-    public ArrayList<File> readDexFilesFromZip(String zipFilePath, String extractPath) {
-        ArrayList<File> list = new ArrayList<>();
-        try {
-            try (ZipFile zipFile = new ZipFile(zipFilePath)) {
-                Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                while (entries.hasMoreElements()) {
-                    ZipEntry entry = entries.nextElement();
-                    if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
-                        InputStream inputStream = zipFile.getInputStream(entry);
-                        list.add(convertInputStreamToFile(inputStream, extractPath + "\\" + entry.getName()));
-                    }
-                }
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-        return list;
-    }
-
-    public String readFile(File file) {
-        String line;
-        StringBuilder output = new StringBuilder();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-            reader.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return output.toString();
-    }
-
     public String[] splitTwoByTwo(String text) {
         int splitUnit = 2;
         String[] splitText = new String[text.length() / splitUnit];
@@ -488,66 +251,6 @@ public class Util {
     }
 
     public HashMap<String, byte[]> getHeader(byte[] stream) {
-
-        HashMap<String, byte[]> header = new HashMap<>();
-
-        try {
-            /*byte[] header_magic = getBytesOfFile(stream, 0, 8);
-            byte[] header_checksum = getBytesOfFile(stream, 8, 4);
-            byte[] header_signature = getBytesOfFile(stream, 12, 20);
-            byte[] header_file_size = getBytesOfFile(stream, 32, 4);
-            byte[] header_header_size = getBytesOfFile(stream, 36, 4);
-            byte[] header_endian_tag = getBytesOfFile(stream, 40, 4);
-            byte[] header_link_size = getBytesOfFile(stream, 44, 4);
-            byte[] header_link_off = getBytesOfFile(stream, 48, 4);
-            byte[] header_map_off = getBytesOfFile(stream, 52, 4);*/
-            byte[] header_string_ids_size = getBytesOfFile(stream, 56, 4);
-            byte[] header_string_ids_off = getBytesOfFile(stream, 60, 4);
-            /*byte[] header_type_ids_size = getBytesOfFile(stream, 64, 4);
-            byte[] header_type_ids_off = getBytesOfFile(stream, 68, 4);
-            byte[] header_proto_ids_size = getBytesOfFile(stream, 72, 4);
-            byte[] header_proto_ids_off = getBytesOfFile(stream, 76, 4);
-            byte[] header_field_ids_size = getBytesOfFile(stream, 80, 4);
-            byte[] header_field_ids_off = getBytesOfFile(stream, 84, 4);
-            byte[] header_method_ids_size = getBytesOfFile(stream, 88, 4);
-            byte[] header_method_ids_off = getBytesOfFile(stream, 92, 4);
-            byte[] header_class_ids_size = getBytesOfFile(stream, 96, 4);
-            byte[] header_class_ids_off = getBytesOfFile(stream, 100, 4);
-            byte[] header_data_size = getBytesOfFile(stream, 104, 4);
-            byte[] header_data_off = getBytesOfFile(stream, 108, 4);*/
-
-            /*header.put("header_magic", header_magic);
-            header.put("header_checksum", header_checksum);
-            header.put("header_signature", header_signature);
-            header.put("header_file_size", header_file_size);
-            header.put("header_header_size", header_header_size);
-            header.put("header_endian_tag", header_endian_tag);
-            header.put("header_link_size", header_link_size);
-            header.put("header_link_off", header_link_off);
-            header.put("header_map_off", header_map_off);*/
-            header.put("header_string_ids_size", header_string_ids_size);
-            header.put("header_string_ids_off", header_string_ids_off);
-            /*header.put("header_type_ids_size", header_type_ids_size);
-            header.put("header_type_ids_off", header_type_ids_off);
-            header.put("header_proto_ids_size", header_proto_ids_size);
-            header.put("header_proto_ids_off", header_proto_ids_off);
-            header.put("header_field_ids_size", header_field_ids_size);
-            header.put("header_field_ids_off", header_field_ids_off);
-            header.put("header_method_ids_size", header_method_ids_size);
-            header.put("header_method_ids_off", header_method_ids_off);
-            header.put("header_class_ids_size", header_class_ids_size);
-            header.put("header_class_ids_off", header_class_ids_off);
-            header.put("header_data_ids_size", header_data_size);
-            header.put("header_data_ids_off", header_data_off);*/
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return header;
-    }
-
-
-    public HashMap<String, byte[]> getHeader(ByteArrayInputStream stream) {
 
         HashMap<String, byte[]> header = new HashMap<>();
 
@@ -575,65 +278,6 @@ public class Util {
             byte[] header_class_ids_off = getBytesOfFile(stream, 100, 4);
             byte[] header_data_size = getBytesOfFile(stream, 104, 4);
             byte[] header_data_off = getBytesOfFile(stream, 108, 4);
-
-            header.put("header_magic", header_magic);
-            header.put("header_checksum", header_checksum);
-            header.put("header_signature", header_signature);
-            header.put("header_file_size", header_file_size);
-            header.put("header_header_size", header_header_size);
-            header.put("header_endian_tag", header_endian_tag);
-            header.put("header_link_size", header_link_size);
-            header.put("header_link_off", header_link_off);
-            header.put("header_map_off", header_map_off);
-            header.put("header_string_ids_size", header_string_ids_size);
-            header.put("header_string_ids_off", header_string_ids_off);
-            header.put("header_type_ids_size", header_type_ids_size);
-            header.put("header_type_ids_off", header_type_ids_off);
-            header.put("header_proto_ids_size", header_proto_ids_size);
-            header.put("header_proto_ids_off", header_proto_ids_off);
-            header.put("header_field_ids_size", header_field_ids_size);
-            header.put("header_field_ids_off", header_field_ids_off);
-            header.put("header_method_ids_size", header_method_ids_size);
-            header.put("header_method_ids_off", header_method_ids_off);
-            header.put("header_class_ids_size", header_class_ids_size);
-            header.put("header_class_ids_off", header_class_ids_off);
-            header.put("header_data_ids_size", header_data_size);
-            header.put("header_data_ids_off", header_data_off);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return header;
-    }
-
-    public HashMap<String, byte[]> getHeader(RandomAccessFile raf) {
-
-        HashMap<String, byte[]> header = new HashMap<>();
-
-        try {
-            byte[] header_magic = getBytesOfFile(raf, 0, 8);
-            byte[] header_checksum = getBytesOfFile(raf, 8, 4);
-            byte[] header_signature = getBytesOfFile(raf, 12, 20);
-            byte[] header_file_size = getBytesOfFile(raf, 32, 4);
-            byte[] header_header_size = getBytesOfFile(raf, 36, 4);
-            byte[] header_endian_tag = getBytesOfFile(raf, 40, 4);
-            byte[] header_link_size = getBytesOfFile(raf, 44, 4);
-            byte[] header_link_off = getBytesOfFile(raf, 48, 4);
-            byte[] header_map_off = getBytesOfFile(raf, 52, 4);
-            byte[] header_string_ids_size = getBytesOfFile(raf, 56, 4);
-            byte[] header_string_ids_off = getBytesOfFile(raf, 60, 4);
-            byte[] header_type_ids_size = getBytesOfFile(raf, 64, 4);
-            byte[] header_type_ids_off = getBytesOfFile(raf, 68, 4);
-            byte[] header_proto_ids_size = getBytesOfFile(raf, 72, 4);
-            byte[] header_proto_ids_off = getBytesOfFile(raf, 76, 4);
-            byte[] header_field_ids_size = getBytesOfFile(raf, 80, 4);
-            byte[] header_field_ids_off = getBytesOfFile(raf, 84, 4);
-            byte[] header_method_ids_size = getBytesOfFile(raf, 88, 4);
-            byte[] header_method_ids_off = getBytesOfFile(raf, 92, 4);
-            byte[] header_class_ids_size = getBytesOfFile(raf, 96, 4);
-            byte[] header_class_ids_off = getBytesOfFile(raf, 100, 4);
-            byte[] header_data_size = getBytesOfFile(raf, 104, 4);
-            byte[] header_data_off = getBytesOfFile(raf, 108, 4);
 
             header.put("header_magic", header_magic);
             header.put("header_checksum", header_checksum);

@@ -65,8 +65,7 @@ public class AppMatch {
         for (File f : AllTargetFilePath) {
             ArrayList<File> targetFileList = new ArrayList<>();
             if (f.isDirectory()) {
-                targetFileList = util.getRecursiveFileListByFormat(targetFileList, f.getAbsolutePath(), "");
-                targetFileList = util.getRecursiveFileListByFormat(targetFileList, f.getAbsolutePath(), ".apk");
+                targetFileList = util.getRecursiveFileListByFormat(targetFileList, f.getAbsolutePath(), ".apk", true);
             } else {
                 targetFileList.add(f);
             }
@@ -81,7 +80,7 @@ public class AppMatch {
         scanResult.setTotalSignature(signatureModels.size());
         scanResult.setTotalMalware(malwareList.size());
         scanResult.setTotalUnscannable(matchCore.getUnscannable());
-        scanResult.setUnscannableList(matchCore.getUnScannedList());
+        scanResult.setUnscannableList(matchCore.getUnscannables());
         scanResult.setTotalTime(time);
         scanResult.setMalwareList(malwareList);
 

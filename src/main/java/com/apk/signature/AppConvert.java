@@ -20,7 +20,7 @@ public class AppConvert {
         Util util = new Util();
         File fileSignature = new File(signature_path);
         long start = System.currentTimeMillis();
-        ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt");
+        ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt", false);
         System.out.println("**********************************************************");
         SQLiteJDBC jdbc = new SQLiteJDBC(signature_path);
         jdbc.createTable();

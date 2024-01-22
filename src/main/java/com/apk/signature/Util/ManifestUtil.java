@@ -102,6 +102,27 @@ public class ManifestUtil extends Util {
         return appManifestModel;
     }
 
+    public String parseManifest(File file) {
+        try {
+            try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (!entry.isDirectory() && entry.getName().equals("AndroidManifest.xml")) {
+                        InputStream inputStream = zipFile.getInputStream(entry);
+                        byte[] bs = IOUtils.toByteArray(inputStream);
+                        inputStream.close();
+                        return new XMLReader().decompressXML(bs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+        return "not found";
+    }
+
+
     public String decodeManifest(File file) {
         try {
             try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
@@ -125,8 +146,58 @@ public class ManifestUtil extends Util {
         return "";
     }
 
-    public String dumpManifest(String path) {
-        String command = Util.aapt2Path + " dump xmltree --file AndroidManifest.xml " + path;
+    public void getCommonInManifest(ArrayList<File> apk_list) {
+        System.out.println("***********" + "factorizedManifest" + "***********");
+        ManifestUtil manifestUtil = new ManifestUtil();
+        File first_file = apk_list.get(0);
+        String fileName = first_file.getAbsolutePath();
+        System.out.println(fileName);
+
+        String manifest = manifestUtil.dumpManifest(first_file);
+        ManifestModel manifestModel = manifestUtil.matchDumpedManifest(manifest);
+
+        ArrayList<String> permission_list = manifestModel.getPermission();
+        ArrayList<String> activity_list = manifestModel.getActivities();
+        ArrayList<String> service_list = manifestModel.getServices();
+        ArrayList<String> receiver_list = manifestModel.getReceivers();
+
+        for (int i = 1; i < apk_list.size(); i++) {
+            System.out.println(apk_list.get(i));
+
+            permission_list = super.removeDupe(permission_list);
+            activity_list = super.removeDupe(activity_list);
+            service_list = super.removeDupe(service_list);
+            receiver_list = super.removeDupe(receiver_list);
+
+
+            String manifest_ = manifestUtil.dumpManifest(apk_list.get(i));
+            ManifestModel manifestModel_ = manifestUtil.matchDumpedManifest(manifest_);
+
+            ArrayList<String> permission_list_ = manifestModel_.getPermission();
+            ArrayList<String> activity_list_ = manifestModel_.getActivities();
+            ArrayList<String> service_list_ = manifestModel_.getServices();
+            ArrayList<String> receiver_list_ = manifestModel_.getReceivers();
+
+            permission_list = super.getCommonOfArrayList(permission_list_, permission_list);
+            activity_list = super.getCommonOfArrayList(activity_list_, activity_list);
+            service_list = super.getCommonOfArrayList(service_list_, service_list);
+            receiver_list = super.getCommonOfArrayList(receiver_list_, receiver_list);
+        }
+
+        permission_list = super.removeDupe(permission_list);
+        activity_list = super.removeDupe(activity_list);
+        service_list = super.removeDupe(service_list);
+        receiver_list = super.removeDupe(receiver_list);
+
+        String path = first_file.getParent();
+        super.writeArrayToFile(permission_list, path + "\\" + "factorizedPermissions" + ".txt");
+        super.writeArrayToFile(activity_list, path + "\\" + "factorizedActivities" + ".txt");
+        super.writeArrayToFile(service_list, path + "\\" + "factorizedServices" + ".txt");
+        super.writeArrayToFile(receiver_list, path + "\\" + "factorizedReceivers" + ".txt");
+    }
+
+    public String dumpManifest(File file) {
+        String command = Util.aapt2Path + " dump xmltree --file AndroidManifest.xml " + file.getAbsolutePath();
         return runCMD(command);
     }
 
@@ -167,8 +238,6 @@ public class ManifestUtil extends Util {
             OutputHandler out = new OutputHandler(process.getInputStream(), "UTF-8");
             OutputHandler err = new OutputHandler(process.getErrorStream(), "UTF-8");
             out.join();
-            System.out.println("Output:");
-            System.out.println(out.getText());
             res = out.getText();
             //System.out.println();
             //  err.join();

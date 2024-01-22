@@ -1,12 +1,14 @@
 package com.apk.signature;
 
 
-import com.apk.signature.ItemsRaf.ItemsClassRaf;
-import com.apk.signature.ItemsRaf.ItemsMethodRaf;
-import com.apk.signature.ItemsRaf.ItemsStringRaf;
+import com.apk.signature.Items.ItemsClass;
+import com.apk.signature.Items.ItemsMethod;
+import com.apk.signature.Items.ItemsString;
 import com.apk.signature.Util.AppUtil;
 import com.apk.signature.Util.Util;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class AppCommon {
@@ -18,13 +20,14 @@ public class AppCommon {
         String path = myObj.nextLine();
 
         System.out.println(
-                "Choose your operation " + "\n" +
-                        "0 to go back" + "\n" +
-                        "1 to get common strings" + "\n" +
-                        "2 to get common methods" + "\n" +
-                        "3 to get common classes" + "\n" +
-                        "4 to get common permissions, activities, services and receivers" + "\n" +
-                        "5 to get all"
+                """
+                        Choose your operation\s
+                        0 to go back
+                        1 to get common strings
+                        2 to get common methods
+                        3 to get common classes
+                        4 to get common permissions, activities, services and receivers
+                        5 to get all"""
         );
 
         AppUtil appUtil = new AppUtil();
@@ -37,7 +40,7 @@ public class AppCommon {
                 AppMain.main(args);
             }
             case "1" -> {
-                ItemsStringRaf item = new ItemsStringRaf();
+                ItemsString item = new ItemsString();
                 System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
                 String s = myObj.nextLine();
                 myObj.close();
@@ -50,7 +53,7 @@ public class AppCommon {
                 }
             }
             case "2" -> {
-                ItemsMethodRaf item = new ItemsMethodRaf();
+                ItemsMethod item = new ItemsMethod();
                 System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
                 String s = myObj.nextLine();
                 myObj.close();
@@ -63,7 +66,7 @@ public class AppCommon {
                 }
             }
             case "3" -> {
-                ItemsClassRaf item = new ItemsClassRaf();
+                ItemsClass item = new ItemsClass();
                 System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
                 String s = myObj.nextLine();
                 myObj.close();
@@ -76,13 +79,13 @@ public class AppCommon {
                 }
             }
             case "4" -> {
-                //System.out.println("Enter aapt2 file path (default path is C:\\scanner\\aapt2.exe):");
-                //Util.aapt2Path = Util.setAapt2Path(myObj.nextLine());
                 Util.aapt2Path = Util.setAapt2Path("");
                 myObj.close();
                 System.out.println("waite ...");
                 try {
-                    appUtil.getCommonInManifest(path);
+                    ArrayList<File> apk_list = new ArrayList<>();
+                    apk_list = appUtil.getRecursiveFileListByFormat(apk_list, path, ".apk", true);
+                    appUtil.getCommonInManifest(apk_list);
                     System.out.println("done");
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -91,9 +94,6 @@ public class AppCommon {
             case "5" -> {
                 System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
                 String s = myObj.nextLine();
-
-                //System.out.println("Enter aapt2 file path (default path is C:\\scanner\\aapt2.exe):");
-                //Util.aapt2Path = Util.setAapt2Path(myObj.nextLine());
                 Util.aapt2Path = Util.setAapt2Path("");
                 myObj.close();
 
@@ -101,12 +101,14 @@ public class AppCommon {
 
                 System.out.println("waite ...");
 
-                ItemsStringRaf itemsString = new ItemsStringRaf();
-                ItemsMethodRaf itemsMethod = new ItemsMethodRaf();
-                ItemsClassRaf itemsClass = new ItemsClassRaf();
+                ItemsString itemsString = new ItemsString();
+                ItemsMethod itemsMethod = new ItemsMethod();
+                ItemsClass itemsClass = new ItemsClass();
 
                 try {
-                    appUtil.getCommonInManifest(path);
+                    ArrayList<File> apk_list = new ArrayList<>();
+                    apk_list = appUtil.getRecursiveFileListByFormat(apk_list, path, ".apk", true);
+                    appUtil.getCommonInManifest(apk_list);
                     System.out.println("done");
                 } catch (Exception e) {
                     e.printStackTrace();
