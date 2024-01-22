@@ -1,13 +1,12 @@
 package com.apk.signature.Util;
 
-
 import com.apk.signature.Items.Item;
-import com.apk.signature.ItemsRaf.ItemRaf;
-import com.apk.signature.Model.ManifestModel;
 import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.io.RandomAccessFile;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -147,50 +146,7 @@ public class AppUtil extends ManifestUtil {
         }
     }
 
-    public void writeToFile(HashMap<String, byte[]> header, RandomAccessFile raf, String fileName, ItemRaf tClass, boolean utf8) {
-        try {
-            byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-            byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-            long ids_count = super.getDecimalValue(header_ids_size);
-            long ids_offset = super.getDecimalValue(header_ids_off);
-
-            File f = new File(Util.TEMP_DEX_PATH + "\\" + fileName);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(f, false));
-
-            if (utf8) {
-                for (int i = 0; i < ids_count; i++) {
-                    String hex = tClass.getDataAsUTF8(header, raf, ids_offset);
-                    ids_offset = ids_offset + tClass.data_size;
-                    writer.append(hex);
-                    writer.append('\n');
-                }
-            } else {
-                for (int i = 0; i < ids_count; i++) {
-                    String hex = tClass.getDataAsHex(header, raf, ids_offset);
-                    ids_offset = ids_offset + tClass.data_size;
-                    writer.append(hex);
-                    writer.append('\n');
-                }
-            }
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void getAll(HashMap<String, byte[]> header, byte[] raf, Item tClass) {
-        byte[] header_ids_size = header.get(tClass.header_x_ids_size);
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_count = super.getDecimalValue(header_ids_size);
-        long ids_offset = super.getDecimalValue(header_ids_off);
-        for (int i = 0; i < ids_count; i++) {
-            String hex = tClass.getDataAsHex(header, raf, ids_offset);
-            ids_offset = ids_offset + tClass.data_size;
-            System.out.println(hex);
-        }
-    }
-
-    public void getAll(HashMap<String, byte[]> header, RandomAccessFile raf, ItemRaf tClass) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = super.getDecimalValue(header_ids_size);
@@ -209,21 +165,7 @@ public class AppUtil extends ManifestUtil {
         return tClass.getDataAsHex(header, raf, ids_offset);
     }
 
-    public String getHexByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, ItemRaf tClass) {
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_offset = super.getDecimalValue(header_ids_off);
-        ids_offset = index * tClass.data_size + ids_offset;
-        return tClass.getDataAsHex(header, raf, ids_offset);
-    }
-
     public byte[] getByteByIndex(HashMap<String, byte[]> header, byte[] raf, long index, Item tClass) {
-        byte[] header_ids_off = header.get(tClass.header_x_ids_off);
-        long ids_offset = super.getDecimalValue(header_ids_off);
-        ids_offset = index * tClass.data_size + ids_offset;
-        return tClass.getDataAsByte(header, raf, ids_offset);
-    }
-
-    public byte[] getByteByIndex(HashMap<String, byte[]> header, RandomAccessFile raf, long index, ItemRaf tClass) {
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = super.getDecimalValue(header_ids_off);
         ids_offset = index * tClass.data_size + ids_offset;

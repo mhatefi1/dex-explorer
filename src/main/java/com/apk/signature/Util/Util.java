@@ -164,17 +164,6 @@ public class Util extends FileUtil {
         return byteToStringHex(reverse);
     }
 
-    public byte[] getBytesOfFile(RandomAccessFile raf, long start, long size) {
-        byte[] bytes = new byte[(int) size];
-        try {
-            raf.seek(start);
-            raf.read(bytes);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return bytes;
-    }
-
     public byte[] getBytesOfFile(byte[] byteArray, long offset, long size) {
         byte[] bytes = new byte[(int) size];
         try {
