@@ -3,8 +3,6 @@ package com.apk.signature;
 import com.apk.signature.Util.ManifestUtil;
 import com.apk.signature.Util.Util;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class AppMain {
@@ -22,15 +20,10 @@ public class AppMain {
                     AppClasses.main(args);
                     break;
                 case "4":
-                    try {
-                        String s = args[1];
-                        System.out.println("waite ...");
-                        Util util = new Util();
-                        util.extractDex(s);
-                        System.out.println("done");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    String s4 = args[1];
+                    System.out.println("waite ...");
+                    new Util().extractDex(s4);
+                    System.out.println("done");
                     break;
                 case "5":
                     AppCommon.main(args);
@@ -46,23 +39,8 @@ public class AppMain {
                     break;
                 case "9":
                     System.out.println("Enter file path: ");
-                    String s = args[1];
-                    File file = new File(s);
-                    if (file.exists()) {
-                        ArrayList<File> list = new ArrayList<>();
-                        if (file.isDirectory()) {
-                            list = new Util().getFileListByFormat(file.getAbsolutePath(), "", false);
-                        } else {
-                            list.add(file);
-                        }
-                        for (File file1 : list) {
-                            System.out.println("**********" + file1.getAbsolutePath() + "**********");
-                            String manifest = new ManifestUtil().parseManifest(file1);
-                            System.out.println(manifest);
-                        }
-                    } else {
-                        System.out.println("file not found");
-                    }
+                    String s9 = args[1];
+                    new ManifestUtil().decodeMultipleManifest(s9);
                     break;
             }
         } else {
@@ -102,13 +80,8 @@ public class AppMain {
                     String s = myObj.nextLine();
                     myObj.close();
                     System.out.println("waite ...");
-                    try {
-                        Util util = new Util();
-                        util.extractDex(s);
-                        System.out.println("done");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    new Util().extractDex(s);
+                    System.out.println("done");
                 }
                 case "5" -> {
                     AppCommon.main(args);
@@ -130,22 +103,7 @@ public class AppMain {
                     System.out.println("Enter file path: ");
                     String s = myObj.nextLine();
                     myObj.close();
-                    File file = new File(s);
-                    if (file.exists()) {
-                        ArrayList<File> list = new ArrayList<>();
-                        if (file.isDirectory()) {
-                            list = new Util().getFileListByFormat(file.getAbsolutePath(), "", false);
-                        } else {
-                            list.add(file);
-                        }
-                        for (File file1 : list) {
-                            System.out.println("**********" + file1.getAbsolutePath() + "**********");
-                            String manifest = new ManifestUtil().parseManifest(file1);
-                            System.out.println(manifest);
-                        }
-                    } else {
-                        System.out.println("file not found");
-                    }
+                    new ManifestUtil().decodeMultipleManifest(s);
                 }
             }
         }

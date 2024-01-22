@@ -32,25 +32,22 @@ public class Util extends FileUtil {
 
     public static void printRed(Object text) {
         //System.out.println(RED + text + RESET);
-        //System.out.println(text);
         AnsiConsole.systemInstall();
-        System.out.println(ansi().fgRed().a(text).reset());
+        System.out.println(ansi().fgBrightRed().a(text).reset());
         AnsiConsole.systemUninstall();
     }
 
     public static void printGreen(Object text) {
         //System.out.println(GREEN + text + RESET);
-        //System.out.println(text);
         AnsiConsole.systemInstall();
-        System.out.println(ansi().fgGreen().a(text).reset());
+        System.out.println(ansi().fgBrightGreen().a(text).reset());
         AnsiConsole.systemUninstall();
     }
 
     public static void printYellow(Object text) {
         //System.out.println(YELLOW + text + RESET);
-        //System.out.println(text);
         AnsiConsole.systemInstall();
-        System.out.println(ansi().fgYellow().a(text).reset());
+        System.out.println(ansi().fgBrightYellow().a(text).reset());
         AnsiConsole.systemUninstall();
     }
 

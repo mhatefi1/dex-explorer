@@ -196,6 +196,29 @@ public class ManifestUtil extends Util {
         super.writeArrayToFile(receiver_list, path + "\\" + "factorizedReceivers" + ".txt");
     }
 
+    public void decodeMultipleManifest(String s) {
+        try {
+            File file = new File(s);
+            if (file.exists()) {
+                ArrayList<File> list = new ArrayList<>();
+                if (file.isDirectory()) {
+                    list = new Util().getFileListByFormat(file.getAbsolutePath(), ".apk", true);
+                } else {
+                    list.add(file);
+                }
+                for (File file1 : list) {
+                    System.out.println("**********" + file1.getAbsolutePath() + "**********");
+                    String manifest = new ManifestUtil().parseManifest(file1);
+                    System.out.println(manifest);
+                }
+            } else {
+                System.out.println("file not found");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public String dumpManifest(File file) {
         String command = Util.aapt2Path + " dump xmltree --file AndroidManifest.xml " + file.getAbsolutePath();
         return runCMD(command);

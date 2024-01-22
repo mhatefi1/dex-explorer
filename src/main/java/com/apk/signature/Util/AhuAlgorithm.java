@@ -1,4 +1,4 @@
-package com.apk.signature;
+package com.apk.signature.Util;
 
 import java.util.*;
 

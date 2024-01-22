@@ -37,22 +37,19 @@ public class FileUtil {
     public void extractDex(String s) {
         try {
             File file = new File(s);
-
-            if (file.isFile()) {
-                String name = splitNameFromFormat(s);
-                File ext = new File(name);
-                boolean dir = ext.mkdir();
-                if (dir) {
-                    readDexFilesFromZip(s, ext.getAbsolutePath());
-                }
-            } else {
+            if (file.isDirectory()) {
                 ArrayList<File> apk = getFileListByFormat(s, ".apk", true);
                 for (File f : apk) {
                     extractDex(f.getAbsolutePath());
                 }
-                ArrayList<File> zip = getFileListByFormat(s, ".zip", false);
-                for (File f : zip) {
-                    extractDex(f.getAbsolutePath());
+            } else {
+                String name = splitNameFromFormat(s);
+                File ext = new File(name + "-");
+                boolean dir = ext.mkdir();
+                if (dir) {
+                    readDexFilesFromZip(s, ext.getAbsolutePath());
+                } else {
+                    printRed("could not create " + s + " folder");
                 }
             }
         } catch (Exception e) {
@@ -234,7 +231,9 @@ public class FileUtil {
     public String splitNameFromFormat(String s) {
         try {
             int dotIndex = s.lastIndexOf(".");
-            return s.substring(0, dotIndex);
+            if (dotIndex >= 0) {
+                return s.substring(0, dotIndex);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
