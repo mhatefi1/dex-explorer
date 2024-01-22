@@ -33,8 +33,10 @@ public class MatchCore {
             try {
                 String signature_txt1 = util.readFile(file);
                 SignatureModel signatureModel1 = parseSignature(signature_txt1);
-                signatureModel1.setName(file.getName());
-                signatureModels.add(signatureModel1);
+                if (signatureModel1 != null) {
+                    signatureModel1.setName(file.getName());
+                    signatureModels.add(signatureModel1);
+                }
             } catch (Exception ignored) {
             }
         }
@@ -214,7 +216,7 @@ public class MatchCore {
             }
             return util.createSignatureModel(permissions, activities, services, receivers, strings, startIndex, endIndex);
         }
-        return new SignatureModel();
+        return null;
     }
 
     public int getTotalFiles() {

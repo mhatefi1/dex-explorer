@@ -4,7 +4,6 @@ import com.apk.signature.Util.Util;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.Scanner;
 
 public class AppMain {
@@ -126,7 +125,7 @@ public class AppMain {
                     AppConvert.main(args);
                     myObj.close();
                 }
-                case "10" -> {
+                case "9" -> {
                     System.out.println("Enter file path: ");
                     String s = myObj.nextLine();
                     myObj.close();
