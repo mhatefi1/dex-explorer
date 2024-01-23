@@ -28,11 +28,16 @@ public class FIndInterval {
         ResultModel model = new ResultModel();
         int min = 0, max = 0;
         ArrayList<Integer> ints = new ArrayList<>();
+        ArrayList<String> notMatchedApks = new ArrayList<>();
+        int totalFiles = 0, totalApks = 0;
         for (File file : files) {
             Util.print("********************" + file.getAbsolutePath() + "********************");
+            boolean matched = false;
+            totalFiles++;
             try {
                 try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
                     Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                    totalApks++;
                     while (entries.hasMoreElements()) {
                         ZipEntry entry = entries.nextElement();
                         if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
@@ -41,18 +46,28 @@ public class FIndInterval {
                                 byte[] bs = IOUtils.toByteArray(inputStream);
                                 HashMap<String, byte[]> header = util.getHeader(bs);
                                 int c = util.getAddressFromHexString(header, bs, string, new ItemsString(), 0, 0);
-                                ints.add(c);
-                                for (int i : ints) {
-                                    if (c < i) {
+                                if (c != -1) {
+                                    if (ints.isEmpty()) {
                                         min = c;
                                         model.setMinimumApkName(file.getAbsolutePath());
                                         model.setMinimumDexName(entry.getName());
+                                    } else {
+                                        for (int i : ints) {
+                                            if (c <= i) {
+                                                min = c;
+                                                model.setMinimumApkName(file.getAbsolutePath());
+                                                model.setMinimumDexName(entry.getName());
+                                            }
+                                        }
                                     }
-                                }
-                                if (c > max) {
-                                    max = c;
-                                    model.setMaximumApkName(file.getAbsolutePath());
-                                    model.setMaximumDexName(entry.getName());
+                                    if (c > max) {
+                                        max = c;
+                                        model.setMaximumApkName(file.getAbsolutePath());
+                                        model.setMaximumDexName(entry.getName());
+                                    }
+                                    ints.add(c);
+                                    matched = true;
+                                    break;
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -63,69 +78,71 @@ public class FIndInterval {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            if (!matched) {
+                notMatchedApks.add(file.getAbsolutePath());
+            }
         }
+        model.setTotalFiles(totalFiles);
+        model.setTotalApks(totalApks);
         model.setMinimumIndex(min);
         model.setMaximumIndex(max);
-
+        model.setNotMatchedApks(notMatchedApks);
         return model;
     }
 
     private static class ResultModel {
         public String minimumApkName, minimumDexName;
         public String maximumApkName, maximumDexName;
-        int minimumIndex, maximumIndex;
+        public ArrayList<String> notMatchedApks;
+        int minimumIndex;
+        int maximumIndex;
+
+        int totalFiles, totalApks;
+        int notMatchedApksSize;
 
         public ResultModel() {
 
         }
 
-        public String getMaximumApkName() {
-            return maximumApkName;
+        public void setTotalFiles(int totalFiles) {
+            this.totalFiles = totalFiles;
+        }
+
+        public void setTotalApks(int totalApks) {
+            this.totalApks = totalApks;
+        }
+
+        public void setNotMatchedApksSize(int notMatchedApksSize) {
+            this.notMatchedApksSize = notMatchedApksSize;
         }
 
         public void setMaximumApkName(String maximumApkName) {
             this.maximumApkName = maximumApkName;
         }
 
-        public String getMaximumDexName() {
-            return maximumDexName;
-        }
-
         public void setMaximumDexName(String maximumDexName) {
             this.maximumDexName = maximumDexName;
-        }
-
-        public String getMinimumApkName() {
-            return minimumApkName;
         }
 
         public void setMinimumApkName(String minimumApkName) {
             this.minimumApkName = minimumApkName;
         }
 
-        public String getMinimumDexName() {
-            return minimumDexName;
-        }
-
         public void setMinimumDexName(String minimumDexName) {
             this.minimumDexName = minimumDexName;
-        }
-
-        public int getMinimumIndex() {
-            return minimumIndex;
         }
 
         public void setMinimumIndex(int minimumIndex) {
             this.minimumIndex = minimumIndex;
         }
 
-        public int getMaximumIndex() {
-            return maximumIndex;
-        }
-
         public void setMaximumIndex(int maximumIndex) {
             this.maximumIndex = maximumIndex;
         }
-    }
 
+        public void setNotMatchedApks(ArrayList<String> notMatchedApks) {
+            setNotMatchedApksSize(notMatchedApks.size());
+            this.notMatchedApks = notMatchedApks;
+        }
+    }
 }

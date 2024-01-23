@@ -1,12 +1,9 @@
 package com.apk.signature;
 
-import com.apk.signature.Model.SignatureModel;
 import com.apk.signature.Util.FIndInterval;
 import com.apk.signature.Util.ManifestUtil;
-import com.apk.signature.Util.SignatureUtil;
 import com.apk.signature.Util.Util;
 
-import java.io.File;
 import java.util.Scanner;
 
 public class AppMain {
