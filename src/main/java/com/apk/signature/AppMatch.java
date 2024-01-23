@@ -54,7 +54,7 @@ public class AppMatch {
 
         Util util = new Util();
 
-        ArrayList<SignatureModel> signatureModels = matchCore.getSigModel(fileSignature);
+        ArrayList<SignatureModel> signatureModels = matchCore.getSigModels(fileSignature);
 
         if (AllTargetFilePath.isEmpty()) {
             AllTargetFilePath.add(targetFile);

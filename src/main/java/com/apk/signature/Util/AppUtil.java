@@ -3,7 +3,10 @@ package com.apk.signature.Util;
 import com.apk.signature.Items.Item;
 import org.apache.pdfbox.io.IOUtils;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -15,11 +18,7 @@ public class AppUtil extends ManifestUtil {
 
     }
 
-    public boolean getAddressFromHexString(HashMap<String, byte[]> header, ByteArrayInputStream stream, String text, Item tClass) {
-        return getAddressFromHexString(header, stream, text, tClass, 0, 0);
-    }
-
-    public boolean getAddressFromHexString(HashMap<String, byte[]> header, ByteArrayInputStream stream, String text, Item tClass, int periodStartIndex, int periodEndIndex) {
+    public int getAddressFromHexString(HashMap<String, byte[]> header, byte[] stream, String text, Item tClass, int periodStartIndex, int periodEndIndex) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = super.getDecimalValue(header_ids_size);
@@ -36,12 +35,12 @@ public class AppUtil extends ManifestUtil {
                     printYellow("{ hex:" + text);
                     printYellow("  ids_offs: " + super.decimalToStringHex(ids_offset));
                     printYellow("  ids_index: " + i + " }");
-                    return true;
+                    return i;
                 }
                 ids_offset = ids_offset + tClass.data_size;
             }
         }
-        return false;
+        return -1;
     }
 
     public void factorizeInFolder(String path, Item tClass, boolean utf8) {
@@ -80,8 +79,8 @@ public class AppUtil extends ManifestUtil {
                     if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
                         try {
                             InputStream inputStream = zipFile.getInputStream(entry);
-                            byte[] bs = IOUtils.toByteArray(inputStream);
-                            ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                            byte[] stream = IOUtils.toByteArray(inputStream);
+                            //ByteArrayInputStream stream = new ByteArrayInputStream(bs);
                             HashMap<String, byte[]> header = super.getHeader(stream);
                             byte[] header_ids_size = header.get(tClass.header_x_ids_size);
                             byte[] header_ids_off = header.get(tClass.header_x_ids_off);
@@ -113,7 +112,7 @@ public class AppUtil extends ManifestUtil {
         return s;
     }
 
-    public void writeToFile(HashMap<String, byte[]> header, ByteArrayInputStream stream, String fileName, Item tClass, boolean utf8) {
+    public void writeToFile(HashMap<String, byte[]> header, byte[] stream, String fileName, Item tClass, boolean utf8) {
         try {
             byte[] header_ids_size = header.get(tClass.header_x_ids_size);
             byte[] header_ids_off = header.get(tClass.header_x_ids_off);
@@ -144,7 +143,7 @@ public class AppUtil extends ManifestUtil {
         }
     }
 
-    public void getAll(HashMap<String, byte[]> header, ByteArrayInputStream stream, Item tClass) {
+    public void getAll(HashMap<String, byte[]> header, byte[] stream, Item tClass) {
         byte[] header_ids_size = header.get(tClass.header_x_ids_size);
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_count = super.getDecimalValue(header_ids_size);
@@ -156,14 +155,14 @@ public class AppUtil extends ManifestUtil {
         }
     }
 
-    public String getHexByIndex(HashMap<String, byte[]> header, ByteArrayInputStream stream, long index, Item tClass) {
+    public String getHexByIndex(HashMap<String, byte[]> header, byte[] stream, long index, Item tClass) {
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = super.getDecimalValue(header_ids_off);
         ids_offset = index * tClass.data_size + ids_offset;
         return tClass.getDataAsHex(header, stream, ids_offset);
     }
 
-    public byte[] getByteByIndex(HashMap<String, byte[]> header, ByteArrayInputStream stream, long index, Item tClass) {
+    public byte[] getByteByIndex(HashMap<String, byte[]> header, byte[] stream, long index, Item tClass) {
         byte[] header_ids_off = header.get(tClass.header_x_ids_off);
         long ids_offset = super.getDecimalValue(header_ids_off);
         ids_offset = index * tClass.data_size + ids_offset;

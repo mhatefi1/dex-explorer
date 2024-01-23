@@ -2,6 +2,7 @@ package com.apk.signature.DB;
 
 import com.apk.signature.Model.DBModel;
 import com.apk.signature.Model.SignatureModel;
+import com.apk.signature.Util.SignatureUtil;
 import com.apk.signature.Util.Util;
 
 import java.io.File;
@@ -114,7 +115,7 @@ public class SQLiteJDBC {
                 int startIndex = rs.getInt(STRING_START);
                 int endIndex = rs.getInt(STRING_END);
                 SignatureModel model = new SignatureModel();
-                model = new Util().createSignatureModel(permissions, activities, services, receivers, strings, startIndex, endIndex);
+                model = new SignatureUtil().createSignatureModel(permissions, activities, services, receivers, strings);
                 model.setName(name);
                 result.add(model);
             }

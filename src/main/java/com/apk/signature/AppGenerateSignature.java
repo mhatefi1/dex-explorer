@@ -50,28 +50,8 @@ public class AppGenerateSignature {
         signature.setManifestModel(manifest);
         signature.setStrings(string_list);
 
-        System.out.println("Set start index or press Enter key if is empty:");
-        String start = myObj.nextLine();
-        int start_index;
-        if (start.isEmpty()) {
-            start_index = 0;
-        } else {
-            start_index = Integer.parseInt(start);
-        }
-
-        System.out.println("Set end index or press Enter key if is empty:");
-        String end = myObj.nextLine();
-        int end_index;
-        if (end.isEmpty()) {
-            end_index = 0;
-        } else {
-            end_index = Integer.parseInt(end);
-        }
-
         signature.setManifestModel(manifest);
         signature.setStrings(string_list);
-        //   signature.setStart(start_index);
-        //  signature.setEnd(end_index);
 
         String result = generateSig(signature);
 
@@ -83,12 +63,33 @@ public class AppGenerateSignature {
         String string = myObj.nextLine();
         if (!string.isEmpty()) {
             String hex = new Util().stringToHexString(string);
-            System.out.println("is this string complete? [y/n]");
+            String interval = "";
+            /*System.out.println("is this string complete? [y/n]");
             String state = myObj.nextLine();
             if (state.equals("y")) {
                 hex = hex + "00";
+            }*/
+            System.out.println("Set start index or press Enter key if is empty:");
+            String start = myObj.nextLine();
+            int start_index;
+            if (start.isEmpty()) {
+                start_index = 0;
+            } else {
+                start_index = Integer.parseInt(start);
             }
-            string_list.add(hex);
+
+            System.out.println("Set end index or press Enter key if is empty:");
+            String end = myObj.nextLine();
+            int end_index;
+            if (end.isEmpty()) {
+                end_index = 0;
+            } else {
+                end_index = Integer.parseInt(end);
+            }
+            if (start_index > 0) {
+                interval = "[" + start_index + "-" + end_index + "]";
+            }
+            string_list.add(hex + interval);
             System.out.println("Do you want add next string? [y/n]");
             String state2 = myObj.nextLine();
             if (state2.equals("y")) {
@@ -110,13 +111,6 @@ public class AppGenerateSignature {
         generateSignatureItems(manifestModel.getReceivers(), builder);
         builder.append("%");
         generateSignatureItems(signature.getStrings(), builder);
-      /*  if (signature.getStart() > 0) {
-            builder.append("[");
-            builder.append(signature.getStart());
-            builder.append("-");
-            builder.append(signature.getEnd());
-            builder.append("]");
-        }*/
         return builder.toString();
     }
 
@@ -148,7 +142,7 @@ public class AppGenerateSignature {
 
     public static void write(String text, Scanner myObj) {
         System.out.println("Write path to save signature or press Enter key to save in current folder:");
-        System.out.println("current folder:" + System.getProperty("user.dir"));
+        Util.printYellow("note: current folder is " + System.getProperty("user.dir"));
         String path = myObj.nextLine();
 
         System.out.println("Enter signature name:");

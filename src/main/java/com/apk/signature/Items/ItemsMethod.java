@@ -41,7 +41,7 @@ public class ItemsMethod extends Item {
     }
 
     @Override
-    public boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start, String[] splitText) {
+    public boolean searchDataByte(HashMap<String, byte[]> header, byte[] stream, long start, String[] splitText) {
         byte[] method_data_b = util.getBytesOfFile(stream, start, method_data_size);
 
         byte[] class_idx_b = Arrays.copyOfRange(method_data_b, 0, 1);
@@ -68,7 +68,7 @@ public class ItemsMethod extends Item {
     }
 
     @Override
-    public byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, byte[] stream, long start) {
         byte[] method_data_b = util.getBytesOfFile(stream, start, method_data_size);
 
         byte[] class_idx_b = Arrays.copyOfRange(method_data_b, 0, 1);
@@ -109,7 +109,7 @@ public class ItemsMethod extends Item {
     }
 
     @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public String getDataAsHex(HashMap<String, byte[]> header, byte[] stream, long start) {
         byte[] method_data_b = util.getBytesOfFile(stream, start, method_data_size);
 
         byte[] class_idx_b = Arrays.copyOfRange(method_data_b, 0, 1);
@@ -128,7 +128,7 @@ public class ItemsMethod extends Item {
     }
 
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public String getDataAsUTF8(HashMap<String, byte[]> header, byte[] stream, long start) {
         byte[] method_data_b = util.getBytesOfFile(stream, start, method_data_size);
 
         byte[] class_idx_b = Arrays.copyOfRange(method_data_b, 0, 1);

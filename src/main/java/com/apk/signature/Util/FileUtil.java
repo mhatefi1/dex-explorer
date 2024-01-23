@@ -66,7 +66,7 @@ public class FileUtil {
         }
     }
 
-    public ArrayList<File> getRecursiveFileListContainNonFormats(ArrayList<File> fileList, String path, String format) {
+    private ArrayList<File> getRecursiveFileListContainNonFormats(ArrayList<File> fileList, String path, String format) {
         File f = new File(path);
         File[] listed = f.listFiles();
         if (listed != null) {
@@ -87,7 +87,7 @@ public class FileUtil {
         return fileList;
     }
 
-    public ArrayList<File> getRecursiveFileList(ArrayList<File> fileList, String input, String format) {
+    private ArrayList<File> getRecursiveFileList(ArrayList<File> fileList, String input, String format) {
         File f = new File(input);
         File[] listed = f.listFiles();
         if (listed != null) {

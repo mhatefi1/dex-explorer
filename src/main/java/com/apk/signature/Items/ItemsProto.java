@@ -22,12 +22,12 @@ public class ItemsProto extends Item {
     }
 
     @Override
-    public boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start, String[] splitText) {
+    public boolean searchDataByte(HashMap<String, byte[]> header, byte[] stream, long start, String[] splitText) {
         return false;
     }
 
     @Override
-    public byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, byte[] stream, long start) {
         byte[] proto_data_b = util.getBytesOfFile(stream, start, proto_data_size);
 
         byte[] shorty_idx_b = Arrays.copyOfRange(proto_data_b, 0, 3);
@@ -40,7 +40,7 @@ public class ItemsProto extends Item {
     }
 
     @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public String getDataAsHex(HashMap<String, byte[]> header, byte[] stream, long start) {
         byte[] proto_data_b = util.getBytesOfFile(stream, start, proto_data_size);
 
         byte[] shorty_idx_b = Arrays.copyOfRange(proto_data_b, 0, 3);
@@ -53,7 +53,7 @@ public class ItemsProto extends Item {
     }
 
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public String getDataAsUTF8(HashMap<String, byte[]> header, byte[] stream, long start) {
         return null;
     }
 }

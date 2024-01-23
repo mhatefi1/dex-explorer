@@ -18,20 +18,20 @@ public abstract class Item {
         this.common_file_name = common_file_name;
     }
 
-    public abstract boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start, String[] splitText);
+    public abstract boolean searchDataByte(HashMap<String, byte[]> header, byte[] stream, long start, String[] splitText);
 
-    public abstract byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start);
+    public abstract byte[] getDataAsByte(HashMap<String, byte[]> header, byte[] stream, long start);
 
-    public abstract String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start);
+    public abstract String getDataAsHex(HashMap<String, byte[]> header, byte[] stream, long start);
 
-    public abstract String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start);
+    public abstract String getDataAsUTF8(HashMap<String, byte[]> header, byte[] stream, long start);
 
-    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream stream, String offseString) {
+    public String getDataAsHex(HashMap<String, byte[]> header, byte[] stream, String offseString) {
         long start = new Util().stringHexToDecimal(offseString);
         return getDataAsHex(header, stream, start);
     }
 
-    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream stream, String offseString) {
+    public String getDataAsUTF8(HashMap<String, byte[]> header, byte[] stream, String offseString) {
         long start = new Util().stringHexToDecimal(offseString);
         return getDataAsUTF8(header, stream, start);
     }

@@ -55,6 +55,10 @@ public class Util extends FileUtil {
         AnsiConsole.systemUninstall();
     }
 
+    public static void print(Object text) {
+        System.out.println(text);
+    }
+
     public static String setAapt2Path(String path) {
         if (path.isEmpty()) {
             return defaultAapt2Path;
@@ -73,69 +77,6 @@ public class Util extends FileUtil {
             }
         }
         return "";
-    }
-
-    public SignatureModel createSignatureModel(String permissions, String activities, String services, String receivers, String strings) {
-        String[] permissions_list = permissions.split(",");
-        String[] activities_list = activities.split(",");
-        String[] service_list = services.split(",");
-        String[] receivers_list = receivers.split(",");
-        String[] strings_list = strings.split(",");
-
-        ManifestModel manifestModel = new ManifestModel();
-
-        ArrayList<String> permissionArrayList = new ArrayList<>();
-        ArrayList<String> activitiesArrayList = new ArrayList<>();
-        ArrayList<String> serviceArrayList = new ArrayList<>();
-        ArrayList<String> receiversArrayList = new ArrayList<>();
-
-        for (String s : permissions_list) {
-            s = hexStringToUTF8(s);
-            permissionArrayList.add(s);
-        }
-        for (String s : activities_list) {
-            s = hexStringToUTF8(s);
-            activitiesArrayList.add(s);
-        }
-        for (String s : service_list) {
-            s = hexStringToUTF8(s);
-            serviceArrayList.add(s);
-        }
-        for (String s : receivers_list) {
-            s = hexStringToUTF8(s);
-            receiversArrayList.add(s);
-        }
-
-        //ArrayList<String> stringsArrayList = new ArrayList<>(Arrays.asList(strings_list));
-        ArrayList<StringModel> stringModels = new ArrayList<>();
-        for (String s : strings_list) {
-            String reg = "(.+)\\[(.+)-(.+)]";
-            Pattern pattern1 = Pattern.compile(reg);
-            Matcher matcher1 = pattern1.matcher(s);
-            if (matcher1.find()) {
-                s = matcher1.group(1);
-                int startIndex = Integer.parseInt(matcher1.group(2));
-                int endIndex = Integer.parseInt(matcher1.group(3));
-                StringModel model = new StringModel(startIndex, endIndex, s);
-                stringModels.add(model);
-            }
-        }
-
-        manifestModel.setPermission(permissionArrayList);
-        manifestModel.setActivities(activitiesArrayList);
-        manifestModel.setServices(serviceArrayList);
-        manifestModel.setReceivers(receiversArrayList);
-
-        SignatureModel signatureModel = new SignatureModel();
-
-        signatureModel.setManifestModel(manifestModel);
-        signatureModel.setStringModels(stringModels);
-
-        //signatureModel.setStrings(stringsArrayList);
-        //signatureModel.setStart(startIndex);
-        //signatureModel.setEnd(endIndex);
-
-        return signatureModel;
     }
 
     public ArrayList<String> getCommonOfArrayList(ArrayList<String> first, ArrayList<String> second) {
@@ -187,6 +128,17 @@ public class Util extends FileUtil {
             inputStream.skip(offset);
             inputStream.read(bytes);
             inputStream.reset();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bytes;
+    }
+
+    public byte[] getBytesOfFile(byte[] stream, long offset, long size) {
+        byte[] bytes = new byte[(int) size];
+        try {
+            int to = (int) (offset + size);
+            bytes = Arrays.copyOfRange(stream, (int) offset, to);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -258,12 +210,25 @@ public class Util extends FileUtil {
         return splitText;
     }
 
-    public HashMap<String, byte[]> getHeader(ByteArrayInputStream stream) {
+    public HashMap<String, byte[]> getStringHeader(byte[] stream) {
+        HashMap<String, byte[]> header = new HashMap<>();
+        try {
+            byte[] header_string_ids_size = getBytesOfFile(stream, 56, 4);
+            byte[] header_string_ids_off = getBytesOfFile(stream, 60, 4);
+            header.put("header_string_ids_size", header_string_ids_size);
+            header.put("header_string_ids_off", header_string_ids_off);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return header;
+    }
+
+    public HashMap<String, byte[]> getHeader(byte[] stream) {
 
         HashMap<String, byte[]> header = new HashMap<>();
 
         try {
-            byte[] header_magic = getBytesOfFile(stream, 0, 8);
+            /*byte[] header_magic = getBytesOfFile(stream, 0, 8);
             byte[] header_checksum = getBytesOfFile(stream, 8, 4);
             byte[] header_signature = getBytesOfFile(stream, 12, 20);
             byte[] header_file_size = getBytesOfFile(stream, 32, 4);
@@ -271,7 +236,7 @@ public class Util extends FileUtil {
             byte[] header_endian_tag = getBytesOfFile(stream, 40, 4);
             byte[] header_link_size = getBytesOfFile(stream, 44, 4);
             byte[] header_link_off = getBytesOfFile(stream, 48, 4);
-            byte[] header_map_off = getBytesOfFile(stream, 52, 4);
+            byte[] header_map_off = getBytesOfFile(stream, 52, 4);*/
             byte[] header_string_ids_size = getBytesOfFile(stream, 56, 4);
             byte[] header_string_ids_off = getBytesOfFile(stream, 60, 4);
             byte[] header_type_ids_size = getBytesOfFile(stream, 64, 4);
@@ -287,7 +252,7 @@ public class Util extends FileUtil {
             byte[] header_data_size = getBytesOfFile(stream, 104, 4);
             byte[] header_data_off = getBytesOfFile(stream, 108, 4);
 
-            header.put("header_magic", header_magic);
+            /*header.put("header_magic", header_magic);
             header.put("header_checksum", header_checksum);
             header.put("header_signature", header_signature);
             header.put("header_file_size", header_file_size);
@@ -295,7 +260,7 @@ public class Util extends FileUtil {
             header.put("header_endian_tag", header_endian_tag);
             header.put("header_link_size", header_link_size);
             header.put("header_link_off", header_link_off);
-            header.put("header_map_off", header_map_off);
+            header.put("header_map_off", header_map_off);*/
             header.put("header_string_ids_size", header_string_ids_size);
             header.put("header_string_ids_off", header_string_ids_off);
             header.put("header_type_ids_size", header_type_ids_size);

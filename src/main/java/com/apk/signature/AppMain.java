@@ -1,8 +1,12 @@
 package com.apk.signature;
 
+import com.apk.signature.Model.SignatureModel;
+import com.apk.signature.Util.FIndInterval;
 import com.apk.signature.Util.ManifestUtil;
+import com.apk.signature.Util.SignatureUtil;
 import com.apk.signature.Util.Util;
 
+import java.io.File;
 import java.util.Scanner;
 
 public class AppMain {
@@ -38,9 +42,13 @@ public class AppMain {
                     AppConvert.main(args);
                     break;
                 case "9":
-                    System.out.println("Enter file path: ");
                     String s9 = args[1];
                     new ManifestUtil().decodeMultipleManifest(s9);
+                    break;
+                case "10":
+                    String s10 = args[1];
+                    String path = args[2];
+                    new FIndInterval().find(s10, path);
                     break;
             }
         } else {
@@ -57,7 +65,8 @@ public class AppMain {
                             6 to match
                             7 to generate signature
                             8 to convert text to sql
-                            9 to decode manifest"""
+                            9 to decode manifest
+                            10 to find a string min and max index"""
             );
 
             String input = myObj.nextLine();
@@ -104,6 +113,14 @@ public class AppMain {
                     String s = myObj.nextLine();
                     myObj.close();
                     new ManifestUtil().decodeMultipleManifest(s);
+                }
+                case "10" -> {
+                    System.out.println("Enter string: ");
+                    String s = myObj.nextLine();
+                    System.out.println("Enter file path: ");
+                    String path = myObj.nextLine();
+                    myObj.close();
+                    new FIndInterval().find(s, path);
                 }
             }
         }

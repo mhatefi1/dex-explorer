@@ -22,25 +22,25 @@ public class ItemsClass extends Item {
     }
 
     @Override
-    public boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start, String[] splitText) {
+    public boolean searchDataByte(HashMap<String, byte[]> header, byte[] stream, long start, String[] splitText) {
         byte[] class_data_b = util.getBytesOfFile(stream, start, class_data_size);
         //return util.compareBytes(splitText, class_data_b);
         return false;
     }
 
     @Override
-    public byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, byte[] stream, long start) {
         return util.getBytesOfFile(stream, start, class_data_size);
     }
 
     @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public String getDataAsHex(HashMap<String, byte[]> header, byte[] stream, long start) {
         byte[] class_data_b = util.getBytesOfFile(stream, start, class_data_size);
         return util.byteToStringHex(class_data_b);
     }
 
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public String getDataAsUTF8(HashMap<String, byte[]> header, byte[] stream, long start) {
         String hex = getDataAsHex(header, stream, start);
         return util.hexStringToUTF8(hex);
     }

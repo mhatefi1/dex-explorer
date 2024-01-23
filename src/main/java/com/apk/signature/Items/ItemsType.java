@@ -22,26 +22,26 @@ public class ItemsType extends Item {
     }
 
     @Override
-    public boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start, String[] splitText) {
+    public boolean searchDataByte(HashMap<String, byte[]> header, byte[] stream, long start, String[] splitText) {
         return false;
     }
 
     @Override
-    public byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, byte[] stream, long start) {
         byte[] type_data_b = util.getBytesOfFile(stream, start, type_data_size);
         long descriptor_idx = util.getDecimalValue(type_data_b);
         return appUtil.getByteByIndex(header, stream, descriptor_idx, new ItemsString());
     }
 
     @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public String getDataAsHex(HashMap<String, byte[]> header, byte[] stream, long start) {
         byte[] type_data_b = util.getBytesOfFile(stream, start, type_data_size);
         long descriptor_idx = util.getDecimalValue(type_data_b);
         return appUtil.getHexByIndex(header, stream, descriptor_idx, new ItemsString());
     }
 
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
+    public String getDataAsUTF8(HashMap<String, byte[]> header, byte[] stream, long start) {
         return null;
     }
 
