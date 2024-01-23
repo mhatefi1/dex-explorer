@@ -5,6 +5,7 @@ import com.apk.signature.Util.AppUtil;
 import com.apk.signature.Util.Util;
 import org.apache.pdfbox.io.IOUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -70,8 +71,10 @@ public class AppString {
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
                                         byte[] bs = IOUtils.toByteArray(inputStream);
-                                        HashMap<String, byte[]> header = util.getHeader(bs);
-                                        util.getAll(header, bs, item);
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
+                                        util.getAll(header, stream, item);
+                                        stream.close();
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -95,9 +98,11 @@ public class AppString {
                                 try {
                                     InputStream inputStream = zipFile.getInputStream(entry);
                                     byte[] bs = IOUtils.toByteArray(inputStream);
-                                    HashMap<String, byte[]> header = util.getHeader(bs);
-                                    String utf8 = item.getDataAsUTF8(header, bs, hex_address);
+                                    ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                    HashMap<String, byte[]> header = util.getHeader(stream);
+                                    String utf8 = item.getDataAsUTF8(header, stream, hex_address);
                                     System.out.println("data string:" + utf8);
+                                    stream.close();
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -118,11 +123,13 @@ public class AppString {
                                 try {
                                     InputStream inputStream = zipFile.getInputStream(entry);
                                     byte[] bs = IOUtils.toByteArray(inputStream);
-                                    HashMap<String, byte[]> header = util.getHeader(bs);
-                                    boolean c = util.getAddressFromHexString(header, bs, s.toUpperCase(), item);
+                                    ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                    HashMap<String, byte[]> header = util.getHeader(stream);
+                                    boolean c = util.getAddressFromHexString(header, stream, s.toUpperCase(), item);
                                     if (!c) {
                                         System.out.println("not found");
                                     }
+                                    stream.close();
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -143,12 +150,14 @@ public class AppString {
                                 try {
                                     InputStream inputStream = zipFile.getInputStream(entry);
                                     byte[] bs = IOUtils.toByteArray(inputStream);
-                                    HashMap<String, byte[]> header = util.getHeader(bs);
+                                    ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                    HashMap<String, byte[]> header = util.getHeader(stream);
                                     String hexString = util.stringToHexString(s);
-                                    boolean c = util.getAddressFromHexString(header, bs, hexString.toUpperCase(), item);
+                                    boolean c = util.getAddressFromHexString(header, stream, hexString.toUpperCase(), item);
                                     if (!c) {
                                         System.out.println("not found");
                                     }
+                                    stream.close();
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -169,9 +178,11 @@ public class AppString {
                                 try {
                                     InputStream inputStream = zipFile.getInputStream(entry);
                                     byte[] bs = IOUtils.toByteArray(inputStream);
-                                    HashMap<String, byte[]> header = util.getHeader(bs);
-                                    String res = util.getHexByIndex(header, bs, Long.parseLong(s), item);
+                                    ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                    HashMap<String, byte[]> header = util.getHeader(stream);
+                                    String res = util.getHexByIndex(header, stream, Long.parseLong(s), item);
                                     System.out.println("index [" + s + "]:" + res);
+                                    stream.close();
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -192,13 +203,15 @@ public class AppString {
                                 try {
                                     InputStream inputStream = zipFile.getInputStream(entry);
                                     byte[] bs = IOUtils.toByteArray(inputStream);
-                                    HashMap<String, byte[]> header = util.getHeader(bs);
+                                    ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                    HashMap<String, byte[]> header = util.getHeader(stream);
                                     try {
-                                        util.writeToFile(header, bs, file.getName() + "-strings.txt", item, s.equals("1"));
+                                        util.writeToFile(header, stream, file.getName() + "-strings.txt", item, s.equals("1"));
                                         System.out.println("done");
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
+                                    stream.close();
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }

@@ -6,7 +6,6 @@ import com.apk.signature.Util.Util;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -71,8 +70,8 @@ public class AppGenerateSignature {
 
         signature.setManifestModel(manifest);
         signature.setStrings(string_list);
-        signature.setStart(start_index);
-        signature.setEnd(end_index);
+        //   signature.setStart(start_index);
+        //  signature.setEnd(end_index);
 
         String result = generateSig(signature);
 
@@ -111,13 +110,13 @@ public class AppGenerateSignature {
         generateSignatureItems(manifestModel.getReceivers(), builder);
         builder.append("%");
         generateSignatureItems(signature.getStrings(), builder);
-        if (signature.getStart() > 0) {
+      /*  if (signature.getStart() > 0) {
             builder.append("[");
             builder.append(signature.getStart());
             builder.append("-");
             builder.append(signature.getEnd());
             builder.append("]");
-        }
+        }*/
         return builder.toString();
     }
 

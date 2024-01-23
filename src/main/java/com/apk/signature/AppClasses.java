@@ -5,6 +5,7 @@ import com.apk.signature.Util.AppUtil;
 import com.apk.signature.Util.Util;
 import org.apache.pdfbox.io.IOUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -67,8 +68,10 @@ public class AppClasses {
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
                                         byte[] bs = IOUtils.toByteArray(inputStream);
-                                        HashMap<String, byte[]> header = util.getHeader(bs);
-                                        util.getAll(header, bs, item);
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
+                                        util.getAll(header, stream, item);
+                                        stream.close();
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -96,7 +99,7 @@ public class AppClasses {
                                         InputStream inputStream = zipFile.getInputStream(entry);
                                         byte[] bs = IOUtils.toByteArray(inputStream);
                                         
-                                        HashMap<String, byte[]> header = util.getHeader(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
 
                                         String hexString = item.getClassDataAsHex(bs, address);
                                         String s = item.parseMethodData(header, bs, address);
@@ -129,15 +132,14 @@ public class AppClasses {
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
                                         byte[] bs = IOUtils.toByteArray(inputStream);
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
 
-                                        HashMap<String, byte[]> header = util.getHeader(bs);
-
-                                        boolean c = util.getAddressFromHexString(header, bs, s.toUpperCase(), item);
+                                        boolean c = util.getAddressFromHexString(header, stream, s.toUpperCase(), item);
                                         if (!c) {
                                             System.out.println("not found");
                                         }
-
-
+                                        stream.close();
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -162,13 +164,11 @@ public class AppClasses {
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
                                         byte[] bs = IOUtils.toByteArray(inputStream);
-
-                                        HashMap<String, byte[]> header = util.getHeader(bs);
-
-                                        String res = util.getHexByIndex(header, bs, Long.parseLong(s), item);
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
+                                        String res = util.getHexByIndex(header, stream, Long.parseLong(s), item);
                                         System.out.println(res);
-
-
+                                        stream.close();
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -193,16 +193,15 @@ public class AppClasses {
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
                                         byte[] bs = IOUtils.toByteArray(inputStream);
-
-                                        HashMap<String, byte[]> header = util.getHeader(bs);
-
+                                        ByteArrayInputStream stream = new ByteArrayInputStream(bs);
+                                        HashMap<String, byte[]> header = util.getHeader(stream);
                                         try {
-                                            util.writeToFile(header, bs, file.getName() + "-classes.txt", item, s.equals("1"));
+                                            util.writeToFile(header, stream, file.getName() + "-classes.txt", item, s.equals("1"));
                                             System.out.println("done");
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                         }
-
+                                        stream.close();
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }

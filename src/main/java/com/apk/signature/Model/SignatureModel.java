@@ -6,9 +6,19 @@ public class SignatureModel {
     ManifestModel manifestModel;
     ArrayList<String> strings, methods;
 
-    int start, end;
+    //int start, end;
 
     String name;
+
+    ArrayList<StringModel> stringModels;
+
+    public ArrayList<StringModel> getStringModels() {
+        return stringModels;
+    }
+
+    public void setStringModels(ArrayList<StringModel> stringModels) {
+        this.stringModels = stringModels;
+    }
 
     public String getName() {
         return name;
@@ -16,22 +26,6 @@ public class SignatureModel {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public int getStart() {
-        return start;
-    }
-
-    public void setStart(int start) {
-        this.start = start;
-    }
-
-    public int getEnd() {
-        return end;
-    }
-
-    public void setEnd(int end) {
-        this.end = end;
     }
 
     public SignatureModel() {

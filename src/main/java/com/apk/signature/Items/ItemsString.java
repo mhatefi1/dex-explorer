@@ -1,11 +1,10 @@
 package com.apk.signature.Items;
 
+import com.apk.signature.Util.Util;
+
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import com.apk.signature.Util.Util;
-import org.apache.pdfbox.io.RandomAccessFile;
 
 public class ItemsString extends Item {
 
@@ -23,7 +22,7 @@ public class ItemsString extends Item {
 
 
     @Override
-    public boolean searchDataByte(HashMap<String, byte[]> header, byte[] stream, long start, String[] splitText) {
+    public boolean searchDataByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start, String[] splitText) {
         byte[] first_offset_of_string_data_b = util.getBytesOfFile(stream, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
         while (true) {
@@ -49,7 +48,7 @@ public class ItemsString extends Item {
     }
 
     @Override
-    public byte[] getDataAsByte(HashMap<String, byte[]> header, byte[] stream, long start) {
+    public byte[] getDataAsByte(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
         byte[] first_offset_of_string_data_b = util.getBytesOfFile(stream, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
 
@@ -79,7 +78,7 @@ public class ItemsString extends Item {
     }
 
     @Override
-    public String getDataAsHex(HashMap<String, byte[]> header, byte[] stream, long start) {
+    public String getDataAsHex(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
         byte[] first_offset_of_string_data_b = util.getBytesOfFile(stream, start, string_data_off_size);
         long offset = util.getDecimalValue(first_offset_of_string_data_b);
         StringBuilder stringBuilder = new StringBuilder();
@@ -105,8 +104,9 @@ public class ItemsString extends Item {
 
         return stringBuilder.toString();
     }
+
     @Override
-    public String getDataAsUTF8(HashMap<String, byte[]> header, byte[] stream, long start) {
+    public String getDataAsUTF8(HashMap<String, byte[]> header, ByteArrayInputStream stream, long start) {
         String hex = getDataAsHex(header, stream, start);
         return util.hexStringToUTF8(hex);
     }
