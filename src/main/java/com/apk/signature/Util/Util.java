@@ -135,14 +135,8 @@ public class Util extends FileUtil {
     }
 
     public byte[] getBytesOfFile(byte[] stream, long offset, long size) {
-        byte[] bytes = new byte[(int) size];
-        try {
-            int to = (int) (offset + size);
-            bytes = Arrays.copyOfRange(stream, (int) offset, to);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return bytes;
+        int to = (int) (offset + size);
+        return Arrays.copyOfRange(stream, (int) offset, to);
     }
 
     public String byteToStringHex(byte[] byteArray) {

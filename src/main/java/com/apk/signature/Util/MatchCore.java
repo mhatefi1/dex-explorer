@@ -187,21 +187,26 @@ public class MatchCore {
 
     private boolean getStringAddressFromHexString(byte[] stream, int ids_count, String text, Item tClass, int periodStartIndex, int periodEndIndex) {
         long ids_offset = 112;
-        if (periodStartIndex < ids_count) {
-            String[] splitText = util.splitTwoByTwo(text);
-            if (periodEndIndex > ids_count || periodEndIndex == 0) {
-                periodEndIndex = ids_count;
-            }
-            ids_offset = ids_offset + (long) tClass.data_size * periodStartIndex;
-            for (int i = periodStartIndex; i <= periodEndIndex; i++) {
-                boolean ss = tClass.searchDataByte(null, stream, ids_offset, splitText);
-                if (ss) {
-                    printYellow("{ hex:" + text);
-                    printYellow("  ids_index: " + i + " }");
-                    return true;
+        try {
+            if (periodStartIndex < ids_count) {
+                String[] splitText = util.splitTwoByTwo(text);
+                if (periodEndIndex > ids_count || periodEndIndex == 0) {
+                    periodEndIndex = ids_count;
                 }
-                ids_offset = ids_offset + tClass.data_size;
+                ids_offset = ids_offset + (long) tClass.data_size * periodStartIndex;
+                for (int i = periodStartIndex; i <= periodEndIndex; i++) {
+                    boolean ss = tClass.searchDataByte(null, stream, ids_offset, splitText);
+                    if (ss) {
+                        printYellow("{ hex:" + text);
+                        printYellow("  ids_index: " + i + " }");
+                        return true;
+                    }
+                    ids_offset = ids_offset + tClass.data_size;
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
         return false;
     }
