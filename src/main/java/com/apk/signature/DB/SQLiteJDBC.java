@@ -22,8 +22,7 @@ public class SQLiteJDBC {
     private static final String SERVICE = "service";
     private static final String RECEIVER = "receiver";
     private static final String STRINGS = "strings";
-    private static final String STRING_START = "string_start";
-    private static final String STRING_END = "string_end";
+
     public String path;
     private Connection c;
     private Statement stmt;
@@ -51,9 +50,7 @@ public class SQLiteJDBC {
                     " " + ACTIVITY + " TEXT , " +
                     " " + SERVICE + " TEXT , " +
                     " " + RECEIVER + " TEXT , " +
-                    " " + STRINGS + " TEXT , " +
-                    " " + STRING_START + " INT , " +
-                    " " + STRING_END + " INT)";
+                    " " + STRINGS + " TEXT)";
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
@@ -71,11 +68,10 @@ public class SQLiteJDBC {
             System.out.println("Opened database successfully");
 
             stmt = c.createStatement();
-            String sql = "INSERT INTO " + TABLE_NAME + " (" + NAME + "," + PERMISSION + "," + ACTIVITY + "," + SERVICE + "," + RECEIVER + "," + STRINGS + "," + STRING_START + "," + STRING_END + ") " +
+            String sql = "INSERT INTO " + TABLE_NAME + " (" + NAME + "," + PERMISSION + "," + ACTIVITY + "," + SERVICE + "," + RECEIVER + "," + STRINGS + ") " +
                     "VALUES (" + "\"" + model.name + "\"" + ", " + "\"" + model.permissions + "\"" + ", " +
                     "\"" + model.activities + "\"" + ", " + "\"" + model.services + "\"" + ", " +
-                    "\"" + model.receivers + "\"" + ", " + "\"" + model.strings + "\"" + ", " +
-                    model.string_start + ", " + model.string_end + " );";
+                    "\"" + model.receivers + "\"" + ", " + "\"" + model.strings + "\"" + ");";
             stmt.executeUpdate(sql);
 
             stmt.close();
@@ -98,12 +94,6 @@ public class SQLiteJDBC {
             stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM " + TABLE_NAME + ";");
 
-
-            ArrayList<String> permission_list = new ArrayList<>();
-            ArrayList<String> activity_list = new ArrayList<>();
-            ArrayList<String> service_list = new ArrayList<>();
-            ArrayList<String> receiver_list = new ArrayList<>();
-
             while (rs.next()) {
                 int id = rs.getInt("id");
                 String name = rs.getString(NAME);
@@ -112,9 +102,7 @@ public class SQLiteJDBC {
                 String services = rs.getString(SERVICE);
                 String receivers = rs.getString(RECEIVER);
                 String strings = rs.getString(STRINGS);
-                int startIndex = rs.getInt(STRING_START);
-                int endIndex = rs.getInt(STRING_END);
-                SignatureModel model = new SignatureModel();
+                SignatureModel model;
                 model = new SignatureUtil().createSignatureModel(permissions, activities, services, receivers, strings);
                 model.setName(name);
                 result.add(model);

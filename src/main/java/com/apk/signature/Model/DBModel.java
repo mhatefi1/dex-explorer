@@ -8,22 +8,13 @@ public class DBModel {
     public String services;
     public String receivers;
     public String strings;
-    public int string_start;
-    public int string_end;
 
-    public DBModel() {
-    }
-
-    public DBModel(int id, String name, String permissions, String activities, String services, String receivers, String strings, int string_start, int string_end) {
-        this.id = id;
-        this.name = name;
+    public DBModel(String permissions, String activities, String services, String receivers, String strings) {
         this.permissions = permissions;
         this.activities = activities;
         this.services = services;
         this.receivers = receivers;
         this.strings = strings;
-        this.string_start = string_start;
-        this.string_end = string_end;
     }
 
     public int getId() {
@@ -82,19 +73,4 @@ public class DBModel {
         this.strings = strings;
     }
 
-    public int getString_start() {
-        return string_start;
-    }
-
-    public void setString_start(int string_start) {
-        this.string_start = string_start;
-    }
-
-    public int getString_end() {
-        return string_end;
-    }
-
-    public void setString_end(int string_end) {
-        this.string_end = string_end;
-    }
 }

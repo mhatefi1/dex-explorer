@@ -1,5 +1,6 @@
 package com.apk.signature.Util;
 
+import com.apk.signature.Model.DBModel;
 import com.apk.signature.Model.ManifestModel;
 import com.apk.signature.Model.SignatureModel;
 import com.apk.signature.Model.StringModel;
@@ -10,20 +11,34 @@ import java.util.regex.Pattern;
 
 public class SignatureUtil extends Util {
 
-    public SignatureModel parseSignature(String signature) {
+    private ArrayList<String> getComponentList(String signature) {
         String regex = "!(.*)@(.*)#(.*)\\$(.*)%(.*)";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(signature);
-
+        ArrayList<String> list = new ArrayList<>();
         if (matcher.find()) {
             String permissions = matcher.group(1);
             String activities = matcher.group(2);
             String services = matcher.group(3);
             String receivers = matcher.group(4);
             String strings = matcher.group(5);
-            return createSignatureModel(permissions, activities, services, receivers, strings);
+            list.add(permissions);
+            list.add(activities);
+            list.add(services);
+            list.add(receivers);
+            list.add(strings);
         }
-        return null;
+        return list;
+    }
+
+    public DBModel parseSignatureAsDB(String signature) {
+        ArrayList<String> list = getComponentList(signature);
+        return new DBModel(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4));
+    }
+
+    public SignatureModel parseSignature(String signature) {
+        ArrayList<String> list = getComponentList(signature);
+        return createSignatureModel(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4));
     }
 
     public SignatureModel createSignatureModel(String permissions, String activities, String services, String receivers, String strings) {

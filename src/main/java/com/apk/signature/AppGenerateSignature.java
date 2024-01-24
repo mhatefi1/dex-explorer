@@ -50,9 +50,6 @@ public class AppGenerateSignature {
         signature.setManifestModel(manifest);
         signature.setStrings(string_list);
 
-        signature.setManifestModel(manifest);
-        signature.setStrings(string_list);
-
         String result = generateSig(signature);
 
         write(result, myObj);
@@ -132,12 +129,6 @@ public class AppGenerateSignature {
             arrayList.add(hex);
         }
         return arrayList;
-    }
-
-    public static void print(ArrayList<String> list) {
-        for (String s : list) {
-            System.out.println(s);
-        }
     }
 
     public static void write(String text, Scanner myObj) {

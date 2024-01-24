@@ -3,14 +3,13 @@ package com.apk.signature.Model;
 import java.util.ArrayList;
 
 public class SignatureModel {
-    ManifestModel manifestModel;
-    ArrayList<String> strings, methods;
+    public String name;
+    public ManifestModel manifestModel;
+    public ArrayList<String> strings;
+    public ArrayList<StringModel> stringModels;
 
-    //int start, end;
-
-    String name;
-
-    ArrayList<StringModel> stringModels;
+    public SignatureModel() {
+    }
 
     public ArrayList<StringModel> getStringModels() {
         return stringModels;
@@ -28,9 +27,6 @@ public class SignatureModel {
         this.name = name;
     }
 
-    public SignatureModel() {
-    }
-
     public ManifestModel getManifestModel() {
         return manifestModel;
     }
@@ -45,13 +41,5 @@ public class SignatureModel {
 
     public void setStrings(ArrayList<String> strings) {
         this.strings = strings;
-    }
-
-    public ArrayList<String> getMethods() {
-        return methods;
-    }
-
-    public void setMethods(ArrayList<String> methods) {
-        this.methods = methods;
     }
 }
