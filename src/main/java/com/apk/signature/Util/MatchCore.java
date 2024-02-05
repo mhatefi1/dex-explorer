@@ -48,6 +48,52 @@ public class MatchCore {
         return signatureModels;
     }
 
+    private ArrayList<SignatureModel> generateSignatureList(ManifestModel appManifestModel, ArrayList<SignatureModel> signatureModels) {
+        ArrayList<SignatureModel> manifestMatchedSignatures = new ArrayList<>();
+        boolean permissionMatch, activitiesMatch, serviceMatch, receiverMatch;
+        for (SignatureModel signatureModel : signatureModels) {
+            try {
+                ManifestModel signatureManifestModel = signatureModel.getManifestModel();
+                boolean permissionEmpty = signatureManifestModel.getPermission().get(0).isEmpty(),
+                        activitiesEmpty = signatureManifestModel.getActivities().get(0).isEmpty(),
+                        serviceEmpty = signatureManifestModel.getServices().get(0).isEmpty(),
+                        receiverEmpty = signatureManifestModel.getReceivers().get(0).isEmpty();
+
+                if (permissionEmpty) {
+                    permissionMatch = true;
+                } else {
+                    permissionMatch = util.contains(appManifestModel.getPermission(), signatureManifestModel.getPermission());
+                }
+
+                if (activitiesEmpty) {
+                    activitiesMatch = true;
+                } else {
+                    activitiesMatch = util.contains(appManifestModel.getActivities(), signatureManifestModel.getActivities());
+                }
+
+                if (serviceEmpty) {
+                    serviceMatch = true;
+                } else {
+                    serviceMatch = util.contains(appManifestModel.getServices(), signatureManifestModel.getServices());
+                }
+
+                if (receiverEmpty) {
+                    receiverMatch = true;
+                } else {
+                    receiverMatch = util.contains(appManifestModel.getReceivers(), signatureManifestModel.getReceivers());
+                }
+                boolean manifestMatch = permissionMatch && activitiesMatch && serviceMatch && receiverMatch;
+
+                if (manifestMatch) {
+                    manifestMatchedSignatures.add(signatureModel);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return manifestMatchedSignatures;
+    }
+
     public ArrayList<MalwareModel> match(ArrayList<File> fileTargetList, ArrayList<SignatureModel> signatureModels) {
         ArrayList<MalwareModel> malwareModels = new ArrayList<>();
         ManifestUtil manifestUtil = new ManifestUtil();
@@ -56,8 +102,8 @@ public class MatchCore {
             totalFiles++;
             Util.print("********************" + file_i.getAbsolutePath() + "********************");
             MalwareModel malwareModel = new MalwareModel();
-            String manifest = manifestUtil.decodeManifest(file_i);
-            if (manifest.isEmpty()) {
+            ManifestModel appManifestModel = manifestUtil.matchManifestNew(file_i);
+            if (appManifestModel == null) {
                 unscannable++;
                 unscannables.add(file_i.getAbsolutePath());
                 printYellow("Unscannable");
@@ -65,51 +111,7 @@ public class MatchCore {
             } else {
                 totalApk++;
             }
-            ManifestModel appManifestModel = manifestUtil.matchDecodedManifest(manifest);
-
-            ArrayList<SignatureModel> manifestMatchedSignatures = new ArrayList<>();
-
-            boolean permissionMatch, activitiesMatch, serviceMatch, receiverMatch;
-            for (SignatureModel signatureModel : signatureModels) {
-                try {
-                    ManifestModel signatureManifestModel = signatureModel.getManifestModel();
-                    boolean permissionEmpty = signatureManifestModel.getPermission().get(0).isEmpty(),
-                            activitiesEmpty = signatureManifestModel.getActivities().get(0).isEmpty(),
-                            serviceEmpty = signatureManifestModel.getServices().get(0).isEmpty(),
-                            receiverEmpty = signatureManifestModel.getReceivers().get(0).isEmpty();
-
-                    if (permissionEmpty) {
-                        permissionMatch = true;
-                    } else {
-                        permissionMatch = util.contains(appManifestModel.getPermission(), signatureManifestModel.getPermission());
-                    }
-
-                    if (activitiesEmpty) {
-                        activitiesMatch = true;
-                    } else {
-                        activitiesMatch = util.contains(appManifestModel.getActivities(), signatureManifestModel.getActivities());
-                    }
-
-                    if (serviceEmpty) {
-                        serviceMatch = true;
-                    } else {
-                        serviceMatch = util.contains(appManifestModel.getServices(), signatureManifestModel.getServices());
-                    }
-
-                    if (receiverEmpty) {
-                        receiverMatch = true;
-                    } else {
-                        receiverMatch = util.contains(appManifestModel.getReceivers(), signatureManifestModel.getReceivers());
-                    }
-                    boolean manifestMatch = permissionMatch && activitiesMatch && serviceMatch && receiverMatch;
-
-                    if (manifestMatch) {
-                        manifestMatchedSignatures.add(signatureModel);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            ArrayList<SignatureModel> manifestMatchedSignatures = generateSignatureList(appManifestModel, signatureModels);
 
             boolean stringMatch = false;
             boolean isMalware = false;
@@ -123,7 +125,6 @@ public class MatchCore {
                             try {
                                 InputStream inputStream = zipFile.getInputStream(entry);
                                 byte[] stream = IOUtils.toByteArray(inputStream);
-                                //HashMap<String, byte[]> header = util.getStringHeader(stream);
                                 byte[] header_ids_size = util.getBytesOfFile(stream, 56, 4);
                                 long ids_count = util.getDecimalValue(header_ids_size);
                                 for (SignatureModel signatureModel : manifestMatchedSignatures) {
@@ -147,7 +148,7 @@ public class MatchCore {
                                 if (isMalware) {
                                     break;
                                 }
-                                //stream.close();
+                                inputStream.close();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -175,7 +176,6 @@ public class MatchCore {
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
                 File file = new File(line);
                 argsFileSignatureList.add(file);
             }
