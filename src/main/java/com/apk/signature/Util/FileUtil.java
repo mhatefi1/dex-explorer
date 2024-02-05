@@ -45,12 +45,12 @@ public class FileUtil {
             } else {
                 String name = splitNameFromFormat(s);
                 File ext = new File(name + "-");
-                boolean dir = ext.mkdir();
-                if (dir) {
-                    readDexFilesFromZip(s, ext.getAbsolutePath());
-                } else {
-                    printRed("could not create " + s + " folder");
-                }
+                //boolean dir = ext.mkdir();
+                //if (dir) {
+                readDexFilesFromZip(s, ext.getAbsolutePath());
+                // } else {
+                //    printRed("could not create " + s + " folder");
+                // }
             }
         } catch (Exception e) {
             System.out.println("failed");
@@ -201,7 +201,7 @@ public class FileUtil {
             String name = splitNameFromFormat(fileName);
             String folderPath = f.getParent();
             File extractPath = new File(folderPath, name);
-            extractPath.mkdir();
+            //extractPath.mkdir();
             return readDexFilesFromZip(path, extractPath.getAbsolutePath());
         }
         ArrayList<File> list = new ArrayList<>();
@@ -218,7 +218,15 @@ public class FileUtil {
                     ZipEntry entry = entries.nextElement();
                     if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
                         InputStream inputStream = zipFile.getInputStream(entry);
-                        list.add(convertInputStreamToFile(inputStream, extractPath + "\\" + entry.getName()));
+                        File file = new File(extractPath);
+                        if (!file.exists()) {
+                            boolean mk = file.mkdir();
+                            if (mk) {
+                                list.add(convertInputStreamToFile(inputStream, extractPath + "\\" + entry.getName()));
+                            }
+                        } else {
+                            list.add(convertInputStreamToFile(inputStream, extractPath + "\\" + entry.getName()));
+                        }
                     }
                 }
             }
