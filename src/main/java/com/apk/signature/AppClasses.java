@@ -14,6 +14,8 @@ import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static com.apk.signature.Util.Util.print;
+
 public class AppClasses {
     private static final String print_all = "1";
     private static final String get_method_item_from_hex_address = "2";
@@ -95,6 +97,7 @@ public class AppClasses {
                             while (entries.hasMoreElements()) {
                                 ZipEntry entry = entries.nextElement();
                                 if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                                    print(entry.getName());
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
                                         byte[] bs = IOUtils.toByteArray(inputStream);
@@ -129,6 +132,7 @@ public class AppClasses {
                             while (entries.hasMoreElements()) {
                                 ZipEntry entry = entries.nextElement();
                                 if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                                    print(entry.getName());
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
                                         byte[] bs = IOUtils.toByteArray(inputStream);
@@ -161,6 +165,7 @@ public class AppClasses {
                             while (entries.hasMoreElements()) {
                                 ZipEntry entry = entries.nextElement();
                                 if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                                    print(entry.getName());
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
                                         byte[] bs = IOUtils.toByteArray(inputStream);
@@ -190,6 +195,7 @@ public class AppClasses {
                             while (entries.hasMoreElements()) {
                                 ZipEntry entry = entries.nextElement();
                                 if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                                    print(entry.getName());
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
                                         byte[] bs = IOUtils.toByteArray(inputStream);
