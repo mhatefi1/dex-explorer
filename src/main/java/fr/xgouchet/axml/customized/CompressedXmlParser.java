@@ -1,4 +1,4 @@
-package fr.xgouchet.axml;
+package fr.xgouchet.axml.customized;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
