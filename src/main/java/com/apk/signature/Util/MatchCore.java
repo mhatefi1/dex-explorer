@@ -18,7 +18,8 @@ import java.util.zip.ZipFile;
 import static com.apk.signature.Util.Util.*;
 
 public class MatchCore {
-
+    private static String dexName;
+    private static boolean dexNamePrinted;
     private final ArrayList<String> unscannables = new ArrayList<>();
     AppUtil util = new AppUtil();
     private int totalFiles, totalApk, unscannable;
@@ -123,6 +124,8 @@ public class MatchCore {
                         ZipEntry entry = entries.nextElement();
                         if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
                             try {
+                                dexName = entry.getName();
+                                dexNamePrinted = false;
                                 InputStream inputStream = zipFile.getInputStream(entry);
                                 byte[] stream = IOUtils.toByteArray(inputStream);
                                 byte[] header_ids_size = util.getBytesOfFile(stream, 56, 4);
@@ -197,6 +200,10 @@ public class MatchCore {
                 for (int i = periodStartIndex; i <= periodEndIndex; i++) {
                     boolean ss = tClass.searchDataByte(null, stream, ids_offset, splitText);
                     if (ss) {
+                        if (!dexNamePrinted) {
+                            print(dexName + ":");
+                            dexNamePrinted = true;
+                        }
                         printYellow("{ hex:" + text);
                         printYellow("  ids_index: " + i + " }");
                         return true;
