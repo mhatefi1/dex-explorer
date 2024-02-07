@@ -43,10 +43,11 @@ public class CompressedXmlParser {
         mNamespaces = new HashMap<>();
     }
 
-    public void parse(final byte[] bs, final CompressedXmlParserListener listener) {
+    public boolean parse(final byte[] bs, final CompressedXmlParserListener listener) {
         mListener = listener;
         mData = bs;
         parseCompressedXml();
+        return mParserOffset == mData.length;
     }
 
     private void parseCompressedXml() {
@@ -80,7 +81,7 @@ public class CompressedXmlParser {
                     parseText();
                     break;
                 case WORD_EOS:
-                    break;
+                    return;
                 default:
                     mParserOffset += WORD_SIZE;
                     break;

@@ -38,12 +38,9 @@ public class CompressedXmlParser {
     private static final int TYPE_COLOR = 0x1C000008;
     private static final int TYPE_COLOR2 = 0x1D000008;
 
-    private static final String[] DIMEN = new String[]{"px", "dp", "sp",
-            "pt", "in", "mm"};
-    // Data
-    private CompressedXmlParserListener mListener;
-    // Internal
+    private static final String[] DIMEN = new String[]{"px", "dp", "sp", "pt", "in", "mm"};
     private final Map<String, String> mNamespaces;
+    private CompressedXmlParserListener mListener;
     private byte[] mData;
     private String[] mStringsTable;
     private int[] mResourcesIds;
@@ -74,7 +71,6 @@ public class CompressedXmlParser {
 
         // parseCompressedHeader();
         parseCompressedXml();
-
     }
 
     /**
@@ -129,7 +125,7 @@ public class CompressedXmlParser {
                     break;
                 case WORD_EOS:
                     mListener.endDocument();
-                    break;
+                    return;
                 default:
                     mParserOffset += WORD_SIZE;
 //				Log.w(TAG, "Unknown word 0x" + Integer.toHexString(word0)

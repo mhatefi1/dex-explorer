@@ -29,7 +29,7 @@ public class ManifestUtil extends Util {
             ArrayList<String> activity_list = new ArrayList<>();
             ArrayList<String> service_list = new ArrayList<>();
             ArrayList<String> receiver_list = new ArrayList<>();
-            new CompressedXmlParser().parse(bs, (uri, localName, qName, attrs) -> {
+            boolean success = new CompressedXmlParser().parse(bs, (uri, localName, qName, attrs) -> {
                 switch (localName) {
                     case "uses-permission":
                     case "permission":
@@ -46,7 +46,7 @@ public class ManifestUtil extends Util {
                         break;
                 }
             });
-
+            if (!success) return null;
             appManifestModel.setPermission(permission_list);
             appManifestModel.setActivities(activity_list);
             appManifestModel.setServices(service_list);
