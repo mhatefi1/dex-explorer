@@ -32,6 +32,9 @@ public class AppMain {
                 case "6":
                     AppMatch.main(args);
                     break;
+                case "62":
+                    AppBinarySearchMatch.main(args);
+                    break;
                 case "7":
                     AppGenerateSignature.main(args);
                     break;
@@ -118,6 +121,9 @@ public class AppMain {
                     String path = myObj.nextLine();
                     myObj.close();
                     new FIndInterval().find(s, path);
+                }
+                case "62" -> {
+                    AppBinarySearchMatch.main(args);
                 }
             }
         }
