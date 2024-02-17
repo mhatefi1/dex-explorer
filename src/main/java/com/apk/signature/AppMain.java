@@ -8,44 +8,52 @@ import java.util.Scanner;
 
 public class AppMain {
 
+    public static final String STRING_EXPLORER = "1";
+    public static final String METHOD_EXPLORER = "2";
+    public static final String CLASS_EXPLORER = "3";
+    public static final String EXTRACT_DEX = "4";
+    public static final String FACTORIZING = "5";
+    public static final String SCAN = "6";
+    public static final String GENERATE_SIGNATURE = "7";
+    public static final String CONVERT_SIGNATURES = "8";
+    public static final String DECODE_MANIFEST = "9";
+    public static final String GET_STRING_INDEX_INTERVAL = "10";
+
     public static void main(String[] args) {
         if (args.length > 0) {
             switch (args[0]) {
-                case "1":
+                case STRING_EXPLORER:
                     AppString.main(args);
                     break;
-                case "2":
+                case METHOD_EXPLORER:
                     AppMethod.main(args);
                     break;
-                case "3":
+                case CLASS_EXPLORER:
                     AppClasses.main(args);
                     break;
-                case "4":
+                case EXTRACT_DEX:
                     String s4 = args[1];
                     System.out.println("waite ...");
                     new Util().extractDex(s4);
                     System.out.println("done");
                     break;
-                case "5":
+                case FACTORIZING:
                     AppCommon.main(args);
                     break;
-                case "6":
-                    AppMatch.main(args);
-                    break;
-                case "62":
+                case SCAN:
                     AppBinarySearchMatch.main(args);
                     break;
-                case "7":
+                case GENERATE_SIGNATURE:
                     AppGenerateSignature.main(args);
                     break;
-                case "8":
+                case CONVERT_SIGNATURES:
                     AppConvert.main(args);
                     break;
-                case "9":
+                case DECODE_MANIFEST:
                     String s9 = args[1];
                     new ManifestUtil().decodeMultipleManifest(s9);
                     break;
-                case "10":
+                case GET_STRING_INDEX_INTERVAL:
                     String s10 = args[1];
                     String path = args[2];
                     new FIndInterval().find(s10, path);
@@ -72,19 +80,19 @@ public class AppMain {
             String input = myObj.nextLine();
 
             switch (input) {
-                case "1" -> {
+                case STRING_EXPLORER -> {
                     AppString.main(args);
                     myObj.close();
                 }
-                case "2" -> {
+                case METHOD_EXPLORER -> {
                     AppMethod.main(args);
                     myObj.close();
                 }
-                case "3" -> {
+                case CLASS_EXPLORER -> {
                     AppClasses.main(args);
                     myObj.close();
                 }
-                case "4" -> {
+                case EXTRACT_DEX -> {
                     System.out.println("Enter file path: ");
                     String s = myObj.nextLine();
                     myObj.close();
@@ -92,38 +100,35 @@ public class AppMain {
                     new Util().extractDex(s);
                     System.out.println("done");
                 }
-                case "5" -> {
+                case FACTORIZING -> {
                     AppCommon.main(args);
                     myObj.close();
                 }
-                case "6" -> {
-                    AppMatch.main(args);
+                case SCAN -> {
+                    AppBinarySearchMatch.main(args);
                     myObj.close();
                 }
-                case "7" -> {
+                case GENERATE_SIGNATURE -> {
                     AppGenerateSignature.main(args);
                     myObj.close();
                 }
-                case "8" -> {
+                case CONVERT_SIGNATURES -> {
                     AppConvert.main(args);
                     myObj.close();
                 }
-                case "9" -> {
+                case DECODE_MANIFEST -> {
                     System.out.println("Enter file path: ");
                     String s = myObj.nextLine();
                     myObj.close();
                     new ManifestUtil().decodeMultipleManifest(s);
                 }
-                case "10" -> {
+                case GET_STRING_INDEX_INTERVAL -> {
                     System.out.println("Enter string: ");
                     String s = myObj.nextLine();
                     System.out.println("Enter file path: ");
                     String path = myObj.nextLine();
                     myObj.close();
                     new FIndInterval().find(s, path);
-                }
-                case "62" -> {
-                    AppBinarySearchMatch.main(args);
                 }
             }
         }

@@ -21,7 +21,7 @@ public class AppMatch {
         String target_path;
         ArrayList<File> AllTargetFilePath = new ArrayList<>();
         MatchCore matchCore = new MatchCore();
-        if (args.length > 0 && args[0].equals("6")) {
+        if (args.length > 0 && args[0].equals(AppMain.SCAN)) {
             signature_path = args[1];
             target_path = args[2];
             File file = new File(target_path);

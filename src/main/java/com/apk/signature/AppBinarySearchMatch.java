@@ -20,7 +20,7 @@ public class AppBinarySearchMatch {
         String target_path;
         ArrayList<File> AllTargetFilePath = new ArrayList<>();
         BinaryMatchCore matchCore = new BinaryMatchCore();
-        if (args.length > 0 && args[0].equals("62")) {
+        if (args.length > 0 && args[0].equals(AppMain.SCAN)) {
             signature_path = args[1];
             target_path = args[2];
             File file = new File(target_path);

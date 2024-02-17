@@ -24,6 +24,7 @@ public class BinaryMatchCore {
     private static int offset_of_last_hex;
     private final ArrayList<String> unscannables = new ArrayList<>();
     AppUtil util = new AppUtil();
+    long f1, f2;
     private int totalFiles, totalApk, unscannable;
 
     public ArrayList<SignatureModel> getSigModels(File fileSignature) {
@@ -214,10 +215,6 @@ public class BinaryMatchCore {
                         printYellow("  ids_index: " + m + " }");
                         return true;
                     }
-                    long f1 = util.stringHexToDecimal(lastHex);
-                    String s0 = splitText[offset_of_last_hex];
-                    long f2 = util.stringHexToDecimal(s0);
-
                     if (f1 < f2) {
                         min = m + 1;
                     } else {
@@ -248,9 +245,9 @@ public class BinaryMatchCore {
             byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(stream, offset, 1);
             String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
             if (!hex.equals(s)) {
-                //return new SearchResultStructure(false, hex, i);
-                lastHex = hex;
-                offset_of_last_hex = i;
+                f1 = util.stringHexToDecimal(hex);
+                String s0 = splitText[i];
+                f2 = util.stringHexToDecimal(s0);
                 return false;
             }
             offset++;
