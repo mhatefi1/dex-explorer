@@ -41,8 +41,8 @@ public enum CompressionMethod {
                 return compressionMethod;
             }
         }
-
-        throw new ZipException("Unknown compression method", ZipException.Type.UNKNOWN_COMPRESSION_METHOD);
+        return CompressionMethod.STORE;
+        //throw new ZipException("Unknown compression method", ZipException.Type.UNKNOWN_COMPRESSION_METHOD);
     }
 
     /**
