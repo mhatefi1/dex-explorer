@@ -405,23 +405,35 @@ public class CompressedXmlParser {
     private String getStringFromStringTable(final int offset) {
         int strLength;
         byte[] chars;
-        if (mData[offset + 1] == mData[offset]) {
-            strLength = mData[offset];
-            chars = new byte[strLength];// NOPMD
-            for (int i = 0; i < strLength; i++) {
-                chars[i] = mData[offset + 2 + i]; // NOPMD
-            }
-        } else {
+        if (offset > 0 && offset < mData.length) {
+            if (mData[offset + 1] == mData[offset]) {
+                strLength = mData[offset];
+                chars = new byte[strLength];
+                for (int i = 0; i < strLength; i++) {
+                    int temp = offset + 2 + i;
+                    if (temp < mData.length) {
+                        chars[i] = mData[temp];
+                    } else {
+                        break;
+                    }
+                }
+            } else {
 
-            strLength = ((mData[offset + 1] << 8) & 0xFF00)
-                    | (mData[offset] & 0xFF);
-            chars = new byte[strLength]; // NOPMD
-            for (int i = 0; i < strLength; i++) {
-                chars[i] = mData[offset + 2 + (i * 2)]; // NOPMD
-            }
+                strLength = ((mData[offset + 1] << 8) & 0xFF00) | (mData[offset] & 0xFF);
+                chars = new byte[strLength];
+                for (int i = 0; i < strLength; i++) {
+                    int temp = offset + 2 + (i * 2);
+                    if (temp < mData.length) {
+                        chars[i] = mData[temp];
+                    } else {
+                        break;
+                    }
+                }
 
+            }
+            return new String(chars);
         }
-        return new String(chars);
+        return "";
     }
 
     /**
