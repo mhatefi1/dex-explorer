@@ -1,5 +1,7 @@
 package fr.xgouchet.axml.customized;
 
+import com.apk.signature.Util.Util;
+
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -263,6 +265,42 @@ public class CompressedXmlParser {
         }
         return new String(chars);
     }
+
+    /*
+        private String getStringFromStringTable(final int offset) {
+        int strLength;
+        byte[] chars;
+        if (offset > 0 && offset < mData.length) {
+            if (mData[offset + 1] == mData[offset]) {
+                strLength = mData[offset];
+                chars = new byte[strLength];
+                for (int i = 0; i < strLength; i++) {
+                    int temp = offset + 2 + i;
+                    if (temp < mData.length) {
+                        chars[i] = mData[temp];
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+
+                strLength = ((mData[offset + 1] << 8) & 0xFF00) | (mData[offset] & 0xFF);
+                chars = new byte[strLength];
+                for (int i = 0; i < strLength; i++) {
+                    int temp = offset + 2 + (i * 2);
+                    if (temp < mData.length) {
+                        chars[i] = mData[temp];
+                    } else {
+                        break;
+                    }
+                }
+
+            }
+            return new String(chars);
+        }
+        return "";
+    }
+     */
 
     private int getLEWord(final int off) {
         return ((mData[off + 3] << 24) & 0xff000000) | ((mData[off + 2] << 16) & 0x00ff0000)

@@ -3,17 +3,21 @@ package com.apk.signature.Util;
 import com.apk.signature.Model.ManifestModel;
 import com.apk.signature.Model.SignatureModel;
 import com.apk.signature.Model.StringModel;
+import net.lingala.zip4j.model.FileHeader;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.RandomAccessFile;
 import org.fusesource.jansi.AnsiConsole;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -26,6 +30,8 @@ public class Util extends FileUtil {
     public static String RED = "\u001B[31m";
     public static String GREEN = "\u001B[32m";
     public static String YELLOW = "\u001B[33m";
+
+    public static String dexName;
 
     public static long runDuration(long startTime) {
         long endTime = System.currentTimeMillis();
@@ -275,4 +281,96 @@ public class Util extends FileUtil {
         }
         return header;
     }
+
+    public void readZip(File file, ReadBytesFromZipListener listener) {
+        try {
+            try (net.lingala.zip4j.ZipFile zipFile = new net.lingala.zip4j.ZipFile(file)) {
+                List<FileHeader> fileHeaders = zipFile.getFileHeaders();
+                List<FileHeader> fileHeaderCustom = new ArrayList<>();
+                boolean countinue = false;
+                for (FileHeader fileHeader : fileHeaders) {
+                    String name = fileHeader.getFileName();
+                    if (name.equals("AndroidManifest.xml")) {
+                        try {
+                            InputStream inputStream = zipFile.getInputStream(fileHeader);
+                            byte[] bs = IOUtils.toByteArray(inputStream);
+                            inputStream.close();
+                            countinue = listener.onReadManifest(bs);
+                        } catch (Exception e) {
+                            if (e.getMessage().contains("zip")) {
+                                listener.onZipError(e);
+                            } else {
+                                listener.onManifestError(e);
+                            }
+                        }
+                    } else if (name.endsWith(".dex")) {
+                        fileHeaderCustom.add(fileHeader);
+                    }
+                }
+                if (countinue) {
+                    for (FileHeader fileHeader : fileHeaderCustom) {
+                        try {
+                            InputStream inputStream = zipFile.getInputStream(fileHeader);
+                            byte[] bs = IOUtils.toByteArray(inputStream);
+                            inputStream.close();
+                            dexName = fileHeader.getFileName();
+                            boolean malware = listener.onReadDex(bs);
+                            if (malware) {
+                                break;
+                            }
+                        } catch (Exception e) {
+                            if (e.getMessage().contains("zip")) {
+                                listener.onZipError(e);
+                            } else {
+                                listener.onDexError(e);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            listener.onZipError(e);
+        }
+        listener.onEnd();
+    }
+
+    /*public void readZip2(File file, ReadBytesFromZipListener listener) {
+        try {
+            try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                List<ZipEntry> dexEntries = new ArrayList<>();
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                boolean countinue = false;
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (!entry.isDirectory()) {
+                        if (entry.getName().equals("AndroidManifest.xml")) {
+                            InputStream inputStream = zipFile.getInputStream(entry);
+                            byte[] bs = IOUtils.toByteArray(inputStream);
+                            inputStream.close();
+                            countinue = listener.onReadManifest(bs);
+                        } else if (entry.getName().endsWith(".dex")) {
+                            dexEntries.add(entry);
+                        }
+                    }
+                }
+                if (countinue) {
+                    for (ZipEntry entry : dexEntries) {
+                        InputStream inputStream = zipFile.getInputStream(entry);
+                        byte[] bs = IOUtils.toByteArray(inputStream);
+                        inputStream.close();
+                        MatchCore.dexName = entry.getName();
+                        boolean malware = listener.onReadDex(bs);
+                        if (malware) {
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (ZipException | IndexOutOfBoundsException e) {
+            //Log.d(MainActivity.tag + "man", Objects.requireNonNull(e.getMessage()));
+            //e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }*/
 }

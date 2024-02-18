@@ -79,10 +79,11 @@ public class AppMatch {
         scanResult.setTotalApk(matchCore.getTotalApk());
         scanResult.setTotalSignature(signatureModels.size());
         scanResult.setTotalMalware(malwareList.size());
-        scanResult.setTotalUnscannable(matchCore.getUnscannable());
-        scanResult.setUnscannableList(matchCore.getUnscannables());
+        scanResult.setTotalUnscannable(matchCore.getUnscannableModel().getSize());
+        //scanResult.setUnscannableList(matchCore.getUnscannables());
         scanResult.setTotalTime(time);
         scanResult.setMalwareList(malwareList);
+        scanResult.setUnscannable(matchCore.getUnscannableModel());
 
         Gson gson = new Gson();
         String json = gson.toJson(scanResult);

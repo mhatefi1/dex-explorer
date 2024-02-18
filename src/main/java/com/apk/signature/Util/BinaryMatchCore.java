@@ -3,29 +3,28 @@ package com.apk.signature.Util;
 import com.apk.signature.DB.SQLiteJDBC;
 import com.apk.signature.Items.Item;
 import com.apk.signature.Items.ItemsString;
-import com.apk.signature.Model.MalwareModel;
-import com.apk.signature.Model.ManifestModel;
-import com.apk.signature.Model.SignatureModel;
-import com.apk.signature.Model.StringModel;
-import org.apache.pdfbox.io.IOUtils;
+import com.apk.signature.Model.*;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import static com.apk.signature.Util.Util.*;
 
 public class BinaryMatchCore {
-    private static String dexName;
     private static boolean dexNamePrinted;
-    private static String lastHex;
-    private static int offset_of_last_hex;
-    private final ArrayList<String> unscannables = new ArrayList<>();
     AppUtil util = new AppUtil();
+    ArrayList<String> not_zip = new ArrayList<>();
+    ArrayList<String> compress_mode = new ArrayList<>();
+    ArrayList<String> split_zip = new ArrayList<>();
+    ArrayList<String> unknown = new ArrayList<>();
+    ArrayList<String> manifest = new ArrayList<>();
+    ArrayList<String> dex = new ArrayList<>();
     long f1, f2;
-    private int totalFiles, totalApk, unscannable;
+    private int totalFiles, totalApk;
+    private Unscannable unscannableModel = new Unscannable();
 
     public ArrayList<SignatureModel> getSigModels(File fileSignature) {
         ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt", false);
@@ -52,7 +51,7 @@ public class BinaryMatchCore {
         return signatureModels;
     }
 
-    private ArrayList<SignatureModel> generateSignatureList(ManifestModel appManifestModel, ArrayList<SignatureModel> signatureModels) {
+    /*private ArrayList<SignatureModel> generateSignatureList(ManifestModel appManifestModel, ArrayList<SignatureModel> signatureModels) {
         ArrayList<SignatureModel> manifestMatchedSignatures = new ArrayList<>();
         boolean permissionMatch, activitiesMatch, serviceMatch, receiverMatch;
         for (SignatureModel signatureModel : signatureModels) {
@@ -96,9 +95,114 @@ public class BinaryMatchCore {
             }
         }
         return manifestMatchedSignatures;
-    }
+    }*/
 
-    public ArrayList<MalwareModel> match(ArrayList<File> fileTargetList, ArrayList<SignatureModel> signatureModels) {
+    public ArrayList<MalwareModel> match(ArrayList<File> fileTargetList, ArrayList<SignatureModel> signature_list) {
+        ArrayList<MalwareModel> malwareModels = new ArrayList<>();
+        ManifestUtil util1 = new ManifestUtil();
+        ItemsString itemsString = new ItemsString();
+        totalFiles = fileTargetList.size();
+        for (File file_i : fileTargetList) {
+            Util.print("********************" + file_i.getAbsolutePath() + "********************");
+            util1.readZip(file_i, new ReadBytesFromZipListener() {
+                ArrayList<SignatureModel> manifestMatchedSignatures = new ArrayList<>();
+                boolean apk = true;
+
+                @Override
+                public boolean onReadManifest(byte[] bs) {
+                    try {
+                        ManifestModel appManifestModel = util1.calcManifest(bs);
+                        if (appManifestModel == null) {
+                            return false;
+                        }
+                        manifestMatchedSignatures = util1.compareAppManifestWithSignatures(signature_list, appManifestModel);
+                    } catch (Exception e) {
+                        onManifestError(e);
+                    }
+                    return !manifestMatchedSignatures.isEmpty();
+                }
+
+                @Override
+                public boolean onReadDex(byte[] bs) {
+                    MalwareModel malwareModel = new MalwareModel();
+                    boolean stringMatch = false;
+                    String result_detailes = "";
+                    dexNamePrinted = false;
+                    try {
+                        byte[] header_ids_size = util.getBytesOfFile(bs, 56, 4);
+                        long ids_count = util.getDecimalValue(header_ids_size);
+                        for (SignatureModel signatureModel : manifestMatchedSignatures) {
+                            ArrayList<StringModel> strings = signatureModel.getStringModels();
+                            for (StringModel stringModel : strings) {
+                                stringMatch = getStringAddressFromHexString(bs, (int) ids_count, stringModel.getString().toUpperCase(),
+                                        itemsString, stringModel.getStart(), stringModel.getEnd());
+                                if (!stringMatch) {
+                                    break;
+                                }
+                            }
+                            malwareModel.setMalware(stringMatch);
+                            if (malwareModel.isMalware()) {
+                                result_detailes = "!!!this is malware!!!" + " matched by: " + signatureModel.getName();
+                                malwareModel.setMalwareFamily(signatureModel.getName());
+                                malwareModel.setAppName(file_i.getAbsolutePath());
+                                malwareModels.add(malwareModel);
+                                break;
+                            }
+                        }
+                        if (malwareModel.isMalware()) {
+                            printRed(result_detailes);
+                        }
+                    } catch (Exception e) {
+                        onDexError(e);
+                    }
+                    return malwareModel.isMalware();
+                }
+
+                @Override
+                public void onZipError(Exception e) {
+                    printYellow("onZipError:" + e.getMessage());
+                    String error = e.getMessage();
+                    if (error.contains("compress")) {
+                        compress_mode.add(file_i.getAbsolutePath());
+                    } else if (error.contains("split")) {
+                        split_zip.add(file_i.getAbsolutePath());
+                    } else if (error.contains("not a zip file")) {
+                        apk = false;
+                        not_zip.add(file_i.getAbsolutePath());
+                    } else {
+                        unknown.add(file_i.getAbsolutePath());
+                    }
+                }
+
+                @Override
+                public void onManifestError(Exception e) {
+                    printYellow("onManifestError:" + e.getMessage());
+                    manifest.add(file_i.getAbsolutePath());
+                }
+
+                @Override
+                public void onDexError(Exception e) {
+                    printYellow("onDexError:" + e.getMessage());
+                    dex.add(file_i.getAbsolutePath());
+                }
+
+                @Override
+                public void onEnd() {
+                    if (apk) totalApk++;
+                }
+            });
+        }
+        Unscannable unscannable1 = new Unscannable();
+        unscannable1.setNot_zip(not_zip);
+        unscannable1.setCompress_mode(compress_mode);
+        unscannable1.setSplit_zip(split_zip);
+        unscannable1.setUnknown(unknown);
+        unscannable1.setManifest(manifest);
+        unscannable1.setDex(dex);
+        setUnscannableModel(unscannable1);
+        return malwareModels;
+    }
+    /*public ArrayList<MalwareModel> match(ArrayList<File> fileTargetList, ArrayList<SignatureModel> signatureModels) {
         ArrayList<MalwareModel> malwareModels = new ArrayList<>();
         ManifestUtil manifestUtil = new ManifestUtil();
         ItemsString itemsString = new ItemsString();
@@ -175,7 +279,7 @@ public class BinaryMatchCore {
             }
         }
         return malwareModels;
-    }
+    }*/
 
     public ArrayList<File> getArgsFileSignatureList(String path) {
         ArrayList<File> argsFileSignatureList = new ArrayList<>();
@@ -193,39 +297,39 @@ public class BinaryMatchCore {
 
     private boolean getStringAddressFromHexString(byte[] stream, int ids_count, String text, Item tClass, int min, int max) {
         long ids_offset = 112;
-        try {
-            if (min < ids_count) {
-                String[] splitText = util.splitTwoByTwo(text);
-                if (max > ids_count || max == 0) {
-                    max = ids_count;
+        // try {
+        if (min < ids_count) {
+            String[] splitText = util.splitTwoByTwo(text);
+            if (max > ids_count || max == 0) {
+                max = ids_count;
+            }
+
+            while (min <= max) {
+                int m = min + (max - min) / 2;
+                long offset = ids_offset + (long) tClass.data_size * m;
+
+                //SearchResultStructure ss = searchDataByte(null, stream, offset, splitText);
+                boolean ss = searchDataByte(stream, offset, splitText);
+                if (ss) {
+                    if (!dexNamePrinted) {
+                        print(dexName + ":");
+                        dexNamePrinted = true;
+                    }
+                    printYellow("{ hex:" + text);
+                    printYellow("  ids_index: " + m + " }");
+                    return true;
                 }
-
-                while (min <= max) {
-                    int m = min + (max - min) / 2;
-                    long offset = ids_offset + (long) tClass.data_size * m;
-
-                    //SearchResultStructure ss = searchDataByte(null, stream, offset, splitText);
-                    boolean ss = searchDataByte(stream, offset, splitText);
-                    if (ss) {
-                        if (!dexNamePrinted) {
-                            print(dexName + ":");
-                            dexNamePrinted = true;
-                        }
-                        printYellow("{ hex:" + text);
-                        printYellow("  ids_index: " + m + " }");
-                        return true;
-                    }
-                    if (f1 < f2) {
-                        min = m + 1;
-                    } else {
-                        max = m - 1;
-                    }
+                if (f1 < f2) {
+                    min = m + 1;
+                } else {
+                    max = m - 1;
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
         }
+        //} catch (Exception e) {
+        //    e.printStackTrace();
+        //   return false;
+        // }
         return false;
     }
 
@@ -257,7 +361,6 @@ public class BinaryMatchCore {
         return true;
     }
 
-
     public int getTotalFiles() {
         return totalFiles;
     }
@@ -266,51 +369,51 @@ public class BinaryMatchCore {
         return totalApk;
     }
 
-    public int getUnscannable() {
-        return unscannable;
+    public Unscannable getUnscannableModel() {
+        return unscannableModel;
     }
 
-    public ArrayList<String> getUnscannables() {
-        return unscannables;
+    public void setUnscannableModel(Unscannable unscannableModel) {
+        this.unscannableModel = unscannableModel;
     }
 
-    /*private static class SearchResultStructure {
-        boolean success;
-        String lastHex;
-        int offset;
+    public ArrayList<String> getNot_zip() {
+        return not_zip;
+    }
 
-        public SearchResultStructure(boolean success, String lastHex, int offset) {
-            this.success = success;
-            this.lastHex = lastHex;
-            this.offset = offset;
-        }
+    public void setNot_zip(ArrayList<String> not_zip) {
+        this.not_zip = not_zip;
+    }
 
-        public SearchResultStructure(boolean success) {
-            this.success = success;
-        }
+    public ArrayList<String> getCompress_mode() {
+        return compress_mode;
+    }
 
-        public boolean isSuccess() {
-            return success;
-        }
+    public void setCompress_mode(ArrayList<String> compress_mode) {
+        this.compress_mode = compress_mode;
+    }
 
-        public void setSuccess(boolean success) {
-            this.success = success;
-        }
+    public ArrayList<String> getSplit_zip() {
+        return split_zip;
+    }
 
-        public String getLastHex() {
-            return lastHex;
-        }
+    public void setSplit_zip(ArrayList<String> split_zip) {
+        this.split_zip = split_zip;
+    }
 
-        public void setLastHex(String lastHex) {
-            this.lastHex = lastHex;
-        }
+    public ArrayList<String> getManifest() {
+        return manifest;
+    }
 
-        public int getOffset() {
-            return offset;
-        }
+    public void setManifest(ArrayList<String> manifest) {
+        this.manifest = manifest;
+    }
 
-        public void setOffset(int offset) {
-            this.offset = offset;
-        }
-    }*/
+    public ArrayList<String> getDex() {
+        return dex;
+    }
+
+    public void setDex(ArrayList<String> dex) {
+        this.dex = dex;
+    }
 }

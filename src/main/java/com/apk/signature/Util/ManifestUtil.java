@@ -1,6 +1,7 @@
 package com.apk.signature.Util;
 
 import com.apk.signature.Model.ManifestModel;
+import com.apk.signature.Model.SignatureModel;
 import fr.xgouchet.axml.customized.Attribute;
 import fr.xgouchet.axml.customized.CompressedXmlParser;
 import org.apache.pdfbox.io.IOUtils;
@@ -56,6 +57,95 @@ public class ManifestUtil extends Util {
             printRed(e.getMessage());
             return null;
         }
+    }
+
+    public ManifestModel calcManifest(byte[] bs) {
+        ArrayList<String> permission_list = new ArrayList<>();
+        ArrayList<String> activity_list = new ArrayList<>();
+        ArrayList<String> service_list = new ArrayList<>();
+        ArrayList<String> receiver_list = new ArrayList<>();
+
+        new CompressedXmlParser().parse(bs, (uri, localName, qName, attrs) -> {
+            switch (localName) {
+                case "uses-permission":
+                case "permission":
+                    //Log.d(MainActivity.tag, "startElement localName:" + localName);
+                    setAttribute(attrs, permission_list);
+                    break;
+                case "activity":
+                    //Log.d(MainActivity.tag, "startElement localName:" + localName);
+                    setAttribute(attrs, activity_list);
+                    break;
+                case "service":
+                    //Log.d(MainActivity.tag, "startElement localName:" + localName);
+                    setAttribute(attrs, service_list);
+                    break;
+                case "receiver":
+                    //Log.d(MainActivity.tag, "startElement localName:" + localName);
+                    setAttribute(attrs, receiver_list);
+                    break;
+            }
+        });
+
+        ManifestModel appManifestModel = new ManifestModel();
+        appManifestModel.setPermission(permission_list);
+        appManifestModel.setActivities(activity_list);
+        appManifestModel.setServices(service_list);
+        appManifestModel.setReceivers(receiver_list);
+        return appManifestModel;
+    }
+
+    public ArrayList<SignatureModel> compareAppManifestWithSignatures(ArrayList<SignatureModel> signature_list, ManifestModel appManifestModel) {
+        ArrayList<SignatureModel> manifestMatchedSignatures = new ArrayList<>();
+
+        boolean permissionMatch, activitiesMatch, serviceMatch, receiverMatch;
+        ManifestModel signatureManifestModel;
+
+        for (SignatureModel model : signature_list) {
+            try {
+                signatureManifestModel = model.getManifestModel();
+            } catch (Exception e) {
+                continue;
+            }
+
+            boolean permissionEmpty = signatureManifestModel.getPermission().get(0).isEmpty(),
+                    activitiesEmpty = signatureManifestModel.getActivities().get(0).isEmpty(),
+                    serviceEmpty = signatureManifestModel.getServices().get(0).isEmpty(),
+                    receiverEmpty = signatureManifestModel.getReceivers().get(0).isEmpty();
+
+            if (permissionEmpty) {
+                permissionMatch = true;
+            } else {
+                permissionMatch = super.contains(appManifestModel.getPermission(), signatureManifestModel.getPermission());
+            }
+
+            if (activitiesEmpty) {
+                activitiesMatch = true;
+            } else {
+                activitiesMatch = super.contains(appManifestModel.getActivities(), signatureManifestModel.getActivities());
+            }
+
+            if (serviceEmpty) {
+                serviceMatch = true;
+            } else {
+                serviceMatch = super.contains(appManifestModel.getServices(), signatureManifestModel.getServices());
+            }
+
+            if (receiverEmpty) {
+                receiverMatch = true;
+            } else {
+                receiverMatch = super.contains(appManifestModel.getReceivers(), signatureManifestModel.getReceivers());
+            }
+
+            boolean manifestMatch = permissionMatch && activitiesMatch && serviceMatch && receiverMatch;
+
+            if (manifestMatch) {
+                manifestMatchedSignatures.add(model);
+                //boolean manifestEmpty = permissionEmpty && activitiesEmpty && serviceEmpty && receiverEmpty;
+                //if (!manifestEmpty) break;
+            }
+        }
+        return manifestMatchedSignatures;
     }
 
     private byte[] getManifestBytes(File file) {

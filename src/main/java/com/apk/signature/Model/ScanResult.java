@@ -14,7 +14,17 @@ public class ScanResult {
     public ArrayList<String> unscannableList;
     ArrayList<MalwareModel> malwareList;
 
+    public Unscannable unscannable;
+
     public ScanResult() {
+    }
+
+    public Unscannable getUnscannable() {
+        return unscannable;
+    }
+
+    public void setUnscannable(Unscannable unscannable) {
+        this.unscannable = unscannable;
     }
 
     public ArrayList<String> getUnscannableList() {
