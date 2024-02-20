@@ -8,10 +8,7 @@ import fr.xgouchet.axml.customized.Attribute;
 import net.lingala.zip4j.model.FileHeader;
 import org.apache.pdfbox.io.IOUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -25,7 +22,24 @@ public class AppZip {
 
     public static void main(String[] args) {
         String input = getInput(args);
-        extractDex(input);
+        //extractDex(input);
+        changeSig("C:\\Users\\sedej\\Desktop\\ms");
+    }
+
+    public static void changeSig(String s) {
+        try {
+            Util util = new AppUtil();
+            ArrayList<File> apk = util.getFileListByFormat(s, ".txt", false);
+            BufferedWriter writer = new BufferedWriter(new FileWriter("C:\\Users\\sedej\\Desktop\\ms\\res.txt", false));
+            for (File file1 : apk) {
+                String d = util.readFile(file1);
+                writer.append(util.splitNameFromFormat(file1.getName()));
+                writer.append(d);
+            }
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void extractDex(String s) {
@@ -84,6 +98,15 @@ public class AppZip {
             myObj.close();
         }
         return s4;
+    }
+
+    public void dfg(String w) {
+        String[] w_rep = w.split(";");
+        int i = 0;
+        for (String s : w_rep) {
+            print("i:" + i + "--s:" + s);
+            i++;
+        }
     }
 
     /*public void extractWithZipInputStream(File file) {

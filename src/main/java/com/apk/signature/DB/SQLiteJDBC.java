@@ -103,7 +103,7 @@ public class SQLiteJDBC {
                 String receivers = rs.getString(RECEIVER);
                 String strings = rs.getString(STRINGS);
                 SignatureModel model;
-                model = new SignatureUtil().createSignatureModel(permissions, activities, services, receivers, strings);
+                model = new SignatureUtil().createSignatureModel(name, permissions, activities, services, receivers, strings, ""); //TODO set flag
                 model.setName(name);
                 result.add(model);
             }

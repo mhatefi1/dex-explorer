@@ -8,6 +8,8 @@ public class SignatureModel {
     public ArrayList<String> strings;
     public ArrayList<StringModel> stringModels;
 
+    public String flags;
+
     public SignatureModel() {
     }
 
@@ -41,5 +43,13 @@ public class SignatureModel {
 
     public void setStrings(ArrayList<String> strings) {
         this.strings = strings;
+    }
+
+    public String getFlags() {
+        return flags;
+    }
+
+    public void setFlags(String flags) {
+        this.flags = flags;
     }
 }

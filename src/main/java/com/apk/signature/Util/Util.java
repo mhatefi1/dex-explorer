@@ -8,9 +8,7 @@ import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.RandomAccessFile;
 import org.fusesource.jansi.AnsiConsole;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -334,43 +332,16 @@ public class Util extends FileUtil {
         listener.onEnd();
     }
 
-    /*public void readZip2(File file, ReadBytesFromZipListener listener) {
-        try {
-            try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
-                List<ZipEntry> dexEntries = new ArrayList<>();
-                Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                boolean countinue = false;
-                while (entries.hasMoreElements()) {
-                    ZipEntry entry = entries.nextElement();
-                    if (!entry.isDirectory()) {
-                        if (entry.getName().equals("AndroidManifest.xml")) {
-                            InputStream inputStream = zipFile.getInputStream(entry);
-                            byte[] bs = IOUtils.toByteArray(inputStream);
-                            inputStream.close();
-                            countinue = listener.onReadManifest(bs);
-                        } else if (entry.getName().endsWith(".dex")) {
-                            dexEntries.add(entry);
-                        }
-                    }
-                }
-                if (countinue) {
-                    for (ZipEntry entry : dexEntries) {
-                        InputStream inputStream = zipFile.getInputStream(entry);
-                        byte[] bs = IOUtils.toByteArray(inputStream);
-                        inputStream.close();
-                        MatchCore.dexName = entry.getName();
-                        boolean malware = listener.onReadDex(bs);
-                        if (malware) {
-                            break;
-                        }
-                    }
-                }
+    public ArrayList<String> readLineByLine(String path) {
+        ArrayList<String> argsFileSignatureList = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                argsFileSignatureList.add(line);
             }
-        } catch (ZipException | IndexOutOfBoundsException e) {
-            //Log.d(MainActivity.tag + "man", Objects.requireNonNull(e.getMessage()));
-            //e.printStackTrace();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-    }*/
+        return argsFileSignatureList;
+    }
 }

@@ -25,7 +25,10 @@ public class AppBinarySearchMatch {
             target_path = args[2];
             File file = new File(target_path);
             if (file.getName().endsWith(".txt")) {
-                AllTargetFilePath = matchCore.getArgsFileSignatureList(target_path);
+                ArrayList<String> filesPath = new Util().readLineByLine(target_path);
+                for (String s : filesPath) {
+                    AllTargetFilePath.add(new File(s));
+                }
             } else {
                 AllTargetFilePath.add(file);
             }
@@ -49,7 +52,6 @@ public class AppBinarySearchMatch {
             printRed("target path doesn't exist");
             System.exit(0);
         }
-        Util.aapt2Path = Util.setAapt2Path("");
 
         Util util = new Util();
 
@@ -74,14 +76,6 @@ public class AppBinarySearchMatch {
 
         long time = Util.runDuration(start);
         ScanResult scanResult = new ScanResult();
-        /*scanResult.setTotalFiles(matchCore.getTotalFiles());
-        scanResult.setTotalApk(matchCore.getTotalApk());
-        scanResult.setTotalSignature(signatureModels.size());
-        scanResult.setTotalMalware(malwareList.size());
-        scanResult.setTotalUnscannable(matchCore.getUnscannable());
-        scanResult.setUnscannableList(matchCore.getUnscannables());
-        scanResult.setTotalTime(time);
-        scanResult.setMalwareList(malwareList);*/
 
         scanResult.setTotalFiles(matchCore.getTotalFiles());
         scanResult.setTotalApk(matchCore.getTotalApk());
