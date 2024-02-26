@@ -56,7 +56,7 @@ public class BinaryMatchCore {
         ItemsString itemsString = new ItemsString();
         totalFiles = fileTargetList.size();
         for (File file_i : fileTargetList) {
-            Util.print("********************" + file_i.getAbsolutePath() + "********************");
+            Util.print("***" + file_i.getAbsolutePath() + "***");
             util1.readZip(file_i, new ReadBytesFromZipListener() {
                 ArrayList<SignatureModel> manifestMatchedSignatures = new ArrayList<>();
                 boolean apk = true;

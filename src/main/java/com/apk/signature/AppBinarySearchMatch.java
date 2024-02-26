@@ -75,6 +75,7 @@ public class AppBinarySearchMatch {
         }
 
         long time = Util.runDuration(start);
+        Gson gson = new Gson();
         ScanResult scanResult = new ScanResult();
 
         scanResult.setTotalFiles(matchCore.getTotalFiles());
@@ -83,14 +84,15 @@ public class AppBinarySearchMatch {
         scanResult.setTotalMalware(malwareList.size());
         scanResult.setTotalUnscannable(matchCore.getUnscannableModel().getSize());
         scanResult.setTotalTime(time);
+
+        String jsonSummarized = gson.toJson(scanResult);
+
         scanResult.setMalwareList(malwareList);
         scanResult.setUnscannable(matchCore.getUnscannableModel());
 
-        Gson gson = new Gson();
         String json = gson.toJson(scanResult);
-
-        printGreen(json);
         util.writeToFile(json, System.getProperty("user.dir") + "\\report-" + System.currentTimeMillis() + ".json");
+        printGreen(jsonSummarized);
 
     }
 }
