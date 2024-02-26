@@ -280,7 +280,7 @@ public class Util extends FileUtil {
         return header;
     }
 
-    public void readZip(File file, ReadBytesFromZipListener listener) {
+    public void readZip4j(File file, ReadBytesFromZipListener listener) {
         try {
             try (net.lingala.zip4j.ZipFile zipFile = new net.lingala.zip4j.ZipFile(file)) {
                 List<FileHeader> fileHeaders = zipFile.getFileHeaders();
@@ -325,6 +325,62 @@ public class Util extends FileUtil {
                         }
                     }
                 }
+            }
+        } catch (Exception e) {
+            listener.onZipError(e);
+        }
+        listener.onEnd();
+    }
+
+    public void readZip(File file, ReadBytesFromZipListener listener) {
+        try {
+            try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                List<ZipEntry> dexEntries = new ArrayList<>();
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                boolean countinue = false;
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (!entry.isDirectory()) {
+                        if (entry.getName().equals("AndroidManifest.xml")) {
+                            try {
+                                InputStream inputStream = zipFile.getInputStream(entry);
+                                byte[] bs = IOUtils.toByteArray(inputStream);
+                                inputStream.close();
+                                countinue = listener.onReadManifest(bs);
+                            } catch (Exception e) {
+                                if (e.getMessage().contains("zip")) {
+                                    listener.onZipError(e);
+                                } else {
+                                    listener.onManifestError(e);
+                                }
+                            }
+                        } else if (entry.getName().endsWith(".dex")) {
+                            dexEntries.add(entry);
+                        }
+                    }
+                }
+                if (countinue) {
+                    for (ZipEntry entry : dexEntries) {
+                        try {
+                            InputStream inputStream = zipFile.getInputStream(entry);
+                            byte[] bs = IOUtils.toByteArray(inputStream);
+                            inputStream.close();
+                            dexName = entry.getName();
+                            boolean malware = listener.onReadDex(bs);
+                            if (malware) {
+                                break;
+                            }
+                        } catch (Exception e) {
+                            if (e.getMessage().contains("zip")) {
+                                listener.onZipError(e);
+                            } else {
+                                listener.onDexError(e);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                listener.onZipError(e);
             }
         } catch (Exception e) {
             listener.onZipError(e);
