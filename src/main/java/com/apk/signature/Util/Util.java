@@ -208,6 +208,16 @@ public class Util extends FileUtil {
         return splitText;
     }
 
+    public byte[] split(String text) {
+        int splitUnit = 2;
+        byte[] splitByte = new byte[text.length() / splitUnit];
+        for (int i = 0, j = 0; i < text.length(); i += splitUnit, j++) {
+            String s = text.substring(i, i + splitUnit);
+            splitByte[j] = (byte) Integer.parseInt(s, 16);
+        }
+        return splitByte;
+    }
+
     public HashMap<String, byte[]> getStringHeader(byte[] stream) {
         HashMap<String, byte[]> header = new HashMap<>();
         try {

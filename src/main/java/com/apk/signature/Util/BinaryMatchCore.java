@@ -160,7 +160,8 @@ public class BinaryMatchCore {
         long ids_offset = 112;
 
         if (min < ids_count) {
-            String[] splitText = util.splitTwoByTwo(text);
+            //String[] splitText = util.splitTwoByTwo(text);
+            byte[] splitByte = util.split(text);
             if (max > ids_count || max == 0) {
                 max = ids_count;
             }
@@ -168,7 +169,8 @@ public class BinaryMatchCore {
             while (min <= max) {
                 int m = min + (max - min) / 2;
                 long offset = ids_offset + (long) tClass.data_size * m;
-                boolean ss = searchDataByte(stream, offset, splitText);
+                //boolean ss = searchDataByte(stream, offset, splitText);
+                boolean ss = searchDataByte(stream, offset, splitByte);
                 if (ss) {
                     if (!dexNamePrinted) {
                         print(dexName + ":");
@@ -211,6 +213,30 @@ public class BinaryMatchCore {
             }
             offset++;
             i++;
+        }
+        return true;
+    }
+
+    private boolean searchDataByte(byte[] stream, long start, byte[] splitByte) {
+        byte[] first_offset_of_string_data_b = util.getBytesOfFile(stream, start, ItemsString.string_data_off_size);
+        long offset = util.getDecimalValue(first_offset_of_string_data_b);
+        while (true) {
+            byte size_in_utf16_b = util.getBytesOfFile(stream, offset, 1)[0];
+            long size_in_utf16_l = size_in_utf16_b & 0xFF;
+            offset++;
+            if (size_in_utf16_l < 127) {
+                break;
+            }
+        }
+
+        for (byte s : splitByte) {
+            byte a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(stream, offset, 1)[0];
+            if (a_string_bit_in_MUTF8_format_b != s) {
+                f1 = a_string_bit_in_MUTF8_format_b & 0xFF;
+                f2 = s & 0xFF;
+                return false;
+            }
+            offset++;
         }
         return true;
     }
