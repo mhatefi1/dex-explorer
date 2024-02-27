@@ -32,7 +32,7 @@ public class BinaryMatchCore {
             try {
                 ArrayList<String> signs = util.readLineByLine(file.getAbsolutePath());
                 for (String s : signs) {
-                    SignatureModel signatureModel1 = new SignatureUtil().parseSignature(s);
+                    SignatureModel signatureModel1 = new SignatureUtil().parseSignature(s, true);
                     if (signatureModel1 != null) {
                         signatureModels.add(signatureModel1);
                     }

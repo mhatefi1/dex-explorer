@@ -2,6 +2,7 @@ package com.apk.signature;
 
 import com.apk.signature.DB.SQLiteJDBC;
 import com.apk.signature.Model.DBModel;
+import com.apk.signature.Model.SignatureModel;
 import com.apk.signature.Util.SignatureUtil;
 import com.apk.signature.Util.Util;
 
@@ -21,15 +22,30 @@ public class AppConvert {
             signature_path = myObj.nextLine();
         }
 
-        Util.aapt2Path = Util.setAapt2Path("");
         Util util = new Util();
         File fileSignature = new File(signature_path);
         long start = System.currentTimeMillis();
         ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt", false);
         System.out.println("**********************************************************");
-        SQLiteJDBC jdbc = new SQLiteJDBC(signature_path);
+        SQLiteJDBC jdbc = new SQLiteJDBC(fileSignature.getParent());
         jdbc.createTable();
-        for (File file_j : fileSignatureList) {
+
+
+        for (File file : fileSignatureList) {
+            try {
+                ArrayList<String> signs = util.readLineByLine(file.getAbsolutePath());
+                for (String s : signs) {
+                    SignatureModel signatureModel1 = new SignatureUtil().parseSignature(s, false);
+                    if (signatureModel1 != null) {
+                        jdbc.insert(signatureModel1);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        /*for (File file_j : fileSignatureList) {
             try {
                 String signature_txt = util.readFile(file_j);
                 DBModel model = new SignatureUtil().parseSignatureAsDB(signature_txt);
@@ -43,7 +59,7 @@ public class AppConvert {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+        }*/
         Util.runDuration(start);
     }
 }

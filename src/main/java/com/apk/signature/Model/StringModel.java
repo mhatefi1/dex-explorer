@@ -33,4 +33,8 @@ public class StringModel {
     public void setString(String string) {
         this.string = string;
     }
+
+    public String getStringModelAsString() {
+        return getString() + "[" + getStart() + "-" + getEnd() + "]";
+    }
 }

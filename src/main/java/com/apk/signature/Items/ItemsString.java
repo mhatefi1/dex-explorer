@@ -41,9 +41,6 @@ public class ItemsString extends Item {
             }
             offset++;
         }
-        /*byte[] a_string_bit_in_MUTF8_format_b = util.getBytesOfFile(raf, offset, 1);
-        String hex = util.getHexValue(a_string_bit_in_MUTF8_format_b);
-        return hex.equals("00");*/
         return true;
     }
 

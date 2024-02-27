@@ -29,7 +29,7 @@ public class SQLiteJDBC {
 
 
     public SQLiteJDBC(String path) {
-        this.path = "jdbc:sqlite:" + path + "/" + SCHEME_NAME + ".db";
+        this.path = "jdbc:sqlite:" + path + "\\" + SCHEME_NAME + ".db";
     }
 
     public SQLiteJDBC(File file) {
@@ -83,6 +83,30 @@ public class SQLiteJDBC {
         }
     }
 
+    public void insert(SignatureModel model) {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection(path);
+            c.setAutoCommit(false);
+            System.out.println("Opened database successfully");
+
+            stmt = c.createStatement();
+            Util util = new Util();
+            String sql = "INSERT INTO " + TABLE_NAME + " (" + NAME + "," + PERMISSION + "," + ACTIVITY + "," + SERVICE + "," + RECEIVER + "," + STRINGS + ") " +
+                    "VALUES (" + "\"" + model.getName() + "\"" + ", " + "\"" + util.getArrayAsString(model.getManifestModel().getPermission()) + "\"" + ", " +
+                    "\"" + util.getArrayAsString(model.getManifestModel().getActivities()) + "\"" + ", " + "\"" + util.getArrayAsString(model.getManifestModel().getServices()) + "\"" + ", " +
+                    "\"" + util.getArrayAsString(model.getManifestModel().getReceivers()) + "\"" + ", " + "\"" + model.getStringModelsAsString() + "\"" + ");";
+            stmt.executeUpdate(sql);
+
+            stmt.close();
+            c.commit();
+            c.close();
+            System.out.println("Records created successfully");
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+    }
+
     public ArrayList<SignatureModel> select() {
         ArrayList<SignatureModel> result = new ArrayList<>();
         try {
@@ -103,7 +127,7 @@ public class SQLiteJDBC {
                 String receivers = rs.getString(RECEIVER);
                 String strings = rs.getString(STRINGS);
                 SignatureModel model;
-                model = new SignatureUtil().createSignatureModel(name, permissions, activities, services, receivers, strings, ""); //TODO set flag
+                model = new SignatureUtil().createSignatureModel(name, permissions, activities, services, receivers, strings, "", true); //TODO set flag
                 model.setName(name);
                 result.add(model);
             }

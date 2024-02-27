@@ -62,14 +62,14 @@ public class SignatureUtil extends Util {
         return list;
     }
 
-    public DBModel parseSignatureAsDB(String signature) {
+    /*public DBModel parseSignatureAsDB(String signature) {
         ArrayList<String> list = getComponentList(signature);
         return new DBModel(list.get(1), list.get(2), list.get(3), list.get(4), list.get(5));
-    }
+    }*/
 
-    public SignatureModel parseSignature(String signature) {
+    public SignatureModel parseSignature(String signature, boolean decodeHex) {
         ArrayList<String> list = getComponentList(signature);
-        return createSignatureModel(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4), list.get(5), list.get(6));
+        return createSignatureModel(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4), list.get(5), list.get(6), decodeHex);
     }
 
     /*public SignatureModel createSignatureModel2(String permissions, String activities, String services, String receivers, String strings) {
@@ -136,7 +136,7 @@ public class SignatureUtil extends Util {
         return signatureModel;
     }*/
 
-    public SignatureModel createSignatureModel(String name, String permissions, String activities, String services, String receivers, String strings, String flags) {
+    public SignatureModel createSignatureModel(String name, String permissions, String activities, String services, String receivers, String strings, String flags, boolean decodeHex) {
         String[] permissions_list = permissions.split(",");
         String[] activities_list = activities.split(",");
         String[] service_list = services.split(",");
@@ -151,19 +151,19 @@ public class SignatureUtil extends Util {
         ArrayList<String> receiversArrayList = new ArrayList<>();
 
         for (String s : permissions_list) {
-            s = hexStringToUTF8(s);
+            if (decodeHex) s = hexStringToUTF8(s);
             permissionArrayList.add(s);
         }
         for (String s : activities_list) {
-            s = hexStringToUTF8(s);
+            if (decodeHex) s = hexStringToUTF8(s);
             activitiesArrayList.add(s);
         }
         for (String s : service_list) {
-            s = hexStringToUTF8(s);
+            if (decodeHex) s = hexStringToUTF8(s);
             serviceArrayList.add(s);
         }
         for (String s : receivers_list) {
-            s = hexStringToUTF8(s);
+            if (decodeHex) s = hexStringToUTF8(s);
             receiversArrayList.add(s);
         }
 

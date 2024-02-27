@@ -33,9 +33,8 @@ public class Util extends FileUtil {
 
     public static long runDuration(long startTime) {
         long endTime = System.currentTimeMillis();
-        long elapsedTime = endTime - startTime;
-        System.out.println("Elapsed time: " + elapsedTime + " milliseconds");
-        return elapsedTime;
+        //System.out.println("Elapsed time: " + endTime - startTime + " milliseconds");
+        return endTime - startTime;
     }
 
     public static void printRed(Object text) {
@@ -81,6 +80,17 @@ public class Util extends FileUtil {
             }
         }
         return "";
+    }
+
+    public String getArrayAsString(ArrayList<String> list) {
+        StringBuilder res = new StringBuilder();
+        for (int i = 0; i < list.size(); i++) {
+            res.append(list.get(i));
+            if (i != list.size() - 1) {
+                res.append(",");
+            }
+        }
+        return res.toString();
     }
 
     public ArrayList<String> getCommonOfArrayList(ArrayList<String> first, ArrayList<String> second) {

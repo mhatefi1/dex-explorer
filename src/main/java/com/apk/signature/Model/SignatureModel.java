@@ -52,4 +52,16 @@ public class SignatureModel {
     public void setFlags(String flags) {
         this.flags = flags;
     }
+
+    public String getStringModelsAsString() {
+        StringBuilder res = new StringBuilder();
+        ArrayList<StringModel> list = getStringModels();
+        for (int i = 0; i < list.size(); i++) {
+            res.append(list.get(i).getStringModelAsString());
+            if (i != list.size() - 1) {
+                res.append(",");
+            }
+        }
+        return res.toString();
+    }
 }
