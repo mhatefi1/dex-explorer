@@ -79,7 +79,7 @@ public class AppUtil extends ManifestUtil {
                     if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
                         try {
                             InputStream inputStream = zipFile.getInputStream(entry);
-                            byte[] stream = IOUtils.toByteArray(inputStream);
+                            byte[] stream = toByteArray(inputStream);
                             //ByteArrayInputStream stream = new ByteArrayInputStream(bs);
                             HashMap<String, byte[]> header = super.getHeader(stream);
                             byte[] header_ids_size = header.get(tClass.header_x_ids_size);

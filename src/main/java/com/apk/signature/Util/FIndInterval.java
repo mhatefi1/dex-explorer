@@ -43,7 +43,7 @@ public class FIndInterval {
                         if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
                             try {
                                 InputStream inputStream = zipFile.getInputStream(entry);
-                                byte[] bs = IOUtils.toByteArray(inputStream);
+                                byte[] bs = util.toByteArray(inputStream);
                                 HashMap<String, byte[]> header = util.getHeader(bs);
                                 int c = util.getAddressFromHexString(header, bs, string, new ItemsString(), 0, 0);
                                 if (c != -1) {

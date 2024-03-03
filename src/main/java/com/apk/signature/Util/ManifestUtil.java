@@ -156,7 +156,7 @@ public class ManifestUtil extends Util {
                     ZipEntry entry = entries.nextElement();
                     if (!entry.isDirectory() && entry.getName().equals("AndroidManifest.xml")) {
                         InputStream inputStream = zipFile.getInputStream(entry);
-                        byte[] bs = IOUtils.toByteArray(inputStream);
+                        byte[] bs = toByteArray(inputStream);
                         inputStream.close();
                         return bs;
                     }
@@ -414,7 +414,7 @@ public class ManifestUtil extends Util {
                     ZipEntry entry = entries.nextElement();
                     if (!entry.isDirectory() && entry.getName().equals("AndroidManifest.xml")) {
                         InputStream inputStream = zipFile.getInputStream(entry);
-                        byte[] bs = IOUtils.toByteArray(inputStream);
+                        byte[] bs = util.toByteArray(inputStream);
                         inputStream.close();
                         return new XMLReader().decompressXML(bs);
                     }
@@ -434,7 +434,7 @@ public class ManifestUtil extends Util {
                     if (!entry.isDirectory() && entry.getName().equals("AndroidManifest.xml")) {
                         try {
                             InputStream inputStream = zipFile.getInputStream(entry);
-                            byte[] bs = IOUtils.toByteArray(inputStream);
+                            byte[] bs = util.toByteArray(inputStream);
                             return new XMLReader().decompressXML(bs);
                         } catch (Exception e) {
                             e.printStackTrace();

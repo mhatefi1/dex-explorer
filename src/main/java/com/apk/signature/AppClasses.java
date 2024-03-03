@@ -69,7 +69,7 @@ public class AppClasses {
                                 if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
-                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        byte[] bs = util.toByteArray(inputStream);
 
                                         HashMap<String, byte[]> header = util.getHeader(bs);
                                         util.getAll(header, bs, item);
@@ -100,7 +100,7 @@ public class AppClasses {
                                     print(entry.getName());
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
-                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        byte[] bs = util.toByteArray(inputStream);
                                         
                                         HashMap<String, byte[]> header = util.getHeader(bs);
 
@@ -135,7 +135,7 @@ public class AppClasses {
                                     print(entry.getName());
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
-                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        byte[] bs = util.toByteArray(inputStream);
 
                                         HashMap<String, byte[]> header = util.getHeader(bs);
 
@@ -168,7 +168,7 @@ public class AppClasses {
                                     print(entry.getName());
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
-                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        byte[] bs = util.toByteArray(inputStream);
 
                                         HashMap<String, byte[]> header = util.getHeader(bs);
                                         String res = util.getHexByIndex(header, bs, Long.parseLong(s), item);
@@ -198,7 +198,7 @@ public class AppClasses {
                                     print(entry.getName());
                                     try {
                                         InputStream inputStream = zipFile.getInputStream(entry);
-                                        byte[] bs = IOUtils.toByteArray(inputStream);
+                                        byte[] bs = util.toByteArray(inputStream);
 
                                         HashMap<String, byte[]> header = util.getHeader(bs);
                                         try {
