@@ -1,6 +1,5 @@
 package com.apk.signature.Util;
 
-import org.apache.pdfbox.io.IOUtils;
 import org.fusesource.jansi.AnsiConsole;
 
 import java.io.ByteArrayOutputStream;
@@ -336,7 +335,7 @@ public class Util extends FileUtil {
                         if (entry.getName().equals("AndroidManifest.xml")) {
                             try {
                                 InputStream inputStream = zipFile.getInputStream(entry);
-                                byte[] bs = IOUtils.toByteArray(inputStream);
+                                byte[] bs = toByteArray(inputStream);
                                 inputStream.close();
                                 continue_ = listener.onReadManifest(bs);
                             } catch (Exception e) {
@@ -355,7 +354,7 @@ public class Util extends FileUtil {
                     for (ZipEntry entry : dexEntries) {
                         try {
                             InputStream inputStream = zipFile.getInputStream(entry);
-                            byte[] bs = IOUtils.toByteArray(inputStream);
+                            byte[] bs = toByteArray(inputStream);
                             inputStream.close();
                             dexName = entry.getName();
                             boolean malware = listener.onReadDex(bs);
@@ -380,16 +379,14 @@ public class Util extends FileUtil {
         listener.onEnd();
     }
 
-    public ArrayList<String> readLineByLine(String path) {
-        ArrayList<String> argsFileSignatureList = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                argsFileSignatureList.add(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return argsFileSignatureList;
+    public byte[] toByteArray(InputStream input) throws IOException {
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        while ((bytesRead = input.read(buffer)) != -1) output.write(buffer, 0, bytesRead);
+        byte[] bs = output.toByteArray();
+        output.flush();
+        output.close();
+        return bs;
     }
 }
