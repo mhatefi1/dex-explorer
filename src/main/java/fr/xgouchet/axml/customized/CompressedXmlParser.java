@@ -1,7 +1,5 @@
 package fr.xgouchet.axml.customized;
 
-import com.apk.signature.Util.Util;
-
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -96,13 +94,9 @@ public class CompressedXmlParser {
     }
 
     private void parseStringTable() {
-
         int chunk = getLEWord(mParserOffset + (WORD_SIZE));
         mStringsCount = getLEWord(mParserOffset + (2 * WORD_SIZE));
-        int mStylesCount = getLEWord(mParserOffset + (3 * WORD_SIZE));
         int strOffset = mParserOffset + getLEWord(mParserOffset + (5 * WORD_SIZE));
-        int styleOffset = getLEWord(mParserOffset + (6 * WORD_SIZE));
-
         mStringsTable = new String[mStringsCount];
         int offset;
         for (int i = 0; i < mStringsCount; ++i) {
@@ -115,23 +109,14 @@ public class CompressedXmlParser {
 
     private void parseResourceTable() {
         int chunk = getLEWord(mParserOffset + (WORD_SIZE));
-        int mResCount = (chunk / 4) - 2;
-
-        int[] mResourcesIds = new int[mResCount];
-        for (int i = 0; i < mResCount; ++i) {
-            mResourcesIds[i] = getLEWord(mParserOffset + ((i + 2) * WORD_SIZE));
-        }
-
         mParserOffset += chunk;
     }
 
     private void parseNamespace(boolean start) {
         final int prefixIdx = getLEWord(mParserOffset + (4 * WORD_SIZE));
         final int uriIdx = getLEWord(mParserOffset + (5 * WORD_SIZE));
-
         final String uri = getString(uriIdx);
         final String prefix = getString(prefixIdx);
-
         if (start) {
             mNamespaces.put(uri, prefix);
         } else {
@@ -141,34 +126,17 @@ public class CompressedXmlParser {
     }
 
     private void parseStartTag() {
-        final int uriIdx = getLEWord(mParserOffset + (4 * WORD_SIZE));
         final int nameIdx = getLEWord(mParserOffset + (5 * WORD_SIZE));
         final int attrCount = getLEShort(mParserOffset + (7 * WORD_SIZE));
-
         final String name = getString(nameIdx);
-        String uri, qname;
-        if (uriIdx == 0xFFFFFFFF) {
-            uri = "";
-            qname = name;
-        } else {
-            uri = getString(uriIdx);
-            if (mNamespaces.containsKey(uri)) {
-                qname = mNamespaces.get(uri) + ':' + name;
-            } else {
-                qname = name;
-            }
-        }
-
         mParserOffset += (9 * WORD_SIZE);
-
         final Attribute[] attrs = new Attribute[attrCount];
         for (int a = 0; a < attrCount; a++) {
             attrs[a] = parseAttribute();
 
             mParserOffset += (5 * 4);
         }
-
-        mListener.startElement(uri, name, qname, attrs);
+        mListener.startElement(name, attrs);
     }
 
     private Attribute parseAttribute() {
@@ -177,10 +145,8 @@ public class CompressedXmlParser {
         final int attrValueIdx = getLEWord(mParserOffset + (2 * WORD_SIZE));
         final int attrType = getLEWord(mParserOffset + (3 * WORD_SIZE));
         final int attrData = getLEWord(mParserOffset + (4 * WORD_SIZE));
-
         final Attribute attr = new Attribute();
         attr.setName(getString(attrNameIdx));
-
         if (attrNSIdx == 0xFFFFFFFF) {
             attr.setNamespace(null);
             attr.setPrefix(null);
@@ -191,35 +157,19 @@ public class CompressedXmlParser {
                 attr.setPrefix(mNamespaces.get(uri));
             }
         }
-
         if (attrValueIdx == 0xFFFFFFFF) {
             attr.setValue(getAttributeValue(attrType, attrData));
         } else {
             attr.setValue(getString(attrValueIdx));
         }
-
         return attr;
-
     }
 
     private void parseText() {
-        final int strIndex = getLEWord(mParserOffset + (4 * WORD_SIZE));
-        String data = getString(strIndex);
         mParserOffset += (7 * WORD_SIZE);
     }
 
     private void parseEndTag() {
-        final int uriIdx = getLEWord(mParserOffset + (4 * WORD_SIZE));
-        final int nameIdx = getLEWord(mParserOffset + (5 * WORD_SIZE));
-
-        final String name = getString(nameIdx);
-        String uri;
-        if (uriIdx == 0xFFFFFFFF) {
-            uri = "";
-        } else {
-            uri = getString(uriIdx);
-        }
-
         mParserOffset += (6 * WORD_SIZE);
     }
 
@@ -230,7 +180,6 @@ public class CompressedXmlParser {
         } else {
             res = null;
         }
-
         return res;
     }
 
@@ -250,7 +199,6 @@ public class CompressedXmlParser {
                     }
                 }
             } else {
-
                 strLength = ((mData[offset + 1] << 8) & 0xFF00) | (mData[offset] & 0xFF);
                 chars = new byte[strLength];
                 for (int i = 0; i < strLength; i++) {
@@ -283,7 +231,6 @@ public class CompressedXmlParser {
             case TYPE_DIMEN -> (data >> 8) + DIMEN[data & 0xFF];
             case TYPE_FRACTION -> {
                 double v = (((double) data) / ((double) 0x7FFFFFFF));
-                //yield String.format("%.2f%%", v);
                 yield new DecimalFormat("#.##%").format(v);
             }
             case TYPE_FLOAT -> Float.toString(Float.intBitsToFloat(data));
@@ -295,5 +242,4 @@ public class CompressedXmlParser {
             default -> String.format("%08X/0x%08X", type, data);
         };
     }
-
 }
