@@ -1,33 +1,21 @@
 package com.apk.signature.Util;
 
-import com.apk.signature.Model.ManifestModel;
-import com.apk.signature.Model.SignatureModel;
-import com.apk.signature.Model.StringModel;
-import net.lingala.zip4j.model.FileHeader;
 import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.io.RandomAccessFile;
 import org.fusesource.jansi.AnsiConsole;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class Util extends FileUtil {
-
-    private static final String defaultAapt2Path = "C:\\scanner\\aapt2.exe";
     public static String TEMP_DEX_PATH = "";
-    public static String aapt2Path = "";//public static String aapt2Path = "C:\\Users\\sedej\\AppData\\Local\\Android\\Sdk\\build-tools\\34.0.0\\aapt2.exe";
-    public static String RESET = "\u001B[0m";
-    public static String RED = "\u001B[31m";
-    public static String GREEN = "\u001B[32m";
-    public static String YELLOW = "\u001B[33m";
 
     public static String dexName;
 
@@ -38,21 +26,18 @@ public class Util extends FileUtil {
     }
 
     public static void printRed(Object text) {
-        //System.out.println(RED + text + RESET);
         AnsiConsole.systemInstall();
         System.out.println(ansi().fgBrightRed().a(text).reset());
         AnsiConsole.systemUninstall();
     }
 
     public static void printGreen(Object text) {
-        //System.out.println(GREEN + text + RESET);
         AnsiConsole.systemInstall();
         System.out.println(ansi().fgBrightGreen().a(text).reset());
         AnsiConsole.systemUninstall();
     }
 
     public static void printYellow(Object text) {
-        //System.out.println(YELLOW + text + RESET);
         AnsiConsole.systemInstall();
         System.out.println(ansi().fgBrightYellow().a(text).reset());
         AnsiConsole.systemUninstall();
@@ -62,7 +47,7 @@ public class Util extends FileUtil {
         System.out.println(text);
     }
 
-    public static String setAapt2Path(String path) {
+    /*public static String setAapt2Path(String path) {
         if (path.isEmpty()) {
             return defaultAapt2Path;
         } else {
@@ -80,7 +65,7 @@ public class Util extends FileUtil {
             }
         }
         return "";
-    }
+    }*/
 
     public String getArrayAsString(ArrayList<String> list) {
         StringBuilder res = new StringBuilder();
@@ -135,7 +120,7 @@ public class Util extends FileUtil {
         return byteToStringHex(reverse);
     }
 
-    public byte[] getBytesOfFile(ByteArrayInputStream inputStream, long offset, long size) {
+    /*public byte[] getBytesOfFile(ByteArrayInputStream inputStream, long offset, long size) {
         byte[] bytes = new byte[(int) size];
         try {
             inputStream.mark(0);
@@ -146,7 +131,7 @@ public class Util extends FileUtil {
             e.printStackTrace();
         }
         return bytes;
-    }
+    }*/
 
     public byte[] getBytesOfFile(byte[] stream, long offset, long size) {
         int to = (int) (offset + size);
@@ -184,7 +169,7 @@ public class Util extends FileUtil {
     }
 
     public <T> ArrayList<T> removeDupe(ArrayList<T> list) {
-        ArrayList<T> newList = new ArrayList<T>();
+        ArrayList<T> newList = new ArrayList<>();
         for (T element : list) {
             if (!newList.contains(element)) {
                 newList.add(element);
@@ -228,19 +213,6 @@ public class Util extends FileUtil {
         return splitByte;
     }
 
-    public HashMap<String, byte[]> getStringHeader(byte[] stream) {
-        HashMap<String, byte[]> header = new HashMap<>();
-        try {
-            byte[] header_string_ids_size = getBytesOfFile(stream, 56, 4);
-            byte[] header_string_ids_off = getBytesOfFile(stream, 60, 4);
-            header.put("header_string_ids_size", header_string_ids_size);
-            header.put("header_string_ids_off", header_string_ids_off);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return header;
-    }
-
     public HashMap<String, byte[]> getHeader(byte[] stream) {
 
         HashMap<String, byte[]> header = new HashMap<>();
@@ -257,7 +229,7 @@ public class Util extends FileUtil {
             byte[] header_map_off = getBytesOfFile(stream, 52, 4);*/
             byte[] header_string_ids_size = getBytesOfFile(stream, 56, 4);
             byte[] header_string_ids_off = getBytesOfFile(stream, 60, 4);
-            byte[] header_type_ids_size = getBytesOfFile(stream, 64, 4);
+            /*byte[] header_type_ids_size = getBytesOfFile(stream, 64, 4);
             byte[] header_type_ids_off = getBytesOfFile(stream, 68, 4);
             byte[] header_proto_ids_size = getBytesOfFile(stream, 72, 4);
             byte[] header_proto_ids_off = getBytesOfFile(stream, 76, 4);
@@ -268,7 +240,7 @@ public class Util extends FileUtil {
             byte[] header_class_ids_size = getBytesOfFile(stream, 96, 4);
             byte[] header_class_ids_off = getBytesOfFile(stream, 100, 4);
             byte[] header_data_size = getBytesOfFile(stream, 104, 4);
-            byte[] header_data_off = getBytesOfFile(stream, 108, 4);
+            byte[] header_data_off = getBytesOfFile(stream, 108, 4);*/
 
             /*header.put("header_magic", header_magic);
             header.put("header_checksum", header_checksum);
@@ -281,7 +253,7 @@ public class Util extends FileUtil {
             header.put("header_map_off", header_map_off);*/
             header.put("header_string_ids_size", header_string_ids_size);
             header.put("header_string_ids_off", header_string_ids_off);
-            header.put("header_type_ids_size", header_type_ids_size);
+            /*header.put("header_type_ids_size", header_type_ids_size);
             header.put("header_type_ids_off", header_type_ids_off);
             header.put("header_proto_ids_size", header_proto_ids_size);
             header.put("header_proto_ids_off", header_proto_ids_off);
@@ -292,7 +264,7 @@ public class Util extends FileUtil {
             header.put("header_class_ids_size", header_class_ids_size);
             header.put("header_class_ids_off", header_class_ids_off);
             header.put("header_data_ids_size", header_data_size);
-            header.put("header_data_ids_off", header_data_off);
+            header.put("header_data_ids_off", header_data_off);*/
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -300,20 +272,20 @@ public class Util extends FileUtil {
         return header;
     }
 
-    public void readZip4j(File file, ReadBytesFromZipListener listener) {
+    /*public void readZip4j(File file, ReadBytesFromZipListener listener) {
         try {
             try (net.lingala.zip4j.ZipFile zipFile = new net.lingala.zip4j.ZipFile(file)) {
                 List<FileHeader> fileHeaders = zipFile.getFileHeaders();
                 List<FileHeader> fileHeaderCustom = new ArrayList<>();
-                boolean countinue = false;
+                boolean continue = false;
                 for (FileHeader fileHeader : fileHeaders) {
                     String name = fileHeader.getFileName();
                     if (name.equals("AndroidManifest.xml")) {
                         try {
                             InputStream inputStream = zipFile.getInputStream(fileHeader);
-                            byte[] bs = IOUtils.toByteArray(inputStream);
+                            byte[] bs = toByteArray(inputStream);
                             inputStream.close();
-                            countinue = listener.onReadManifest(bs);
+                            continue = listener.onReadManifest(bs);
                         } catch (Exception e) {
                             if (e.getMessage().contains("zip")) {
                                 listener.onZipError(e);
@@ -325,11 +297,11 @@ public class Util extends FileUtil {
                         fileHeaderCustom.add(fileHeader);
                     }
                 }
-                if (countinue) {
+                if (continue) {
                     for (FileHeader fileHeader : fileHeaderCustom) {
                         try {
                             InputStream inputStream = zipFile.getInputStream(fileHeader);
-                            byte[] bs = IOUtils.toByteArray(inputStream);
+                            byte[] bs = toByteArray(inputStream);
                             inputStream.close();
                             dexName = fileHeader.getFileName();
                             boolean malware = listener.onReadDex(bs);
@@ -350,14 +322,14 @@ public class Util extends FileUtil {
             listener.onZipError(e);
         }
         listener.onEnd();
-    }
+    }*/
 
     public void readZip(File file, ReadBytesFromZipListener listener) {
         try {
             try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
                 List<ZipEntry> dexEntries = new ArrayList<>();
                 Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                boolean countinue = false;
+                boolean continue_ = false;
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = entries.nextElement();
                     if (!entry.isDirectory()) {
@@ -366,7 +338,7 @@ public class Util extends FileUtil {
                                 InputStream inputStream = zipFile.getInputStream(entry);
                                 byte[] bs = IOUtils.toByteArray(inputStream);
                                 inputStream.close();
-                                countinue = listener.onReadManifest(bs);
+                                continue_ = listener.onReadManifest(bs);
                             } catch (Exception e) {
                                 if (e.getMessage().contains("zip")) {
                                     listener.onZipError(e);
@@ -379,7 +351,7 @@ public class Util extends FileUtil {
                         }
                     }
                 }
-                if (countinue) {
+                if (continue_) {
                     for (ZipEntry entry : dexEntries) {
                         try {
                             InputStream inputStream = zipFile.getInputStream(entry);

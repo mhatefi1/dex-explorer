@@ -248,6 +248,19 @@ public class FileUtil {
         return s;
     }
 
+    public ArrayList<String> readLineByLine(String path) {
+        ArrayList<String> argsFileSignatureList = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                argsFileSignatureList.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return argsFileSignatureList;
+    }
+
     public String getWorkingFilePath(File f) {
         if (f.isDirectory())
             return f.getAbsolutePath();

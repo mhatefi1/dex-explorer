@@ -5,7 +5,6 @@ import com.apk.signature.Items.ItemsClass;
 import com.apk.signature.Items.ItemsMethod;
 import com.apk.signature.Items.ItemsString;
 import com.apk.signature.Util.AppUtil;
-import com.apk.signature.Util.Util;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -79,7 +78,6 @@ public class AppCommon {
                 }
             }
             case "4" -> {
-                Util.aapt2Path = Util.setAapt2Path("");
                 myObj.close();
                 System.out.println("waite ...");
                 try {
@@ -94,7 +92,6 @@ public class AppCommon {
             case "5" -> {
                 System.out.println("Enter 1 to compare as utf8 and 0 as hex string: ");
                 String s = myObj.nextLine();
-                Util.aapt2Path = Util.setAapt2Path("");
                 myObj.close();
 
                 boolean utf8 = s.equals("1");
