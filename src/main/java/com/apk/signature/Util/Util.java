@@ -15,7 +15,6 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 public class Util extends FileUtil {
     public static String TEMP_DEX_PATH = "";
-
     public static String dexName;
 
     public static long runDuration(long startTime) {
@@ -25,21 +24,21 @@ public class Util extends FileUtil {
     }
 
     public static void printRed(Object text) {
-        AnsiConsole.systemInstall();
+        //AnsiConsole.systemInstall();
         System.out.println(ansi().fgBrightRed().a(text).reset());
-        AnsiConsole.systemUninstall();
+        //AnsiConsole.systemUninstall();
     }
 
     public static void printGreen(Object text) {
-        AnsiConsole.systemInstall();
+        //AnsiConsole.systemInstall();
         System.out.println(ansi().fgBrightGreen().a(text).reset());
-        AnsiConsole.systemUninstall();
+        //AnsiConsole.systemUninstall();
     }
 
     public static void printYellow(Object text) {
-        AnsiConsole.systemInstall();
+        //AnsiConsole.systemInstall();
         System.out.println(ansi().fgBrightYellow().a(text).reset());
-        AnsiConsole.systemUninstall();
+        //AnsiConsole.systemUninstall();
     }
 
     public static void print(Object text) {

@@ -3,6 +3,7 @@ package com.apk.signature;
 import com.apk.signature.Util.FIndInterval;
 import com.apk.signature.Util.ManifestUtil;
 import com.apk.signature.Util.Util;
+import org.fusesource.jansi.AnsiConsole;
 
 import java.util.Scanner;
 
@@ -20,6 +21,7 @@ public class AppMain {
     public static final String GET_STRING_INDEX_INTERVAL = "10";
 
     public static void main(String[] args) {
+        AnsiConsole.systemInstall();
         if (args.length > 0) {
             switch (args[0]) {
                 case STRING_EXPLORER:
