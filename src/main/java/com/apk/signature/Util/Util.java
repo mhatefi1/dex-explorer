@@ -1,5 +1,6 @@
 package com.apk.signature.Util;
 
+import com.apk.signature.Model.MatchStateEnum;
 import org.fusesource.jansi.AnsiConsole;
 
 import java.io.ByteArrayOutputStream;
@@ -323,6 +324,7 @@ public class Util extends FileUtil {
     }*/
 
     public void readZip(File file, ReadBytesFromZipListener listener) {
+        MatchStateEnum.state state = MatchStateEnum.state.NOT_MATCH;
         try {
             try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
                 List<ZipEntry> dexEntries = new ArrayList<>();
@@ -338,6 +340,7 @@ public class Util extends FileUtil {
                                 inputStream.close();
                                 continue_ = listener.onReadManifest(bs);
                             } catch (Exception e) {
+                                state = MatchStateEnum.state.ERROR;
                                 if (e.getMessage().contains("zip")) {
                                     listener.onZipError(e);
                                 } else {
@@ -358,9 +361,11 @@ public class Util extends FileUtil {
                             dexName = entry.getName();
                             boolean malware = listener.onReadDex(bs);
                             if (malware) {
+                                state = MatchStateEnum.state.MALWARE;
                                 break;
                             }
                         } catch (Exception e) {
+                            state = MatchStateEnum.state.ERROR;
                             if (e.getMessage().contains("zip")) {
                                 listener.onZipError(e);
                             } else {
@@ -370,12 +375,13 @@ public class Util extends FileUtil {
                     }
                 }
             } catch (Exception e) {
+                state = MatchStateEnum.state.ERROR;
                 listener.onZipError(e);
             }
         } catch (Exception e) {
             listener.onZipError(e);
         }
-        listener.onEnd();
+        listener.onEnd(state);
     }
 
     public byte[] toByteArray(InputStream input) throws IOException {

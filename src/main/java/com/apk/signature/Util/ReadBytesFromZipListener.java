@@ -1,5 +1,6 @@
 package com.apk.signature.Util;
 
+import com.apk.signature.Model.MatchStateEnum;
 import net.lingala.zip4j.exception.ZipException;
 
 public interface ReadBytesFromZipListener {
@@ -13,6 +14,6 @@ public interface ReadBytesFromZipListener {
 
     void onDexError(Exception e);
 
-    void onEnd();
+    void onEnd(MatchStateEnum.state state);
 
 }

@@ -5,6 +5,7 @@ import com.apk.signature.Model.Report;
 import com.apk.signature.Model.ScanResult;
 import com.apk.signature.Model.SignatureModel;
 import com.apk.signature.Util.BinaryMatchCore;
+import com.apk.signature.Util.BinaryMatchSubStringCore;
 import com.apk.signature.Util.Util;
 import com.google.gson.Gson;
 
@@ -108,6 +109,7 @@ public class AppBinarySearchMatch {
         scanResult.setTotalMalware(malwareList.size());
         scanResult.setTotalUnscannable(matchCore.getUnscannableModel().getSize());
         scanResult.setTotalTime(time);
+        scanResult.setTotalNotMatch(matchCore.getNotMatch().size());
 
         String jsonSummarized = gson.toJson(new Report(scanResult));
 
@@ -116,6 +118,7 @@ public class AppBinarySearchMatch {
             scanResult.setTotalSignature(signatureModels.size());
             scanResult.setMalwareList(malwareList);
             scanResult.setUnscannable(matchCore.getUnscannableModel());
+            scanResult.setNotMatchList(matchCore.getNotMatch());
             String json = gson.toJson(scanResult);
             util.writeToFile(json, System.getProperty("user.dir") + "\\report-" + System.currentTimeMillis() + ".json");
         }

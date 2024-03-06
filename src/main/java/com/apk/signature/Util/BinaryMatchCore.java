@@ -19,6 +19,7 @@ public class BinaryMatchCore {
     ArrayList<String> unknown = new ArrayList<>();
     ArrayList<String> manifest = new ArrayList<>();
     ArrayList<String> dex = new ArrayList<>();
+    ArrayList<String> notMatch = new ArrayList<>();
     long f1, f2;
     private int totalFiles, totalApk;
     private Unscannable unscannableModel = new Unscannable();
@@ -55,8 +56,9 @@ public class BinaryMatchCore {
         ManifestUtil util1 = new ManifestUtil();
         ItemsString itemsString = new ItemsString();
         totalFiles = fileTargetList.size();
-        for (File file_i : fileTargetList) {
-            Util.print("***" + file_i.getAbsolutePath() + "***");
+        for (int i = 0; i < totalFiles; i++) {
+            File file_i = fileTargetList.get(i);
+            Util.print(i + 1 + "/" + totalFiles + " ***" + file_i.getAbsolutePath() + "***");
             util1.readZip(file_i, new ReadBytesFromZipListener() {
                 ArrayList<SignatureModel> manifestMatchedSignatures = new ArrayList<>();
                 boolean apk = true;
@@ -140,8 +142,9 @@ public class BinaryMatchCore {
                 }
 
                 @Override
-                public void onEnd() {
+                public void onEnd(MatchStateEnum.state state) {
                     if (apk) totalApk++;
+                    if (state == MatchStateEnum.state.NOT_MATCH) notMatch.add(file_i.getAbsolutePath());
                 }
             });
         }
@@ -153,6 +156,7 @@ public class BinaryMatchCore {
         unscannable1.setManifest(manifest);
         unscannable1.setDex(dex);
         setUnscannableModel(unscannable1);
+        setNotMatch(notMatch);
         return malwareModels;
     }
 
@@ -263,5 +267,13 @@ public class BinaryMatchCore {
 
     public void setDex(ArrayList<String> dex) {
         this.dex = dex;
+    }
+
+    public ArrayList<String> getNotMatch() {
+        return notMatch;
+    }
+
+    public void setNotMatch(ArrayList<String> notMatch) {
+        this.notMatch = notMatch;
     }
 }

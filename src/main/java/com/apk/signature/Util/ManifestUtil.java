@@ -4,7 +4,6 @@ import com.apk.signature.Model.ManifestModel;
 import com.apk.signature.Model.SignatureModel;
 import fr.xgouchet.axml.customized.Attribute;
 import fr.xgouchet.axml.customized.CompressedXmlParser;
-import org.apache.pdfbox.io.IOUtils;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;

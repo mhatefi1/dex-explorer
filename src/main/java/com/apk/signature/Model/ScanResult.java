@@ -8,10 +8,10 @@ public class ScanResult {
     public int totalMalware;
     public int totalSignature;
     public long totalTime;
-
+    public int totalNotMatch;
     public int totalUnscannable;
-
     public ArrayList<String> unscannableList;
+    public ArrayList<String> notMatchList;
     ArrayList<MalwareModel> malwareList;
 
     public Unscannable unscannable;
@@ -94,4 +94,21 @@ public class ScanResult {
     public void setMalwareList(ArrayList<MalwareModel> malwareList) {
         this.malwareList = malwareList;
     }
+
+    public ArrayList<String> getNotMatchList() {
+        return notMatchList;
+    }
+
+    public void setNotMatchList(ArrayList<String> notMatchList) {
+        this.notMatchList = notMatchList;
+    }
+
+    public int getTotalNotMatch() {
+        return totalNotMatch;
+    }
+
+    public void setTotalNotMatch(int totalNotMatch) {
+        this.totalNotMatch = totalNotMatch;
+    }
+
 }
