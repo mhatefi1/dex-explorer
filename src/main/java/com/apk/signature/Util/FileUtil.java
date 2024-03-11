@@ -261,6 +261,16 @@ public class FileUtil {
         return argsFileSignatureList;
     }
 
+    public void writeToFile(byte[] bytes, String path) {
+        try {
+            FileOutputStream fos = new FileOutputStream(path);
+            fos.write(bytes);
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public String getWorkingFilePath(File f) {
         if (f.isDirectory())
             return f.getAbsolutePath();

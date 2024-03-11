@@ -3,10 +3,7 @@ package com.apk.signature.Util;
 import com.apk.signature.Model.MatchStateEnum;
 import org.fusesource.jansi.AnsiConsole;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -382,6 +379,100 @@ public class Util extends FileUtil {
             listener.onZipError(e);
         }
         listener.onEnd(state);
+    }
+
+    /*public void readZip(File file) {
+        try {
+            try (ZipFile zipFile = new ZipFile(file.getAbsolutePath())) {
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (!entry.isDirectory()) {
+                        if (entry.getName().endsWith(".dex")) {
+                            InputStream inputStream = zipFile.getInputStream(entry);
+                            byte[] bs = toByteArray(inputStream);
+                            byte[] stringSection = getStringSection(bs);
+                            String path = "Z:\\fff\\test.txt";
+                            writeToFile(stringSection, path);
+                            inputStream.close();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }*/
+
+    private ArrayList<byte[]> chunkBytes(byte[] bs) {
+        ArrayList<byte[]> list = new ArrayList<>();
+        int length = bs.length;
+        int start_offset = 0;
+        int limit = 1048576;
+        int lastOffsetOfMain = length - 1;
+        int end_offset = limit - 1;
+        if (limit >= length) {
+            list.add(bs);
+        } else {
+            while (start_offset < lastOffsetOfMain) {
+                while (bs[end_offset] != 0) {
+                    end_offset--;
+                }
+                int size = end_offset - start_offset + 1;
+                byte[] index = getBytesOfFile(bs, start_offset, size);
+                list.add(index);
+                start_offset = start_offset + size;
+                end_offset = end_offset + limit;
+                if (end_offset > length) {
+                    end_offset = lastOffsetOfMain;
+                }
+            }
+        }
+        return list;
+    }
+
+    private byte[] getStringSection(byte[] bs) {
+        long from_offset = 112;
+        byte[] header_ids_size = getBytesOfFile(bs, 56, 4);
+        long ids_count = getDecimalValue(header_ids_size);
+
+
+        long to_offset = from_offset + (long) 4 * (ids_count - 1);
+
+        long start_string_section = getDecimalValue(getBytesOfFile(bs, from_offset, 4));
+        long end_string_section = getDecimalValue(getBytesOfFile(bs, to_offset, 4));
+        long offset = end_string_section;
+
+        do {
+            end_string_section = getBytesOfFile(bs, offset, 1)[0];
+            offset++;
+        } while (end_string_section != 0);
+
+        long size = offset - start_string_section;
+        return getBytesOfFile(bs, start_string_section, size);
+    }
+
+    public void FF() {
+        try {
+            Util util3 = new Util();
+            String parent = "C:\\Users\\sedej\\Downloads\\MEmu Download\\aoo\\app-test1\\";
+            String path3 = parent + "classes.dex";
+            String path4 = parent + "classes.txt";
+            try (InputStream inputStream = new FileInputStream(path3)) {
+                byte[] bs = util3.toByteArray(inputStream);
+                byte[] stringSection = util3.getStringSection(bs);
+                util3.writeToFile(stringSection, path4);
+                ArrayList<byte[]> list = chunkBytes(stringSection);
+                for (int i = 0; i < list.size(); i++) {
+                    byte[] bs_i = list.get(i);
+                    util3.writeToFile(bs_i, parent + "c_" + i + ".txt");
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public byte[] toByteArray(InputStream input) throws IOException {

@@ -1,11 +1,9 @@
 package com.apk.signature.Util;
 
-import com.apk.signature.Model.DBModel;
-import com.apk.signature.Model.ManifestModel;
-import com.apk.signature.Model.SignatureModel;
-import com.apk.signature.Model.StringModel;
+import com.apk.signature.Model.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,6 +60,27 @@ public class SignatureUtil extends Util {
         return list;
     }
 
+    private String[] getComponentListNewManifest(String signature) {
+        try {
+            String[] tt = signature.split(";");
+            switch (tt.length) {
+                case 4: {
+                    return tt;
+                }
+                case 3: {
+                    return new String[]{tt[0], tt[1], tt[2], ""};
+                }
+                case 2: {
+                    return new String[]{tt[0], tt[1], "", ""};
+                }
+            }
+        } catch (Exception e) {
+            printRed(signature);
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /*public DBModel parseSignatureAsDB(String signature) {
         ArrayList<String> list = getComponentList(signature);
         return new DBModel(list.get(1), list.get(2), list.get(3), list.get(4), list.get(5));
@@ -70,6 +89,15 @@ public class SignatureUtil extends Util {
     public SignatureModel parseSignature(String signature, boolean decodeHex) {
         ArrayList<String> list = getComponentList(signature);
         return createSignatureModel(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4), list.get(5), list.get(6), decodeHex);
+    }
+
+    public SignatureModel2 parseSignatureNewManifest(String signature, boolean decodeHex) {
+        String[] list = getComponentListNewManifest(signature);
+        if (list != null) {
+            return createSignatureModelNewManifest(list[0], list[1], list[2], list[3], decodeHex);
+        } else {
+            return null;
+        }
     }
 
     /*public SignatureModel createSignatureModel2(String permissions, String activities, String services, String receivers, String strings) {
@@ -194,6 +222,48 @@ public class SignatureUtil extends Util {
         SignatureModel signatureModel = new SignatureModel();
 
         signatureModel.setManifestModel(manifestModel);
+        signatureModel.setStringModels(stringModels);
+        signatureModel.setName(name);
+        signatureModel.setFlags(flags);
+
+        return signatureModel;
+    }
+
+    public SignatureModel2 createSignatureModelNewManifest(String name, String manifest, String strings, String flags, boolean decodeHex) {
+        ArrayList<String> permissionArrayList = new ArrayList<>();
+        if (!manifest.isEmpty()) {
+            String[] manifest_list = manifest.split(",");
+            for (String s : manifest_list) {
+                if (decodeHex) s = hexStringToUTF8(s);
+                permissionArrayList.add(s);
+            }
+        }
+
+        ArrayList<StringModel> stringModels = new ArrayList<>();
+        if (!strings.isEmpty()) {
+            String[] strings_list = strings.split(",");
+            for (String s : strings_list) {
+                String reg = "(.+)\\[(.+)-(.+)]";
+                Pattern pattern1 = Pattern.compile(reg);
+                Matcher matcher1 = pattern1.matcher(s);
+                if (matcher1.find()) {
+                    s = matcher1.group(1);
+                    int startIndex = Integer.parseInt(matcher1.group(2));
+                    int endIndex = Integer.parseInt(matcher1.group(3));
+                    StringModel model = new StringModel(startIndex, endIndex, s);
+                    stringModels.add(model);
+                } else {
+                    int startIndex = 0;
+                    int endIndex = 0;
+                    StringModel model = new StringModel(startIndex, endIndex, s);
+                    stringModels.add(model);
+                }
+            }
+        }
+
+        SignatureModel2 signatureModel = new SignatureModel2();
+
+        signatureModel.setManifests(permissionArrayList);
         signatureModel.setStringModels(stringModels);
         signatureModel.setName(name);
         signatureModel.setFlags(flags);

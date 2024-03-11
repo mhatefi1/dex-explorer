@@ -1,11 +1,8 @@
 package com.apk.signature;
 
-import com.apk.signature.Model.MalwareModel;
-import com.apk.signature.Model.Report;
-import com.apk.signature.Model.ScanResult;
-import com.apk.signature.Model.SignatureModel;
+import com.apk.signature.Model.*;
 import com.apk.signature.Util.BinaryMatchCore;
-import com.apk.signature.Util.BinaryMatchSubStringCore;
+import com.apk.signature.Util.BinaryMatchCoreNewManifest;
 import com.apk.signature.Util.Util;
 import com.google.gson.Gson;
 
@@ -15,13 +12,13 @@ import java.util.Scanner;
 
 import static com.apk.signature.Util.Util.*;
 
-public class AppBinarySearchMatch {
+public class AppBinarySearchMatchNewManifest {
     public static void main(String[] args) {
         String signature_path = "";
         String target_path = "";
         ArrayList<File> AllTargetFilePath = new ArrayList<>();
-        BinaryMatchCore matchCore = new BinaryMatchCore();
-        //BinaryMatchSubStringCore matchCore = new BinaryMatchSubStringCore();
+        BinaryMatchCoreNewManifest matchCore = new BinaryMatchCoreNewManifest();
+
         boolean arg_sig = false, arg_file = false, report = false;
 
         if (args != null) {
@@ -41,7 +38,7 @@ public class AppBinarySearchMatch {
                 }
             }
         } else {
-            AppBinarySearchMatch.main(new String[]{""});
+            AppBinarySearchMatchNewManifest.main(new String[]{""});
         }
 
         Scanner myObj = new Scanner(System.in);
@@ -60,14 +57,14 @@ public class AppBinarySearchMatch {
         if (!fileSignature.exists()) {
             printRed("signature path doesn't exist");
             //System.exit(0);
-            AppBinarySearchMatch.main(new String[]{""});
+            AppBinarySearchMatchNewManifest.main(new String[]{""});
         }
 
         File targetFile = new File(target_path);
         if (!targetFile.exists()) {
             printRed("target path doesn't exist");
             //System.exit(0);
-            AppBinarySearchMatch.main(new String[]{"", signature_path});
+            AppBinarySearchMatchNewManifest.main(new String[]{"", signature_path});
 
         }
 
@@ -83,7 +80,17 @@ public class AppBinarySearchMatch {
 
         Util util = new Util();
 
-        ArrayList<SignatureModel> signatureModels = matchCore.getSigModels(fileSignature);
+        ArrayList<SignatureModel2> signatureModels = matchCore.getSigModels(fileSignature);
+        /*print("*****************");
+        for (SignatureModel2 df:signatureModels){
+            for (String sd:df.getManifests()) {
+                print("--"+sd);
+            }
+            for (StringModel ds : df.getStringModels()){
+                print("##"+ds.getString());
+            }
+        }
+        print("*****************");*/
 
         /*if (AllTargetFilePath.isEmpty()) {
             AllTargetFilePath.add(targetFile);
@@ -98,7 +105,7 @@ public class AppBinarySearchMatch {
             } else {
                 targetFileList.add(f);
             }
-            ArrayList<MalwareModel> list = matchCore.match(targetFileList, signatureModels);
+            ArrayList<MalwareModel> list = matchCore.match2(targetFileList, signatureModels);
             malwareList.addAll(list);
         }
 
@@ -124,6 +131,6 @@ public class AppBinarySearchMatch {
             util.writeToFile(json, System.getProperty("user.dir") + "\\report-" + System.currentTimeMillis() + ".json");
         }
         printGreen(jsonSummarized);
-        AppBinarySearchMatch.main(new String[]{"", signature_path, "", report ? "report" : ""});
+        AppBinarySearchMatchNewManifest.main(new String[]{"", signature_path, "", report ? "report" : ""});
     }
 }

@@ -43,7 +43,7 @@ public class AppMain {
                     AppCommon.main(args);
                     break;
                 case SCAN:
-                    AppBinarySearchMatch.main(args);
+                    AppBinarySearchMatchNewManifest.main(args);
                     break;
                 case GENERATE_SIGNATURE:
                     AppGenerateSignature.main(args);
