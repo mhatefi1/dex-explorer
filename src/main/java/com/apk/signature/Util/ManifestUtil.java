@@ -6,6 +6,7 @@ import com.apk.signature.Model.SignatureModel;
 import com.apk.signature.Model.SignatureModel2;
 import fr.xgouchet.axml.customized.Attribute;
 import fr.xgouchet.axml.customized.CompressedXmlParser;
+import org.apache.pdfbox.contentstream.operator.graphics.AppendRectangleToPath;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -96,21 +97,23 @@ public class ManifestUtil extends Util {
         return appManifestModel;
     }
 
-    public ManifestModel2 calcManifest2(byte[] bs) {
+    public ArrayList<String> calcManifest2(byte[] bs) {
         ArrayList<String> permission_list = new ArrayList<>();
 
         new CompressedXmlParser().parse(bs, (localName, attrs) -> {
-            switch (localName) {
+            /*switch (localName) {
                 case "uses-permission", "permission", "service", "receiver", "activity":
                     //Log.d(MainActivity.tag, "startElement localName:" + localName);
                     setAttribute(attrs, permission_list);
                     break;
-            }
+            }*/
+            setAttributeInHex(attrs, permission_list);
         });
 
-        ManifestModel2 appManifestModel = new ManifestModel2();
-        appManifestModel.setAll(permission_list);
-        return appManifestModel;
+        //ManifestModel2 appManifestModel = new ManifestModel2();
+        //appManifestModel.setAll(permission_list);
+        //return appManifestModel;
+        return permission_list;
     }
 
     public ArrayList<SignatureModel> compareAppManifestWithSignatures(ArrayList<SignatureModel> signature_list, ManifestModel appManifestModel) {
@@ -159,34 +162,25 @@ public class ManifestUtil extends Util {
 
             if (manifestMatch) {
                 manifestMatchedSignatures.add(model);
-                //boolean manifestEmpty = permissionEmpty && activitiesEmpty && serviceEmpty && receiverEmpty;
-                //if (!manifestEmpty) break;
             }
         }
         return manifestMatchedSignatures;
     }
 
-    public ArrayList<SignatureModel2> compareAppManifestWithSignatures2(ArrayList<SignatureModel2> signature_list, ManifestModel2 appManifestModel) {
+    public ArrayList<SignatureModel2> compareAppManifestWithSignatures2(ArrayList<SignatureModel2> signature_list, ArrayList<String> appManifest) {
         ArrayList<SignatureModel2> manifestMatchedSignatures = new ArrayList<>();
         boolean permissionMatch;
-
         for (SignatureModel2 model : signature_list) {
-
             boolean permissionEmpty = model.getManifests().isEmpty();
-
             if (permissionEmpty) {
                 permissionMatch = true;
             } else {
-                permissionMatch = super.contains(appManifestModel.getAll(), model.getManifests());
+                permissionMatch = super.containsIgnoreCase(appManifest, model.getManifests());
             }
-
-            boolean manifestMatch = permissionMatch;
-
-            if (manifestMatch) {
+            if (permissionMatch) {
                 manifestMatchedSignatures.add(model);
             }
         }
-
         return manifestMatchedSignatures;
     }
 
@@ -217,6 +211,17 @@ public class ManifestUtil extends Util {
             for (Attribute att : atts) {
                 if (att.getName().equals("name") || att.getName().isEmpty()) {
                     list.add(att.getValue());
+                    break;
+                }
+            }
+        }
+    }
+
+    private void setAttributeInHex(Attribute[] atts, ArrayList<String> list) {
+        if (atts != null) {
+            for (Attribute att : atts) {
+                if (att.getName().equals("name") || att.getName().isEmpty()) {
+                    list.add(stringToHexString(att.getValue()));
                     break;
                 }
             }

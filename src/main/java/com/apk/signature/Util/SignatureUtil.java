@@ -54,6 +54,7 @@ public class SignatureUtil extends Util {
                 list.add("");
             }
         } catch (Exception e) {
+            print("ggtt:" + signature);
             e.printStackTrace();
         }
 

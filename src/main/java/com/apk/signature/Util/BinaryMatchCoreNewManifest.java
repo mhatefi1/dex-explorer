@@ -33,7 +33,7 @@ public class BinaryMatchCoreNewManifest {
             try {
                 ArrayList<String> signs = util.readLineByLine(file.getAbsolutePath());
                 for (String s : signs) {
-                    SignatureModel2 signatureModel2 = new SignatureUtil().parseSignatureNewManifest(s, true);
+                    SignatureModel2 signatureModel2 = new SignatureUtil().parseSignatureNewManifest(s, false);
                     if (signatureModel2 != null) {
                         signatureModels.add(signatureModel2);
                     }
@@ -175,11 +175,11 @@ public class BinaryMatchCoreNewManifest {
                 @Override
                 public boolean onReadManifest(byte[] bs) {
                     try {
-                        ManifestModel2 appManifestModel = util1.calcManifest2(bs);
-                        if (appManifestModel == null) {
+                        ArrayList<String> appManifest = util1.calcManifest2(bs);
+                        if (appManifest == null) {
                             return false;
                         }
-                        manifestMatchedSignatures = util1.compareAppManifestWithSignatures2(signature_list, appManifestModel);
+                        manifestMatchedSignatures = util1.compareAppManifestWithSignatures2(signature_list, appManifest);
                     } catch (Exception e) {
                         onManifestError(e);
                     }

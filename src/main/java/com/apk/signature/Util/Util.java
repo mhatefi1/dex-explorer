@@ -190,6 +190,30 @@ public class Util extends FileUtil {
         return allItemsPresent;
     }
 
+    public boolean containsIgnoreCase(ArrayList<String> list, ArrayList<String> subList) {
+        boolean allItemsPresent = true;
+
+        if (list != null && subList != null) {
+
+            for (String sub_item : subList) {
+                boolean itemsPresent = false;
+                for (String item : list) {
+                    if (sub_item.equalsIgnoreCase(item)) {
+                        itemsPresent = true;
+                        break;
+                    }
+                }
+                if (!itemsPresent) {
+                    allItemsPresent = false;
+                    break;
+                }
+            }
+        } else {
+            allItemsPresent = false;
+        }
+        return allItemsPresent;
+    }
+
     public String[] splitTwoByTwo(String text) {
         int splitUnit = 2;
         String[] splitText = new String[text.length() / splitUnit];
