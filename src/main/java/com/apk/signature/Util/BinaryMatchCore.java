@@ -26,7 +26,7 @@ public class BinaryMatchCore {
 
     public ArrayList<SignatureModel> getSigModels(File fileSignature) {
         ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt", false);
-        ArrayList<File> dbSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".db", false);
+        //ArrayList<File> dbSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".db", false);
         ArrayList<SignatureModel> signatureModels = new ArrayList<>();
 
         for (File file : fileSignatureList) {
@@ -43,11 +43,11 @@ public class BinaryMatchCore {
             }
         }
 
-        for (File file : dbSignatureList) {
+        /*for (File file : dbSignatureList) {
             SQLiteJDBC jdbc = new SQLiteJDBC(file);
             ArrayList<SignatureModel> dbList = jdbc.select();
             signatureModels.addAll(dbList);
-        }
+        }*/
         return signatureModels;
     }
 

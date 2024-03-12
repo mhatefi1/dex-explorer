@@ -104,7 +104,7 @@ public class AppBinarySearchMatchNewManifest {
             } else {
                 targetFileList.add(f);
             }
-            ArrayList<MalwareModel> list = matchCore.match2(targetFileList, signatureModels);
+            ArrayList<MalwareModel> list = matchCore.match(targetFileList, signatureModels);
             malwareList.addAll(list);
         }
 
