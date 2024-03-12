@@ -121,7 +121,7 @@ public class BinaryMatchCore {
                         compress_mode.add(file_i.getAbsolutePath());
                     } else if (error.contains("split")) {
                         split_zip.add(file_i.getAbsolutePath());
-                    } else if (error.contains("not a zip file")) {
+                    } else if (error.contains("zip END header not found")) {
                         apk = false;
                         not_zip.add(file_i.getAbsolutePath());
                     } else {

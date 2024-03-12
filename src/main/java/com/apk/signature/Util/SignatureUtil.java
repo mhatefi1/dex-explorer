@@ -3,7 +3,6 @@ package com.apk.signature.Util;
 import com.apk.signature.Model.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,7 +91,7 @@ public class SignatureUtil extends Util {
         return createSignatureModel(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4), list.get(5), list.get(6), decodeHex);
     }
 
-    public SignatureModel2 parseSignatureNewManifest(String signature, boolean decodeHex) {
+    public SignatureModelNew parseSignatureNewManifest(String signature, boolean decodeHex) {
         String[] list = getComponentListNewManifest(signature);
         if (list != null) {
             return createSignatureModelNewManifest(list[0], list[1], list[2], list[3], decodeHex);
@@ -230,7 +229,7 @@ public class SignatureUtil extends Util {
         return signatureModel;
     }
 
-    public SignatureModel2 createSignatureModelNewManifest(String name, String manifest, String strings, String flags, boolean decodeHex) {
+    public SignatureModelNew createSignatureModelNewManifest(String name, String manifest, String strings, String flags, boolean decodeHex) {
         ArrayList<String> permissionArrayList = new ArrayList<>();
         if (!manifest.isEmpty()) {
             String[] manifest_list = manifest.split(",");
@@ -262,7 +261,7 @@ public class SignatureUtil extends Util {
             }
         }
 
-        SignatureModel2 signatureModel = new SignatureModel2();
+        SignatureModelNew signatureModel = new SignatureModelNew();
 
         signatureModel.setManifests(permissionArrayList);
         signatureModel.setStringModels(stringModels);

@@ -1,7 +1,6 @@
 package com.apk.signature;
 
 import com.apk.signature.Model.*;
-import com.apk.signature.Util.BinaryMatchCore;
 import com.apk.signature.Util.BinaryMatchCoreNewManifest;
 import com.apk.signature.Util.Util;
 import com.google.gson.Gson;
@@ -80,7 +79,7 @@ public class AppBinarySearchMatchNewManifest {
 
         Util util = new Util();
 
-        ArrayList<SignatureModel2> signatureModels = matchCore.getSigModels(fileSignature);
+        ArrayList<SignatureModelNew> signatureModels = matchCore.getSigModels(fileSignature);
         /*print("*****************");
         for (SignatureModel2 df:signatureModels){
             for (String sd:df.getManifests()) {

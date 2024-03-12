@@ -2,7 +2,7 @@ package com.apk.signature.Model;
 
 import java.util.ArrayList;
 
-public class SignatureModel2 {
+public class SignatureModelNew {
     public String name;
 
     public ArrayList<String> strings;
@@ -11,7 +11,7 @@ public class SignatureModel2 {
     public ArrayList<StringModel> stringModels;
     public String flags;
 
-    public SignatureModel2() {
+    public SignatureModelNew() {
     }
 
     public ArrayList<StringModel> getStringModels() {

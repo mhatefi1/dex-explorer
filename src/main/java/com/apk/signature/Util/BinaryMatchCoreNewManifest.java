@@ -1,6 +1,5 @@
 package com.apk.signature.Util;
 
-import com.apk.signature.DB.SQLiteJDBC;
 import com.apk.signature.Items.Item;
 import com.apk.signature.Items.ItemsString;
 import com.apk.signature.Model.*;
@@ -24,18 +23,18 @@ public class BinaryMatchCoreNewManifest {
     private int totalFiles, totalApk;
     private Unscannable unscannableModel = new Unscannable();
 
-    public ArrayList<SignatureModel2> getSigModels(File fileSignature) {
+    public ArrayList<SignatureModelNew> getSigModels(File fileSignature) {
         ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt", false);
         //ArrayList<File> dbSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".db", false);
-        ArrayList<SignatureModel2> signatureModels = new ArrayList<>();
+        ArrayList<SignatureModelNew> signatureModels = new ArrayList<>();
 
         for (File file : fileSignatureList) {
             try {
                 ArrayList<String> signs = util.readLineByLine(file.getAbsolutePath());
                 for (String s : signs) {
-                    SignatureModel2 signatureModel2 = new SignatureUtil().parseSignatureNewManifest(s, false);
-                    if (signatureModel2 != null) {
-                        signatureModels.add(signatureModel2);
+                    SignatureModelNew signatureModelNew = new SignatureUtil().parseSignatureNewManifest(s, false);
+                    if (signatureModelNew != null) {
+                        signatureModels.add(signatureModelNew);
                     }
                 }
             } catch (Exception e) {
@@ -121,7 +120,7 @@ public class BinaryMatchCoreNewManifest {
                         compress_mode.add(file_i.getAbsolutePath());
                     } else if (error.contains("split")) {
                         split_zip.add(file_i.getAbsolutePath());
-                    } else if (error.contains("not a zip file")) {
+                    } else if (error.contains("zip END header not found")) {
                         apk = false;
                         not_zip.add(file_i.getAbsolutePath());
                     } else {
@@ -160,7 +159,7 @@ public class BinaryMatchCoreNewManifest {
         return malwareModels;
     }
 
-    public ArrayList<MalwareModel> match2(ArrayList<File> fileTargetList, ArrayList<SignatureModel2> signature_list) {
+    public ArrayList<MalwareModel> match2(ArrayList<File> fileTargetList, ArrayList<SignatureModelNew> signature_list) {
         ArrayList<MalwareModel> malwareModels = new ArrayList<>();
         ManifestUtil util1 = new ManifestUtil();
         ItemsString itemsString = new ItemsString();
@@ -169,17 +168,17 @@ public class BinaryMatchCoreNewManifest {
             File file_i = fileTargetList.get(i);
             Util.print(i + 1 + "/" + totalFiles + " ***" + file_i.getAbsolutePath() + "***");
             util1.readZip(file_i, new ReadBytesFromZipListener() {
-                ArrayList<SignatureModel2> manifestMatchedSignatures = new ArrayList<>();
+                ArrayList<SignatureModelNew> manifestMatchedSignatures = new ArrayList<>();
                 boolean apk = true;
 
                 @Override
                 public boolean onReadManifest(byte[] bs) {
                     try {
-                        ArrayList<String> appManifest = util1.calcManifest2(bs);
+                        ArrayList<String> appManifest = util1.calcManifestInNew(bs);
                         if (appManifest == null) {
                             return false;
                         }
-                        manifestMatchedSignatures = util1.compareAppManifestWithSignatures2(signature_list, appManifest);
+                        manifestMatchedSignatures = util1.compareAppManifestWithSignaturesInNew(signature_list, appManifest);
                     } catch (Exception e) {
                         onManifestError(e);
                     }
@@ -195,7 +194,7 @@ public class BinaryMatchCoreNewManifest {
                     try {
                         byte[] header_ids_size = util.getBytesOfFile(bs, 56, 4);
                         long ids_count = util.getDecimalValue(header_ids_size);
-                        for (SignatureModel2 signatureModel : manifestMatchedSignatures) {
+                        for (SignatureModelNew signatureModel : manifestMatchedSignatures) {
                             ArrayList<StringModel> strings = signatureModel.getStringModels();
                             for (StringModel stringModel : strings) {
                                 stringMatch = getStringAddressFromHexString(bs, (int) ids_count, stringModel.getString(),
@@ -230,7 +229,7 @@ public class BinaryMatchCoreNewManifest {
                         compress_mode.add(file_i.getAbsolutePath());
                     } else if (error.contains("split")) {
                         split_zip.add(file_i.getAbsolutePath());
-                    } else if (error.contains("not a zip file")) {
+                    } else if (error.contains("zip END header not found")) {
                         apk = false;
                         not_zip.add(file_i.getAbsolutePath());
                     } else {
