@@ -19,6 +19,7 @@ public class AppMain {
     public static final String CONVERT_SIGNATURES = "8";
     public static final String DECODE_MANIFEST = "9";
     public static final String GET_STRING_INDEX_INTERVAL = "10";
+    public static final String CONVERT_OLD_SIG_TO_NEW = "11";
 
     public static void main(String[] args) {
         AnsiConsole.systemInstall();
@@ -43,6 +44,7 @@ public class AppMain {
                     AppCommon.main(args);
                     break;
                 case SCAN:
+                    //AppBinarySearchMatch.main(args);
                     AppBinarySearchMatchNewManifest.main(args);
                     break;
                 case GENERATE_SIGNATURE:
@@ -60,6 +62,9 @@ public class AppMain {
                     String path = args[2];
                     new FIndInterval().find(s10, path);
                     break;
+                case CONVERT_OLD_SIG_TO_NEW:
+                    new Util().convertSignatureFormat(args[0]);
+                    break;
             }
         } else {
 
@@ -76,7 +81,8 @@ public class AppMain {
                             7 to generate signature
                             8 to convert text to sql
                             9 to decode manifest
-                            10 to find a string min and max index"""
+                            10 to find a string min and max index
+                            11 to convert old sig to new"""
             );
 
             String input = myObj.nextLine();
@@ -131,6 +137,12 @@ public class AppMain {
                     String path = myObj.nextLine();
                     myObj.close();
                     new FIndInterval().find(s, path);
+                }
+                case CONVERT_OLD_SIG_TO_NEW -> {
+                    System.out.println("Enter string: ");
+                    String s = myObj.nextLine();
+                    myObj.close();
+                    new Util().convertSignatureFormat(s);
                 }
             }
         }

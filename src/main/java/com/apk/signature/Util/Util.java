@@ -499,6 +499,39 @@ public class Util extends FileUtil {
         }
     }
 
+    public void convertSignatureFormat(String s) {
+        ArrayList<String> filesPath = new Util().readLineByLine(s);
+        String dd = null;
+        print(s);
+        String path = new File(s).getParent() + "\\" + "new_signature.txt";
+        print(path);
+        try {
+            try (FileOutputStream fos = new FileOutputStream(path)) {
+                for (String signature : filesPath) {
+                    dd = signature;
+                    print(signature);
+                    String[] tt = signature.split(";");
+                    String name = tt[0];
+                    String permissions = tt[1];
+                    String activities = tt[2];
+                    String services = tt[3];
+                    String receivers = tt[4];
+                    String strings = tt[5];
+
+                    if (!permissions.isEmpty() && !activities.isEmpty()) activities = "," + activities;
+                    if (!activities.isEmpty() && !services.isEmpty()) services = "," + services;
+                    if (!services.isEmpty() && !receivers.isEmpty()) receivers = "," + receivers;
+
+                    String fd = name + ";" + permissions + activities + services + receivers + ";" + strings + "\n";
+                    fos.write(fd.getBytes());
+                }
+            }
+        } catch (Exception e) {
+            print("file:" + dd);
+            e.printStackTrace();
+        }
+    }
+
     public byte[] toByteArray(InputStream input) throws IOException {
         byte[] buffer = new byte[8192];
         int bytesRead;
