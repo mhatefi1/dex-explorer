@@ -7,8 +7,6 @@ import com.apk.signature.Model.*;
 import java.io.File;
 import java.util.ArrayList;
 
-import static com.apk.signature.AppBinarySearchMatch.allFiles;
-import static com.apk.signature.AppBinarySearchMatch.scanItem;
 import static com.apk.signature.Util.Util.*;
 
 public class BinaryMatchCoreNewManifest {
@@ -59,8 +57,7 @@ public class BinaryMatchCoreNewManifest {
         totalFiles = fileTargetList.size();
         for (int i = 0; i < totalFiles; i++) {
             File file_i = fileTargetList.get(i);
-            Util.print(scanItem + 1 + "/" + allFiles + " ***" + file_i.getAbsolutePath() + "***");
-            scanItem++;
+            Util.print(i + 1 + "/" + totalFiles + " ***" + file_i.getAbsolutePath() + "***");
             util1.readZip(file_i, new ReadBytesFromZipListener() {
                 ArrayList<SignatureModelNew> manifestMatchedSignatures = new ArrayList<>();
                 boolean apk = true;

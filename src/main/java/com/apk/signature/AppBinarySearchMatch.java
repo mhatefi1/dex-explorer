@@ -16,8 +16,6 @@ import static com.apk.signature.Util.Util.printGreen;
 import static com.apk.signature.Util.Util.printRed;
 
 public class AppBinarySearchMatch {
-    public static long allFiles = 0;
-    public static long scanItem = 0;
     public static void main(String[] args) {
         String signature_path = "";
         String target_path = "";
@@ -90,15 +88,6 @@ public class AppBinarySearchMatch {
 
         long start = System.currentTimeMillis();
         ArrayList<MalwareModel> malwareList = new ArrayList<>();
-        for (File f : AllTargetFilePath) {
-            ArrayList<File> targetFileList = new ArrayList<>();
-            if (f.isDirectory()) {
-                targetFileList = util.getRecursiveFileListByFormat(targetFileList, f.getAbsolutePath(), ".apk", true);
-            } else {
-                targetFileList.add(f);
-            }
-            allFiles = allFiles + targetFileList.size();
-        }
 
         for (File f : AllTargetFilePath) {
             ArrayList<File> targetFileList = new ArrayList<>();
