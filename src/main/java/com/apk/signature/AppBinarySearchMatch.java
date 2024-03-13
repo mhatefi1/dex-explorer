@@ -3,9 +3,8 @@ package com.apk.signature;
 import com.apk.signature.Model.MalwareModel;
 import com.apk.signature.Model.Report;
 import com.apk.signature.Model.ScanResult;
-import com.apk.signature.Model.SignatureModel;
-import com.apk.signature.Util.BinaryMatchCore;
-import com.apk.signature.Util.BinaryMatchSubStringCore;
+import com.apk.signature.Model.SignatureModelNew;
+import com.apk.signature.Util.BinaryMatchCoreNewManifest;
 import com.apk.signature.Util.Util;
 import com.google.gson.Gson;
 
@@ -13,15 +12,18 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import static com.apk.signature.Util.Util.*;
+import static com.apk.signature.Util.Util.printGreen;
+import static com.apk.signature.Util.Util.printRed;
 
 public class AppBinarySearchMatch {
+    public static long allFiles = 0;
+    public static long scanItem = 0;
     public static void main(String[] args) {
         String signature_path = "";
         String target_path = "";
         ArrayList<File> AllTargetFilePath = new ArrayList<>();
-        BinaryMatchCore matchCore = new BinaryMatchCore();
-        //BinaryMatchSubStringCore matchCore = new BinaryMatchSubStringCore();
+        //BinaryMatchCore matchCore = new BinaryMatchCore();
+        BinaryMatchCoreNewManifest matchCore = new BinaryMatchCoreNewManifest();
         boolean arg_sig = false, arg_file = false, report = false;
 
         if (args != null) {
@@ -83,14 +85,21 @@ public class AppBinarySearchMatch {
 
         Util util = new Util();
 
-        ArrayList<SignatureModel> signatureModels = matchCore.getSigModels(fileSignature);
-
-        /*if (AllTargetFilePath.isEmpty()) {
-            AllTargetFilePath.add(targetFile);
-        }*/
+        //ArrayList<SignatureModel> signatureModels = matchCore.getSigModels(fileSignature);
+        ArrayList<SignatureModelNew> signatureModels = matchCore.getSigModels(fileSignature);
 
         long start = System.currentTimeMillis();
         ArrayList<MalwareModel> malwareList = new ArrayList<>();
+        for (File f : AllTargetFilePath) {
+            ArrayList<File> targetFileList = new ArrayList<>();
+            if (f.isDirectory()) {
+                targetFileList = util.getRecursiveFileListByFormat(targetFileList, f.getAbsolutePath(), ".apk", true);
+            } else {
+                targetFileList.add(f);
+            }
+            allFiles = allFiles + targetFileList.size();
+        }
+
         for (File f : AllTargetFilePath) {
             ArrayList<File> targetFileList = new ArrayList<>();
             if (f.isDirectory()) {

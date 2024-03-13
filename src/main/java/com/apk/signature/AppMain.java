@@ -44,8 +44,7 @@ public class AppMain {
                     AppCommon.main(args);
                     break;
                 case SCAN:
-                    //AppBinarySearchMatch.main(args);
-                    AppBinarySearchMatchNewManifest.main(args);
+                    AppBinarySearchMatch.main(args);
                     break;
                 case GENERATE_SIGNATURE:
                     AppGenerateSignature.main(args);
@@ -139,7 +138,7 @@ public class AppMain {
                     new FIndInterval().find(s, path);
                 }
                 case CONVERT_OLD_SIG_TO_NEW -> {
-                    System.out.println("Enter string: ");
+                    System.out.println("Enter path: ");
                     String s = myObj.nextLine();
                     myObj.close();
                     new Util().convertSignatureFormat(s);
