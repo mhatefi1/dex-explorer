@@ -500,16 +500,31 @@ public class Util extends FileUtil {
     }
 
     public void convertSignatureFormat(String s) {
-        ArrayList<String> filesPath = new Util().readLineByLine(s);
+        Util util = new Util();
+        File file = new File(s);
+        String path;
+        ArrayList<File> fileSignatureList = new ArrayList<>();
+
+        if (file.getName().endsWith(".txt")) {
+            fileSignatureList.add(file);
+            path = file.getParent() + "\\" + "new_signature.txt";
+        } else if (file.isDirectory()) {
+            fileSignatureList = util.getRecursiveFileListByFormat(
+                    new ArrayList<>(), file.getAbsolutePath(), ".txt", false);
+            path = file.getAbsolutePath() + "\\" + "new_signature.txt";
+        } else {
+            printRed("no valid signature");
+            return;
+        }
+
         String dd = null;
-        print(s);
-        String path = new File(s).getParent() + "\\" + "new_signature.txt";
         print(path);
-        try {
-            try (FileOutputStream fos = new FileOutputStream(path)) {
-                for (String signature : filesPath) {
+        try (FileOutputStream fos = new FileOutputStream(path)) {
+            for (File file_i : fileSignatureList) {
+                ArrayList<String> signs = util.readLineByLine(file_i.getAbsolutePath());
+                for (String signature : signs) {
                     dd = signature;
-                    print(signature);
+                    if (signature.isEmpty()) continue;
                     String[] tt = signature.split(";");
                     String name = tt[0];
                     String permissions = tt[1];
@@ -528,7 +543,7 @@ public class Util extends FileUtil {
             }
         } catch (Exception e) {
             print("file:" + dd);
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
