@@ -2,7 +2,7 @@ package com.apk.signature.Util;
 
 import com.apk.signature.Model.ManifestModel;
 import com.apk.signature.Model.SignatureModel;
-import com.apk.signature.Model.SignatureModelNew;
+import com.apk.signature.Model.SignatureModel;
 import fr.xgouchet.axml.customized.Attribute;
 import fr.xgouchet.axml.customized.CompressedXmlParser;
 
@@ -155,10 +155,10 @@ public class ManifestUtil extends Util {
         return manifestMatchedSignatures;
     }
 
-    public ArrayList<SignatureModelNew> compareAppManifestWithSignaturesInNew(ArrayList<SignatureModelNew> signature_list, ArrayList<String> appManifest) {
-        ArrayList<SignatureModelNew> manifestMatchedSignatures = new ArrayList<>();
+    public ArrayList<SignatureModel> compareAppManifestWithSignaturesInNew(ArrayList<SignatureModel> signature_list, ArrayList<String> appManifest) {
+        ArrayList<SignatureModel> manifestMatchedSignatures = new ArrayList<>();
         boolean permissionMatch;
-        for (SignatureModelNew model : signature_list) {
+        for (SignatureModel model : signature_list) {
             boolean permissionEmpty = model.getManifests().isEmpty();
             if (permissionEmpty) {
                 permissionMatch = true;

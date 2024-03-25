@@ -23,18 +23,18 @@ public class BinaryMatchCoreNewManifest {
     private int totalFiles, totalApk;
     private Unscannable unscannableModel = new Unscannable();
 
-    public ArrayList<SignatureModelNew> getSigModels(File fileSignature) {
+    public ArrayList<SignatureModel> getSigModels(File fileSignature) {
         ArrayList<File> fileSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".txt", false);
         //ArrayList<File> dbSignatureList = util.getFileListByFormat(fileSignature.getAbsolutePath(), ".db", false);
-        ArrayList<SignatureModelNew> signatureModels = new ArrayList<>();
+        ArrayList<SignatureModel> signatureModels = new ArrayList<>();
 
         for (File file : fileSignatureList) {
             try {
                 ArrayList<String> signs = util.readLineByLine(file.getAbsolutePath());
                 for (String s : signs) {
-                    SignatureModelNew signatureModelNew = new SignatureUtil().parseSignatureNewManifest(s, false);
-                    if (signatureModelNew != null) {
-                        signatureModels.add(signatureModelNew);
+                    SignatureModel SignatureModel = new SignatureUtil().parseSignatureNewManifest(s, false);
+                    if (SignatureModel != null) {
+                        signatureModels.add(SignatureModel);
                     }
                 }
             } catch (Exception e) {
@@ -50,7 +50,7 @@ public class BinaryMatchCoreNewManifest {
         return signatureModels;
     }
 
-    public ArrayList<MalwareModel> match(ArrayList<File> fileTargetList, ArrayList<SignatureModelNew> signature_list) {
+    public ArrayList<MalwareModel> match(ArrayList<File> fileTargetList, ArrayList<SignatureModel> signature_list) {
         ArrayList<MalwareModel> malwareModels = new ArrayList<>();
         ManifestUtil util1 = new ManifestUtil();
         ItemsString itemsString = new ItemsString();
@@ -59,7 +59,7 @@ public class BinaryMatchCoreNewManifest {
             File file_i = fileTargetList.get(i);
             Util.print(i + 1 + "/" + totalFiles + " ***" + file_i.getAbsolutePath() + "***");
             util1.readZip(file_i, new ReadBytesFromZipListener() {
-                ArrayList<SignatureModelNew> manifestMatchedSignatures = new ArrayList<>();
+                ArrayList<SignatureModel> manifestMatchedSignatures = new ArrayList<>();
                 boolean apk = true;
 
                 @Override
@@ -85,7 +85,7 @@ public class BinaryMatchCoreNewManifest {
                     try {
                         byte[] header_ids_size = util.getBytesOfFile(bs, 56, 4);
                         long ids_count = util.getDecimalValue(header_ids_size);
-                        for (SignatureModelNew signatureModel : manifestMatchedSignatures) {
+                        for (SignatureModel signatureModel : manifestMatchedSignatures) {
                             ArrayList<StringModel> strings = signatureModel.getStringModels();
                             for (StringModel stringModel : strings) {
                                 stringMatch = getStringAddressFromHexString(bs, (int) ids_count, stringModel.getString(),

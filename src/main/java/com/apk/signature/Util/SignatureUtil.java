@@ -91,10 +91,10 @@ public class SignatureUtil extends Util {
         return createSignatureModel(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4), list.get(5), list.get(6), decodeHex);
     }
 
-    public SignatureModelNew parseSignatureNewManifest(String signature, boolean decodeHex) {
+    public SignatureModel parseSignatureNewManifest(String signature, boolean decodeHex) {
         String[] list = getComponentListNewManifest(signature);
         if (list != null) {
-            return createSignatureModelNewManifest(list[0], list[1], list[2], list[3], decodeHex);
+            return createSignatureModelManifest(list[0], list[1], list[2], list[3], decodeHex);
         } else {
             return null;
         }
@@ -229,7 +229,7 @@ public class SignatureUtil extends Util {
         return signatureModel;
     }
 
-    public SignatureModelNew createSignatureModelNewManifest(String name, String manifest, String strings, String flags, boolean decodeHex) {
+    public SignatureModel createSignatureModelManifest(String name, String manifest, String strings, String flags, boolean decodeHex) {
         ArrayList<String> permissionArrayList = new ArrayList<>();
         if (!manifest.isEmpty()) {
             String[] manifest_list = manifest.split(",");
@@ -261,7 +261,7 @@ public class SignatureUtil extends Util {
             }
         }
 
-        SignatureModelNew signatureModel = new SignatureModelNew();
+        SignatureModel signatureModel = new SignatureModel();
 
         signatureModel.setManifests(permissionArrayList);
         signatureModel.setStringModels(stringModels);

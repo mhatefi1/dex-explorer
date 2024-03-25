@@ -3,7 +3,7 @@ package com.apk.signature;
 import com.apk.signature.Model.MalwareModel;
 import com.apk.signature.Model.Report;
 import com.apk.signature.Model.ScanResult;
-import com.apk.signature.Model.SignatureModelNew;
+import com.apk.signature.Model.SignatureModel;
 import com.apk.signature.Util.BinaryMatchCoreNewManifest;
 import com.apk.signature.Util.Util;
 import com.google.gson.Gson;
@@ -84,7 +84,7 @@ public class AppBinarySearchMatch {
         Util util = new Util();
 
         //ArrayList<SignatureModel> signatureModels = matchCore.getSigModels(fileSignature);
-        ArrayList<SignatureModelNew> signatureModels = matchCore.getSigModels(fileSignature);
+        ArrayList<SignatureModel> signatureModels = matchCore.getSigModels(fileSignature);
 
         long start = System.currentTimeMillis();
         ArrayList<MalwareModel> malwareList = new ArrayList<>();
