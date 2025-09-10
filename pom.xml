@@ -4,11 +4,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.apk.dexExplorer</groupId>
-  <artifactId>apkScanner</artifactId>
-  <version>1</version>
+  <groupId>com.dex.explorer</groupId>
+  <artifactId>dexExplorer</artifactId>
+  <version>2</version>
 
-  <name>apk scanner</name>
+  <name>dex explorer</name>
 
   <dependencies>
     <dependency>
