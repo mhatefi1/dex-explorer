@@ -28,7 +28,7 @@ import static com.dex.explorer.Util.Util.print;
 public class AppMain {
 
     // Define constants for the command-line arguments
-    private static final String CMD_EXPLORE = "explore";
+    private static final String CMD_DUMP = "dump";
     private static final String CMD_SEARCH = "search";
 
     public static void main(String[] args) {
@@ -53,8 +53,8 @@ public class AppMain {
         // 2. --- Command Dispatcher ---
         // Based on the first argument, call the appropriate handler method.
         switch (command.toLowerCase()) {
-            case CMD_EXPLORE:
-                handleExploreOperation(inputFile);
+            case CMD_DUMP:
+                handleDumpOperation(inputFile);
                 break;
 
             case CMD_SEARCH:
@@ -76,19 +76,19 @@ public class AppMain {
     }
 
     /**
-     * Handles exploring an APK or a single DEX file and writing its contents to a JSON file.
+     * Handles dumping an APK or a single DEX file's contents to a JSON file.
      * @param inputFile The APK or DEX file to analyze.
      */
-    private static void handleExploreOperation(File inputFile) {
-        print("Starting 'explore' operation for: " + inputFile.getName());
+    private static void handleDumpOperation(File inputFile) {
+        print("Starting 'dump' operation for: " + inputFile.getName());
         print("Please wait...");
 
-        File exploreDir = createExploreDirectoryForFile(inputFile);
-        if (exploreDir == null) {
+        File dumpDir = createExploreDirectoryForFile(inputFile);
+        if (dumpDir == null) {
             print("Error: Could not create the output directory.");
             return;
         }
-        Util.TEMP_DEX_PATH = exploreDir.getAbsolutePath();
+        Util.TEMP_DEX_PATH = dumpDir.getAbsolutePath();
         File outputFile = new File(Util.TEMP_DEX_PATH, "items.json");
         AppUtil util = new AppUtil();
 
@@ -107,7 +107,7 @@ public class AppMain {
                         ZipEntry entry = entries.nextElement();
                         if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
                             try (InputStream inputStream = zipFile.getInputStream(entry)) {
-                                processDexStreamForExplore(writer, inputStream, entry.getName(), util);
+                                processDexStreamForDump(writer, inputStream, entry.getName(), util);
                             }
                         }
                     }
@@ -115,13 +115,13 @@ public class AppMain {
             } else if (fileName.endsWith(".dex")) {
                 // Handle a single DEX file
                 try (InputStream inputStream = new FileInputStream(inputFile)) {
-                    processDexStreamForExplore(writer, inputStream, inputFile.getName(), util);
+                    processDexStreamForDump(writer, inputStream, inputFile.getName(), util);
                 }
             }
 
             writer.endArray(); // ]
             writer.endObject(); // }
-            print("\nDone. Results saved to: " + outputFile.getAbsolutePath());
+            print("\nDone.\nResult saved in: " + outputFile.getAbsolutePath());
 
         } catch (IOException e) {
             print("An IO error occurred: " + e.getMessage());
@@ -130,9 +130,9 @@ public class AppMain {
     }
 
     /**
-     * Reusable helper to process a DEX stream and write its contents to the JsonWriter.
+     * Reusable helper to process a DEX stream and write its contents to the JsonWriter for a dump.
      */
-    private static void processDexStreamForExplore(JsonWriter writer, InputStream dexStream, String dexName, AppUtil util) throws IOException {
+    private static void processDexStreamForDump(JsonWriter writer, InputStream dexStream, String dexName, AppUtil util) throws IOException {
         print("Processing DEX: " + dexName);
         writer.beginObject(); // { (dex item)
         writer.name("dex_name").value(dexName);
@@ -249,15 +249,15 @@ public class AppMain {
     private static void printUsage() {
         print("""
                \s
-                APK DEX Explorer Tool
+                APK & DEX Dumper Tool
                 ---------------------
                 Usage: java -jar YourApp.jar [command] [file-path] [options]
                \s
                 [file-path] can be a path to an apk or a dex file.
                \s
                 Commands:
-                  explore - Explores the file and writes all strings and methods to a JSON file.
-                            Example: java -jar YourApp.jar explore "C:\\path\\to\\your\\app.apk"
+                  dump    - Dumps all strings and methods from the file into a JSON file.
+                            Example: java -jar YourApp.jar dump "C:\\path\\to\\your\\app.apk"
                            \s
                   search  - Searches for a specific string within the file's DEX data.
                             Example: java -jar YourApp.jar search "C:\\path\\to\\classes.dex" "your-search-term"
