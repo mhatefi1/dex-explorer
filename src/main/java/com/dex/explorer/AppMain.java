@@ -121,7 +121,7 @@ public class AppMain {
 
             writer.endArray(); // ]
             writer.endObject(); // }
-            print("\nDone. Results saved to: " + outputFile.getAbsolutePath());
+            print("\nDone.\nResult saved in: " + outputFile.getAbsolutePath());
 
         } catch (IOException e) {
             print("An IO error occurred: " + e.getMessage());
