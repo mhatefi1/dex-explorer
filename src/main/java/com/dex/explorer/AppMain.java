@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +28,7 @@ import static com.dex.explorer.Util.Util.print;
 public class AppMain {
 
     // Define constants for the command-line arguments
-    private static final String CMD_WRITE_ALL = "write";
+    private static final String CMD_EXPLORE = "explore";
     private static final String CMD_SEARCH = "search";
 
     public static void main(String[] args) {
@@ -40,18 +41,20 @@ public class AppMain {
 
         String command = args[0];
         String filePath = args[1];
-        File apkFile = new File(filePath);
+        File inputFile = new File(filePath);
+        String lowerCasePath = filePath.toLowerCase();
 
-        if (!apkFile.exists() || !apkFile.isFile()) {
-            print("Error: File does not exist or is not a valid file -> " + filePath);
+        if (!inputFile.exists() || !inputFile.isFile() || (!lowerCasePath.endsWith(".apk") && !lowerCasePath.endsWith(".dex"))) {
+            print("Error: Input must be a valid .apk or .dex file -> " + filePath);
+            printUsage();
             return;
         }
 
         // 2. --- Command Dispatcher ---
         // Based on the first argument, call the appropriate handler method.
         switch (command.toLowerCase()) {
-            case CMD_WRITE_ALL:
-                handleWriteOperation(apkFile);
+            case CMD_EXPLORE:
+                handleExploreOperation(inputFile);
                 break;
 
             case CMD_SEARCH:
@@ -62,7 +65,7 @@ public class AppMain {
                     return;
                 }
                 String searchTerm = args[2];
-                handleSearchOperation(apkFile, searchTerm);
+                handleSearchOperation(inputFile, searchTerm);
                 break;
 
             default:
@@ -73,57 +76,49 @@ public class AppMain {
     }
 
     /**
-     * Handles the logic for writing all strings and methods to a JSON file.
-     * Corresponds to the original "1" option.
-     * @param apkFile The APK file to analyze.
+     * Handles exploring an APK or a single DEX file and writing its contents to a JSON file.
+     * @param inputFile The APK or DEX file to analyze.
      */
-    private static void handleWriteOperation(File apkFile) {
-        print("Starting 'write' operation for: " + apkFile.getName());
+    private static void handleExploreOperation(File inputFile) {
+        print("Starting 'explore' operation for: " + inputFile.getName());
         print("Please wait...");
 
-        File exploreDir = createExploreDirectoryForFile(apkFile);
+        File exploreDir = createExploreDirectoryForFile(inputFile);
         if (exploreDir == null) {
             print("Error: Could not create the output directory.");
             return;
         }
         Util.TEMP_DEX_PATH = exploreDir.getAbsolutePath();
         File outputFile = new File(Util.TEMP_DEX_PATH, "items.json");
-
         AppUtil util = new AppUtil();
 
-        try (ZipFile zipFile = new ZipFile(apkFile);
-             JsonWriter writer = new JsonWriter(new FileWriter(outputFile, StandardCharsets.UTF_8))) {
-
+        try (JsonWriter writer = new JsonWriter(new FileWriter(outputFile, StandardCharsets.UTF_8))) {
             writer.setIndent("  "); // For pretty-printing
             writer.beginObject(); // {
-            writer.name("path").value(apkFile.getAbsolutePath());
+            writer.name("path").value(inputFile.getAbsolutePath());
             writer.name("dexs").beginArray(); // "dexs": [
 
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
-                    print("Processing DEX file: " + entry.getName());
-
-                    writer.beginObject(); // { (dex item)
-                    writer.name("dex_name").value(entry.getName());
-
-                    try (InputStream inputStream = zipFile.getInputStream(entry)) {
-                        byte[] bs = Util.toByteArray(inputStream);
-                        HashMap<String, byte[]> header = util.getHeader(bs);
-
-                        // Write strings, methods, and classes for this dex
-                        util.writeToFile(header, bs, new ItemsString(), writer);
-                        util.writeToFile(header, bs, new ItemsMethod(), writer);
-
-                    } catch (Exception e) {
-                        print("Error processing " + entry.getName() + ": " + e.getMessage());
-                        e.printStackTrace();
-                    } finally {
-                        writer.endObject(); // } (dex item)
+            String fileName = inputFile.getName().toLowerCase();
+            if (fileName.endsWith(".apk")) {
+                // Handle APK file by iterating through its DEX entries
+                try (ZipFile zipFile = new ZipFile(inputFile)) {
+                    Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                    while (entries.hasMoreElements()) {
+                        ZipEntry entry = entries.nextElement();
+                        if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                            try (InputStream inputStream = zipFile.getInputStream(entry)) {
+                                processDexStreamForExplore(writer, inputStream, entry.getName(), util);
+                            }
+                        }
                     }
                 }
+            } else if (fileName.endsWith(".dex")) {
+                // Handle a single DEX file
+                try (InputStream inputStream = new FileInputStream(inputFile)) {
+                    processDexStreamForExplore(writer, inputStream, inputFile.getName(), util);
+                }
             }
+
             writer.endArray(); // ]
             writer.endObject(); // }
             print("\nDone. Results saved to: " + outputFile.getAbsolutePath());
@@ -135,59 +130,67 @@ public class AppMain {
     }
 
     /**
-     * Handles the logic for searching for a specific term within the APK's DEX files.
-     * Corresponds to the original "2" option.
-     * @param apkFile The APK file to search within.
+     * Reusable helper to process a DEX stream and write its contents to the JsonWriter.
+     */
+    private static void processDexStreamForExplore(JsonWriter writer, InputStream dexStream, String dexName, AppUtil util) throws IOException {
+        print("Processing DEX: " + dexName);
+        writer.beginObject(); // { (dex item)
+        writer.name("dex_name").value(dexName);
+        try {
+            byte[] bs = Util.toByteArray(dexStream);
+            HashMap<String, byte[]> header = util.getHeader(bs);
+
+            // Write strings and methods for this dex
+            util.writeToFile(header, bs, new ItemsString(), writer);
+            util.writeToFile(header, bs, new ItemsMethod(), writer);
+
+        } catch (Exception e) {
+            print("Error processing " + dexName + ": " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            writer.endObject(); // } (dex item)
+        }
+    }
+
+
+    /**
+     * Handles searching for a term within an APK or a single DEX file.
+     * @param inputFile The APK or DEX file to search within.
      * @param searchTerm The string to search for.
      */
-    private static void handleSearchOperation(File apkFile, String searchTerm) {
-        print("Starting 'search' operation for \"" + searchTerm + "\" in: " + apkFile.getName());
+    private static void handleSearchOperation(File inputFile, String searchTerm) {
+        print("Starting 'search' operation for \"" + searchTerm + "\" in: " + inputFile.getName());
         print("Please wait...");
 
         AppUtil util = new AppUtil();
-        String hexSearchTerm = util.stringToHexString(searchTerm).toUpperCase();
         boolean foundAny = false;
 
-        try (ZipFile zipFile = new ZipFile(apkFile)) {
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
-                    try (InputStream inputStream = zipFile.getInputStream(entry)) {
-                        byte[] bs = Util.toByteArray(inputStream);
-                        HashMap<String, byte[]> header = util.getHeader(bs);
-
-                        // Perform the searches
-                        SearchResultModel stringSearch = util.getAddressFromHexString(header, bs, hexSearchTerm, new ItemsString(), 0, 0);
-                        SearchResultModel methodSearch = util.getAddressFromHexString(header, bs, hexSearchTerm, new ItemsMethod(), 0, 0);
-                        SearchResultModel classSearch = util.getAddressFromHexString(header, bs, hexSearchTerm, new ItemsClass(), 0, 0);
-
-                        List<SearchResultModel> searchResultList = new ArrayList<>();
-                        if (stringSearch != null) {
-                            stringSearch.setDex_name(entry.getName());
-                            searchResultList.add(stringSearch);
+        try {
+            String fileName = inputFile.getName().toLowerCase();
+            if (fileName.endsWith(".apk")) {
+                // Handle APK file by iterating through its DEX entries
+                try (ZipFile zipFile = new ZipFile(inputFile)) {
+                    Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                    while (entries.hasMoreElements()) {
+                        ZipEntry entry = entries.nextElement();
+                        if (!entry.isDirectory() && entry.getName().endsWith(".dex")) {
+                            try (InputStream inputStream = zipFile.getInputStream(entry)) {
+                                if (processDexStreamForSearch(inputStream, entry.getName(), searchTerm, util)) {
+                                    foundAny = true;
+                                }
+                            }
                         }
-                        if (methodSearch != null) {
-                            methodSearch.setDex_name(entry.getName());
-                            searchResultList.add(methodSearch);
-                        }
-                        if (classSearch != null) {
-                            classSearch.setDex_name(entry.getName());
-                            searchResultList.add(classSearch);
-                        }
-
-                        if (!searchResultList.isEmpty()) {
-                            foundAny = true;
-                            print("\n--- Found results in: " + entry.getName() + " ---");
-                            print(new GsonBuilder().setPrettyPrinting().create().toJson(searchResultList));
-                        }
-
-                    } catch (Exception e) {
-                        print("Error searching in " + entry.getName() + ": " + e.getMessage());
-                        e.printStackTrace();
+                    }
+                }
+            } else if (fileName.endsWith(".dex")) {
+                // Handle a single DEX file
+                try (InputStream inputStream = new FileInputStream(inputFile)) {
+                    if (processDexStreamForSearch(inputStream, inputFile.getName(), searchTerm, util)) {
+                        foundAny = true;
                     }
                 }
             }
+
             if (!foundAny) {
                 print("Search term not found in any DEX file.");
             }
@@ -198,6 +201,49 @@ public class AppMain {
     }
 
     /**
+     * Reusable helper to search a DEX stream for a term and print results.
+     * @return true if a result was found, false otherwise.
+     */
+    private static boolean processDexStreamForSearch(InputStream dexStream, String dexName, String searchTerm, AppUtil util) {
+        String hexSearchTerm = util.stringToHexString(searchTerm).toUpperCase();
+        List<SearchResultModel> searchResultList = new ArrayList<>();
+        boolean found = false;
+
+        try {
+            byte[] bs = Util.toByteArray(dexStream);
+            HashMap<String, byte[]> header = util.getHeader(bs);
+
+            // Perform the searches
+            SearchResultModel stringSearch = util.getAddressFromHexString(header, bs, hexSearchTerm, new ItemsString(), 0, 0);
+            SearchResultModel methodSearch = util.getAddressFromHexString(header, bs, hexSearchTerm, new ItemsMethod(), 0, 0);
+            SearchResultModel classSearch = util.getAddressFromHexString(header, bs, hexSearchTerm, new ItemsClass(), 0, 0);
+
+            if (stringSearch != null) {
+                stringSearch.setDex_name(dexName);
+                searchResultList.add(stringSearch);
+            }
+            if (methodSearch != null) {
+                methodSearch.setDex_name(dexName);
+                searchResultList.add(methodSearch);
+            }
+            if (classSearch != null) {
+                classSearch.setDex_name(dexName);
+                searchResultList.add(classSearch);
+            }
+
+            if (!searchResultList.isEmpty()) {
+                found = true;
+                print("\n--- Found results in: " + dexName + " ---");
+                print(new GsonBuilder().setPrettyPrinting().create().toJson(searchResultList));
+            }
+        } catch (Exception e) {
+            print("Error searching in " + dexName + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+        return found;
+    }
+
+    /**
      * Prints the usage instructions for the command-line tool.
      */
     private static void printUsage() {
@@ -205,38 +251,16 @@ public class AppMain {
                \s
                 APK DEX Explorer Tool
                 ---------------------
-                Usage: java -jar YourApp.jar [command] [apk-file-path] [options]
+                Usage: java -jar YourApp.jar [command] [file-path] [options]
+               \s
+                [file-path] can be a path to an apk or a dex file.
                \s
                 Commands:
-                  write   - Explores the APK and writes all strings and methods to a JSON file.
-                            Example: java -jar YourApp.jar write "C:\\path\\to\\your\\app.apk"
+                  explore - Explores the file and writes all strings and methods to a JSON file.
+                            Example: java -jar YourApp.jar explore "C:\\path\\to\\your\\app.apk"
                            \s
-                  search  - Searches for a specific string within the APK's DEX files.
-                            Example: java -jar YourApp.jar search "C:\\path\\to\\your\\app.apk" "your-search-term"
+                  search  - Searches for a specific string within the file's DEX data.
+                            Example: java -jar YourApp.jar search "C:\\path\\to\\classes.dex" "your-search-term"
                \s""");
     }
 }
-
-/*
-```
-
-        ### How to Compile and Run
-
-1.  **Compile:** If you're using Maven, you can create an executable JAR with dependencies by adding the `maven-assembly-plugin` to your `pom.xml`. If compiling manually, make sure all the required libraries (Gson, JAnsi, etc.) are in your classpath.
-        ```bash
-    # Assuming you have a standard Maven project structure
-mvn clean package
-        ```
-
-        2.  **Run from Command Line:** After building the JAR (e.g., `YourApp-1.0-SNAPSHOT-jar-with-dependencies.jar`), you can run it like this from your terminal:
-
-        * **To write all items to `items.json`:**
-        ```bash
-java -jar target/YourApp-1.0-SNAPSHOT-jar-with-dependencies.jar write "C:\Users\You\Downloads\some_app.apk"
-        ```
-
-        * **To search for a specific term (e.g., "MainActivity"):**
-        ```bash
-java -jar target/YourApp-1.0-SNAPSHOT-jar-with-dependencies.jar search "C:\Users\You\Downloads\some_app.apk" "MainActivity"
-
-*/
